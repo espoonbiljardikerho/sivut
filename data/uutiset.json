@@ -5,7 +5,7 @@
     "title": "testi uutinen",
     "date": "",
     "excerpt": "lyhyt kuvaus on",
-    "img": null,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/testi-uutinen.jpg",
     "tag": "Kaisa",
     "body": "pidempää sisältöä on"
   },
