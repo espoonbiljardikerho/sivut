@@ -302,11 +302,8 @@
     <div class="login-logo">EBK Admin</div>
     <div class="login-sub">Espoon Biljardikerho · Hallintapaneeli</div>
     <label>Salasana</label>
-    <input type="password" id="login-pass" placeholder="••••••••" />
-    <label>GitHub Token</label>
-    <input type="password" id="login-token" placeholder="ghp_..." />
-    <p class="login-hint">Token tallennetaan vain selaimeen. Tarvitaan repo-oikeus.</p>
-    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Kirjaudu sisään</button>
+    <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Kirjaudu sisään</button>
     <p id="login-error" style="color:var(--danger);font-size:12px;margin-top:10px;display:none"></p>
   </div>
 </div>
@@ -651,6 +648,7 @@
 const REPO_OWNER  = 'espoonbiljardikerho';
 const REPO_NAME   = 'sivut';
 const ADMIN_PASS  = 'ebk2024admin'; // Change this!
+const GH_TOKEN    = 'PASTE_YOUR_TOKEN_HERE'; // Replace with your GitHub token
 const BRANCH      = 'main';
 
 // ── State ───────────────────────────────────────────────────────────────────
@@ -664,20 +662,19 @@ let pendingImg = null; // { file, folder, filename }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 function doLogin() {
-  const pass  = document.getElementById('login-pass').value;
-  const token = document.getElementById('login-token').value.trim();
-  const err   = document.getElementById('login-error');
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
 
   if (pass !== ADMIN_PASS) {
     err.textContent = 'Väärä salasana.'; err.style.display = 'block'; return;
   }
-  if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
-    err.textContent = 'Token näyttää virheelliseltä (pitäisi alkaa ghp_ tai github_pat_).';
+  if (GH_TOKEN === 'PASTE_YOUR_TOKEN_HERE') {
+    err.textContent = 'GitHub token ei ole asetettu admin.html tiedostossa.';
     err.style.display = 'block'; return;
   }
 
-  ghToken = token;
-  localStorage.setItem('ebk_token', token);
+  ghToken = GH_TOKEN;
+  localStorage.setItem('ebk_authed', '1');
   err.style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
@@ -686,15 +683,20 @@ function doLogin() {
 }
 
 function doLogout() {
-  localStorage.removeItem('ebk_token');
+  localStorage.removeItem('ebk_authed');
   location.reload();
 }
 
 // Auto-login if token in storage
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('ebk_token');
-  if (saved) {
-    document.getElementById('login-token').value = saved;
+  const savedAuthed = localStorage.getItem('ebk_authed');
+  // Auto-login if previously authenticated
+  if (savedAuthed && GH_TOKEN !== 'PASTE_YOUR_TOKEN_HERE') {
+    ghToken = GH_TOKEN;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    document.getElementById('sidebar-user-name').textContent = 'Admin · ';
+    loadAllData();
   }
 });
 
