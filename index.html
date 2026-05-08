@@ -496,21 +496,9 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 }
 
 /* Hero */
-[data-theme="light"] .hero-photo {
-  filter: saturate(0.85) brightness(1.02) !important;
-}
-[data-theme="light"] .hero-gradient {
-  background: linear-gradient(120deg, rgba(242,234,208,0.72) 0%, rgba(255,255,255,0) 60%) !important;
-}
-[data-theme="light"] .hero-felt {
-  background-image: repeating-linear-gradient(
-    0deg, transparent, transparent 39px,
-    rgba(31,58,34,0.04) 39px, rgba(31,58,34,0.04) 40px
-  ), repeating-linear-gradient(
-    90deg, transparent, transparent 39px,
-    rgba(31,58,34,0.04) 39px, rgba(31,58,34,0.04) 40px
-  ) !important;
-}
+
+
+
 [data-theme="light"] h1 em,
 [data-theme="light"] .hero-emphasis { color: #1F3A22 !important; }
 
@@ -623,9 +611,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 [data-theme="light"] .hero {
   background: linear-gradient(160deg, #1F3A22 0%, #2D5A32 100%) !important;
 }
-[data-theme="light"] .hero-gradient {
-  background: linear-gradient(120deg, rgba(31,58,34,0.85) 0%, rgba(31,58,34,0.2) 60%) !important;
-}
+
 [data-theme="light"] .hero-content h1,
 [data-theme="light"] .hero-content p,
 [data-theme="light"] .hero-content .hero-label,
@@ -755,33 +741,15 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 [data-theme="light"] .table-count { color: var(--text-muted) !important; }
 
 /* ── ISSUE 8: Index hero - more transparent, greyer, blends to background ── */
-[data-theme="light"] .hero-photo {
-  filter: grayscale(1) brightness(0.75) !important;
-  opacity: 0.35 !important;
-}
-[data-theme="light"] .hero-gradient {
-  background: linear-gradient(
-    120deg,
-    rgba(250,247,241,0.92) 0%,
-    rgba(250,247,241,0.75) 35%,
-    rgba(250,247,241,0.45) 60%,
-    rgba(250,247,241,0.2) 100%
-  ) !important;
-}
-[data-theme="light"] .hero-felt { opacity: 0.06 !important; }
+
+
 
 /* Hero text readable on light bg */
-[data-theme="light"] .hero-left h1 { color: #1C1A14 !important; }
-[data-theme="light"] .hero-left h1 em { color: #1F3A22 !important; }
-[data-theme="light"] .hero-left p,
-[data-theme="light"] .hero-badge,
-[data-theme="light"] .hero-stat-num { color: #1C1A14 !important; }
+
+
+
 [data-theme="light"] .hero-stat-label { color: #595449 !important; }
-[data-theme="light"] .hero-badge { 
-  background: rgba(31,58,34,0.08) !important;
-  border-color: rgba(31,58,34,0.2) !important;
-  color: #1F3A22 !important;
-}
+
 
 
 /* ── White billiard balls - add dark stroke in light mode ── */
@@ -797,6 +765,73 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 [data-theme="light"] .table-icon-wrap svg circle[fill="#E8E4DC"] {
   stroke: rgba(28,26,20,0.3) !important;
   stroke-width: 1.5 !important;
+}
+
+
+
+
+/* ── HERO LIGHT MODE ─────────────────────────────────────────────────────── */
+[data-theme="light"] .hero-bg {
+  background: linear-gradient(
+    100deg,
+    rgba(250,247,241,0.97) 0%,
+    rgba(250,247,241,0.90) 30%,
+    rgba(250,247,241,0.65) 55%,
+    rgba(250,247,241,0.20) 80%,
+    rgba(250,247,241,0.05) 100%
+  ) !important;
+}
+[data-theme="light"] .hero-photo {
+  filter: grayscale(0.5) brightness(1.05) saturate(0.5) !important;
+  opacity: 0.45 !important;
+}
+[data-theme="light"] .hero-felt { opacity: 0.04 !important; }
+
+/* Hero text - dark on light background */
+[data-theme="light"] .hero-left * { color: #1C1A14; }
+[data-theme="light"] .hero-left h1 em { color: #1F3A22 !important; }
+[data-theme="light"] .hero-left p { color: #595449 !important; }
+[data-theme="light"] .hero-badge {
+  background: rgba(255,255,255,0.80) !important;
+  border-color: rgba(28,26,20,0.12) !important;
+  color: #595449 !important;
+}
+[data-theme="light"] .hero-badge::before { background: #1F3A22 !important; }
+[data-theme="light"] .hero-stat {
+  background: rgba(255,255,255,0.85) !important;
+  border-color: rgba(28,26,20,0.12) !important;
+}
+[data-theme="light"] .hero-stat-num   { color: #1F3A22 !important; }
+[data-theme="light"] .hero-stat-label { color: #595449 !important; }
+
+/* Liity jäseneksi button */
+[data-theme="light"] .hero-left .btn-primary {
+  background: #1F3A22 !important;
+  color: #FAF7F1 !important;
+  border-color: #1F3A22 !important;
+}
+[data-theme="light"] .hero-left .btn-secondary {
+  background: rgba(255,255,255,0.7) !important;
+  color: #1C1A14 !important;
+  border-color: rgba(28,26,20,0.2) !important;
+}
+
+
+/* Light mode: hero should be content-sized, not force extra height */
+[data-theme="light"] .hero {
+  min-height: unset !important;
+  background: transparent !important;
+}
+/* Ensure hero-bg covers only the hero, not beyond */
+[data-theme="light"] .hero-bg {
+  background: linear-gradient(
+    100deg,
+    rgba(250,247,241,0.97) 0%,
+    rgba(250,247,241,0.90) 30%,
+    rgba(250,247,241,0.65) 55%,
+    rgba(250,247,241,0.20) 80%,
+    rgba(250,247,241,0.05) 100%
+  ) !important;
 }
 
 </style>
