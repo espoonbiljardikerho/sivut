@@ -489,7 +489,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 (function () {
   const BASE  = 'https://espoonbiljardikerho.yhdistysavain.fi';
 
-  const WORKER = 'https://ebk-proxy.jkahima.workers.dev';
+  const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
 
   async function fetchWithFallback(url) {
     // Extract just the path from the full URL and proxy through our worker
@@ -647,12 +647,15 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
     // Walk through strong tags to find field:value pairs
     main.querySelectorAll('strong, b').forEach(el => {
-      const label = el.textContent.replace(/:/,'').trim().toLowerCase();
-      const next  = el.nextSibling?.textContent?.trim() || el.parentElement?.textContent?.replace(el.textContent,'').trim() || '';
+      const label = el.textContent.replace(/:/g,'').trim().toLowerCase();
+      // Only use direct next text node — avoid grabbing the whole parent paragraph
+      const nextNode = el.nextSibling;
+      const next = (nextNode?.nodeType === 3 ? nextNode.textContent : null)?.trim()
+                   || el.nextElementSibling?.textContent?.trim()
+                   || '';
       if (!next || next === ':') return;
-      if (label.includes('laji'))             detail.sport    = next;
-      if (label.includes('pelipaikka'))       detail.venue    = next;
-      if (label.includes('pvm') || label.includes('aika')) detail.date = next;
+      if (label === 'laji')                   detail.sport    = next;
+      if (label === 'pelipaikka')             detail.venue    = next;
       if (label.includes('alkamisaika')) {
           const tm = next.match(/(\d+):(\d+)/);
           if (tm) {
@@ -662,10 +665,12 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
             detail.time = next;
           }
         }
-      if (label.includes('osallistumismaksu')) detail.fee     = next;
-      if (label.includes('osallistumisoikeus')) detail.access = next;
-      if (label.includes('ilmoittautuminen') && next.match(/\d/)) detail.deadline = next;
-      if (label.includes('kapasiteetti') || label.includes('nopeinta') || label.includes('paikk')) detail.capacity = next;
+      if (label === 'osallistumismaksu')      detail.fee     = next;
+      if (label === 'osallistumisoikeus')     detail.access  = next;
+      if (label === 'ilmoittautuminen' && next.match(/\d/)) detail.deadline = next;
+      // Capacity: only capture short values (not full description paragraphs)
+      if ((label === 'kapasiteetti' || label.includes('nopeinta') || label === 'paikkaluku')
+          && next.length < 60) detail.capacity = next;
     });
 
     // Capacity often embedded in "osallistumisoikeus" text
@@ -788,7 +793,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
         <div class="summary-detail-row">
           <span class="summary-detail-icon">👥</span>
           <div>
-            <span class="summary-detail-label">Kapasiteetti</span>
+            <span class="summary-detail-label">Info</span>
             <span class="summary-detail-value">${detail.capacity}${detail.signupCount > 0 ? ` · <strong>${detail.signupCount} ilmoittautunut</strong>` : ''}</span>
           </div>
         </div>` : ''}
