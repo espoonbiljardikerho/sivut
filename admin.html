@@ -292,6 +292,21 @@
   a:hover { text-decoration: underline; }
 
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap');
+
+  /* Image picker */
+  .picker-img {
+    aspect-ratio: 1; object-fit: cover; width: 100%;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent; transition: all 0.15s;
+    display: block; background: var(--surface2);
+  }
+  .picker-img:hover { border-color: var(--gold); transform: scale(1.03); }
+  .picker-thumb { position: relative; }
+  .picker-thumb-name {
+    font-size: 10px; color: var(--text3); margin-top: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
 </style>
 </head>
 <body>
@@ -470,11 +485,14 @@
         </div>
         <div class="field form-full">
           <label>Kuva</label>
-          <div class="img-upload-area" id="nf-img-area">
-            <input type="file" accept="image/*" onchange="handleImageUpload(this,'nf-img-preview','nf-img-path')">
-            <div>📷 Klikkaa ladataksesi kuva</div>
-            <div class="text-muted" style="margin-top:4px" id="nf-img-path"></div>
-            <img id="nf-img-preview" class="img-preview" style="display:none">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <div class="img-upload-area" id="nf-img-area" style="flex:1">
+              <input type="file" accept="image/*" onchange="handleImageUpload(this,'nf-img-preview','nf-img-path')">
+              <div>📷 Klikkaa ladataksesi kuva</div>
+              <div class="text-muted" style="margin-top:4px" id="nf-img-path"></div>
+              <img id="nf-img-preview" class="img-preview" style="display:none">
+            </div>
+            <button type="button" class="btn btn-secondary" style="flex-shrink:0;margin-top:0" onclick="openImgPicker('news')">📁 Repo</button>
           </div>
         </div>
         <div class="field form-full">
@@ -551,11 +569,14 @@
         </div>
         <div class="field form-full">
           <label>Kuva</label>
-          <div class="img-upload-area">
-            <input type="file" accept="image/*" onchange="handleImageUpload(this,'ef-img-preview','ef-img-path')">
-            <div>📷 Klikkaa ladataksesi kuva</div>
-            <div class="text-muted" style="margin-top:4px" id="ef-img-path"></div>
-            <img id="ef-img-preview" class="img-preview" style="display:none">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <div class="img-upload-area" style="flex:1">
+              <input type="file" accept="image/*" onchange="handleImageUpload(this,'ef-img-preview','ef-img-path')">
+              <div>📷 Klikkaa ladataksesi kuva</div>
+              <div class="text-muted" style="margin-top:4px" id="ef-img-path"></div>
+              <img id="ef-img-preview" class="img-preview" style="display:none">
+            </div>
+            <button type="button" class="btn btn-secondary" style="flex-shrink:0;margin-top:0" onclick="openImgPicker('events')">📁 Repo</button>
           </div>
         </div>
       </div>
@@ -614,11 +635,14 @@
         </div>
         <div class="field form-full">
           <label>Kuva</label>
-          <div class="img-upload-area">
-            <input type="file" accept="image/*" onchange="handleImageUpload(this,'mf-img-preview','mf-img-path','members')">
-            <div>📷 Klikkaa ladataksesi kuva</div>
-            <div class="text-muted" style="margin-top:4px" id="mf-img-path"></div>
-            <img id="mf-img-preview" class="img-preview" style="display:none">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <div class="img-upload-area" style="flex:1">
+              <input type="file" accept="image/*" onchange="handleImageUpload(this,'mf-img-preview','mf-img-path','members')">
+              <div>📷 Klikkaa ladataksesi kuva</div>
+              <div class="text-muted" style="margin-top:4px" id="mf-img-path"></div>
+              <img id="mf-img-preview" class="img-preview" style="display:none">
+            </div>
+            <button type="button" class="btn btn-secondary" style="flex-shrink:0;margin-top:0" onclick="openImgPicker('members')">📁 Repo</button>
           </div>
         </div>
       </div>
@@ -894,7 +918,8 @@ async function saveNews() {
   const btn = document.getElementById('news-save-btn');
   btn.textContent = 'Tallennetaan…'; btn.disabled = true;
 
-  let imgUrl = editingIdx !== null ? newsData[editingIdx]?.img : null;
+  let imgUrl = window._pickedImgUrl?.context === 'news' ? window._pickedImgUrl.url : (editingIdx !== null ? newsData[editingIdx]?.img : null);
+  window._pickedImgUrl = null;
   if (pendingImg) {
     try {
       imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename);
@@ -977,7 +1002,8 @@ async function saveEvent() {
     dateInfo = { day: dm[1], month: MONTHS_FI[parseInt(dm[2])-1], year: dm[3] || new Date().getFullYear(), isSeries: false };
   }
 
-  let imgUrl = editingIdx !== null ? eventsData[editingIdx]?.img : null;
+  let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url : (editingIdx !== null ? eventsData[editingIdx]?.img : null);
+  window._pickedImgUrl = null;
   if (pendingImg) {
     try { imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
     catch(e) { toast('Kuvan lataus epäonnistui', 'error'); return; }
@@ -1069,7 +1095,8 @@ async function saveMember() {
   const name = document.getElementById('mf-name').value.trim();
   if (!name) { toast('Nimi on pakollinen', 'error'); return; }
 
-  let photoUrl = editingIdx !== null ? membersData[editingIdx]?.photo : null;
+  let photoUrl = window._pickedImgUrl?.context === 'members' ? window._pickedImgUrl.url : (editingIdx !== null ? membersData[editingIdx]?.photo : null);
+  window._pickedImgUrl = null;
   if (pendingImg) {
     try { photoUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
     catch(e) { toast('Kuvan lataus epäonnistui', 'error'); return; }
@@ -1078,8 +1105,14 @@ async function saveMember() {
   const sportsRaw = document.getElementById('mf-sports').value;
   const sports    = sportsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
+  // Always regenerate slug from current name
+  const newSlug = autoSlugFrom(name);
+  // For existing members, update slug only if name changed (keeps URLs stable for original members)
+  const currentSlug = editingIdx !== null ? membersData[editingIdx].slug : null;
+  const currentName = editingIdx !== null ? membersData[editingIdx].name : null;
+  const finalSlug   = currentSlug && currentName === name ? currentSlug : newSlug;
   const item = {
-    slug:      editingIdx !== null ? membersData[editingIdx].slug : autoSlugFrom(name),
+    slug: finalSlug,
     name,
     nickname:  document.getElementById('mf-nickname').value.trim() || null,
     type:      document.getElementById('mf-type').value,
@@ -1201,5 +1234,35 @@ document.querySelectorAll('.modal-bg').forEach(bg => {
   bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
 });
 </script>
+
+<!-- ── Image Picker Modal ──────────────────────────────────────────────────── -->
+<div class="modal-bg" id="img-picker-modal">
+  <div class="modal" style="width:760px">
+    <div class="modal-header">
+      <div class="modal-title">Valitse kuva</div>
+      <button class="modal-close" onclick="closeModal('img-picker-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+        <select class="search-input" style="max-width:160px" id="picker-folder" onchange="loadPickerFolder()">
+          <option value="images/news">images/news</option>
+          <option value="images/members">images/members</option>
+          <option value="images/events">images/events</option>
+        </select>
+        <span class="text-muted" id="picker-count"></span>
+        <div style="margin-left:auto">
+          <input class="search-input" placeholder="Suodata…" id="picker-search" oninput="filterPickerImages()" style="max-width:180px">
+        </div>
+      </div>
+      <div id="picker-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:420px;overflow-y:auto">
+        <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🖼</div><p>Ladataan kuvia…</p></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('img-picker-modal')">Peruuta</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
