@@ -5,9 +5,10 @@
     "name": "sadawdwad",
     "tag": "Pyramidi",
     "dateInfo": {
-      "day": "13",
-      "month": "Kesä",
-      "year": "2026",
+      "raw": "13.6.2026",
+      "day": null,
+      "month": null,
+      "year": null,
       "isSeries": false
     },
     "time": "19:00",
