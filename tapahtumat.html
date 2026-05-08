@@ -509,6 +509,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Vaihda teema" aria-label="Vaihda teema">☀</button>
 </nav>
 
 <div class="mobile-menu">
@@ -520,7 +521,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   <a href="yhteystiedot.html">Yhteystiedot</a>
   <a href="javascript:void(0)" onclick="openJoinModal()" class="m-cta">Liity jäseneksi</a>
   <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-  </div>
+  
+  <button class="theme-toggle" onclick="toggleTheme()" style="margin-top:8px;align-self:flex-start" title="Vaihda teema">☀</button></div>
 </div>
 
 <!-- PAGE HERO -->
