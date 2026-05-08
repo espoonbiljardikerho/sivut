@@ -896,117 +896,64 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   async function fetchProfile(slug) {
     if (profileCache[slug]?.loaded) return profileCache[slug];
-    profileCache[slug] = { ...(profileCache[slug] || {}) };
 
+    // ── Use pre-scraped JSON data ──────────────────────────────────────────
+    const d = memberData[slug];
+    if (d) {
+      profileCache[slug] = {
+        loaded:       true,
+        photo:        d.photo        || null,
+        sports:       d.sports       || [],
+        joined:       d.joined       || null,
+        started:      d.started      || null,
+        nickname:     d.nickname     || null,
+        achievements: d.achievements || [],
+        records:      d.records      || [],
+        motto:        d.motto        || null,
+        bio:          d.bio          || null,
+      };
+      return profileCache[slug];
+    }
+
+    // ── Fallback: live scrape if not in JSON ───────────────────────────────
+    profileCache[slug] = {};
     try {
-      let doc = profileCache[slug].doc;
-      if (!doc) {
-        const url = BASE + '/jasenet/' + slug + '/';
-        let html;
-        try {
-          html = await fetchWithFallback(url);
-        } catch(err) {
-          throw new Error('fetch failed: ' + err.message);
-        }
-        doc = new DOMParser().parseFromString(html, 'text/html');
-        photoCache[slug] = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || null;
-      }
-
+      const url = BASE + '/jasenet/' + slug + '/';
+      const html = await fetchWithFallback(url);
+      const doc  = new DOMParser().parseFromString(html, 'text/html');
       const main = doc.querySelector('main, .content main, article') || doc.body;
-
-      // Extract nickname from h1 title e.g. "Ahola Jarno (Jackson)"
-      const h1Text = doc.querySelector('h1')?.textContent || '';
-      const nickMatch = h1Text.match(/\(([^)]+)\)/);
-      const nickname = nickMatch ? nickMatch[1] : null;
-
-      // Fields
-      const joined    = extractField(doc, 'liittynyt');
-      const sports    = parseSports(extractField(doc, 'biljardilajit'));
-      const started   = extractField(doc, 'aloittanut biljardin');
-      const motto     = extractField(doc, 'motto');
-
-      // The Yhdistysavain page renders as:
-      // <p><strong>Label:</strong> value</p>
-      // <p><strong>Parhaat saavutukset:</strong></p>
-      // <ul><li>achievement</li>...</ul>
-      // <p><em>bio text</em></p>
-
-      // The Worker returns all content as plain text inside <p> tags.
-      // Structure: "Parhaat saavutukset:- item1- item2Ennätykset:- item3Tavoitteet:..."
-      // We parse by finding section boundaries in the full text content.
-
-      function parseSection(fullText, startLabel, endLabels) {
-        const lower = fullText.toLowerCase();
-        const startIdx = lower.indexOf(startLabel.toLowerCase());
-        if (startIdx === -1) return [];
-
-        let endIdx = fullText.length;
-        for (const end of endLabels) {
-          const idx = lower.indexOf(end.toLowerCase(), startIdx + startLabel.length);
-          if (idx !== -1 && idx < endIdx) endIdx = idx;
-        }
-
-        const section = fullText.slice(startIdx + startLabel.length, endIdx).trim();
-
-        // Items are separated by "– " or "- " (with preceding space or start)
-        // Split on any dash/en-dash that is preceded by a letter/digit (end of previous item)
-        const items = section
-          .split(/\s*[–-]\s+(?=[A-ZÄÖÅ"0-9"'])/g)
-          .map(s => s.replace(/^[–\-\s]+/, '').trim())
-          .filter(s => s.length > 3
-            && !s.toLowerCase().includes('ei tiedossa')
-            && !s.toLowerCase().includes('ei vielä')
-            && !s.toLowerCase().includes('ei mainittavia'));
-        return items;
-      }
-
-      function parseField(fullText, label) {
-        const lower = fullText.toLowerCase();
-        const idx = lower.indexOf(label.toLowerCase());
-        if (idx === -1) return null;
-        // Get text after label until next newline or next bold-like section
-        const after = fullText.slice(idx + label.length).replace(/^[:\s*"]+/, '');
-        const end = after.search(/\n|[A-ZÄÖÅ][a-zäöå]+:/);
-        const val = (end > 0 ? after.slice(0, end) : after.slice(0, 200)).replace(/[*"]+/g, '').trim();
-        return val.length > 1 ? val : null;
-      }
-
-      // Get full text of the main content area
       const fullText = main.textContent || '';
 
-      const STOP_LABELS = ['Ennätykset', 'Tavoitteet', 'Lempipelaajat', 'Pelivälineet', 'Asuinalue'];
-      const achievements = parseSection(fullText, 'Parhaat saavutukset:', STOP_LABELS);
-      const records      = parseSection(fullText, 'Ennätykset:', ['Tavoitteet', 'Lempipelaajat', 'Pelivälineet']);
+      const h1Text   = doc.querySelector('h1')?.textContent || '';
+      const nickMatch = h1Text.match(/\(([^)]+)\)/);
 
-      // Motto — look for it in text
-      const mottoRaw = parseField(fullText, 'Motto:') || parseField(fullText, 'Motto');
-      const mottoVal = mottoRaw ? mottoRaw.replace(/^[""'\s*]+|[""'\s*]+$/g, '').trim() : null;
+      function parseSection(text, startLabel, endLabels) {
+        const lower = text.toLowerCase();
+        const si = lower.indexOf(startLabel.toLowerCase());
+        if (si === -1) return [];
+        let ei = text.length;
+        for (const e of endLabels) {
+          const ix = lower.indexOf(e.toLowerCase(), si + startLabel.length);
+          if (ix !== -1 && ix < ei) ei = ix;
+        }
+        return text.slice(si + startLabel.length, ei).trim()
+          .split(/\s*[–-]\s+(?=[A-ZÄÖÅ"0-9"'])/g)
+          .map(s => s.replace(/^[–\-\s]+/, '').trim())
+          .filter(s => s.length > 3 && !s.toLowerCase().includes('ei tiedossa'));
+      }
 
-      // Bio: italic <em> elements that are long and look like prose
-      const bioEls = Array.from(main.querySelectorAll('em, i')).filter(el => {
-        const t = el.textContent.trim();
-        return t.length > 80 && !t.match(/^[A-ZÄÖÅ][a-zäöå]+:/);
-      });
-      const bio = bioEls.length
-        ? bioEls.map(el => el.textContent.trim()).join('\n\n').slice(0, 1200)
-        : null;
-
-      // Joined year
-      const joinedYear = joined ? (joined.match(/\d{4}/) || [])[0] || joined : null;
-      const startedYear = started ? (started.match(/\d{4}/) || [])[0] || started : null;
-
+      const STOP = ['Ennätykset','Tavoitteet','Lempipelaajat','Pelivälineet'];
       profileCache[slug] = {
-        loaded: true,
-        photo: photoCache[slug] || null,
-        sports,
-        joined: joinedYear,
-        started: startedYear,
-        nickname,
-        achievements,
-        records,
-        motto: mottoVal && !isBlank(mottoVal) ? mottoVal : null,
-        bio: bio && bio.length > 20 ? bio : null,
-        doc,
+        loaded:       true,
+        photo:        doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || null,
+        sports:       parseSports(extractField(doc, 'biljardilajit')),
+        joined:       (extractField(doc,'liittynyt')?.match(/\d{4}/) || [])[0] || null,
+        started:      (extractField(doc,'aloittanut biljardin')?.match(/\d{4}/) || [])[0] || null,
+        nickname:     nickMatch ? nickMatch[1] : null,
+        achievements: parseSection(fullText, 'Parhaat saavutukset:', STOP),
+        records:      parseSection(fullText, 'Ennätykset:', ['Tavoitteet','Lempipelaajat']),
+        motto:        extractField(doc, 'motto') || null,
+        bio:          null,
       };
     } catch(err) {
       console.warn('fetchProfile failed for', slug, err);
@@ -1015,7 +962,6 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
         nickname: null, achievements: [], records: [], motto: null, bio: null
       };
     }
-
     return profileCache[slug];
   }
 
@@ -1547,7 +1493,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE = 'https://formspree.io/f/mykodovl';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();
