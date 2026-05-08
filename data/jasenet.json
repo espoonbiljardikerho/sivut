@@ -1975,22 +1975,5 @@
     "bio": "Ying liittyi EBK:n jäseneksi marraskuussa 2021 ja osallistui heti naisten Kaisan SM-kilpailuihin. Pääasialliset lajit on kaisa ja pool.",
     "achievements": [],
     "records": []
-  },
-  {
-    "slug": "john",
-    "name": "john toe",
-    "nickname": "doe",
-    "type": "tays",
-    "joined": "2015",
-    "started": "1959",
-    "sports": [
-      "Kaisa",
-      "Pyramidi"
-    ],
-    "motto": "mottoa on",
-    "bio": "mitäpä tähä ny pistäsää",
-    "photo": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/members/john.jpg",
-    "achievements": [],
-    "records": []
   }
 ]
