@@ -1092,64 +1092,29 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (async function loadNews() {
-  const BASE        = 'https://espoonbiljardikerho.yhdistysavain.fi';
+  const FALLBACK = 'https://images.unsplash.com/photo-1615213612138-4d1195b1c0e8?w=700&auto=format';
 
-  const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
-
-  async function fetchWithFallback(url) {
-    // Extract just the path from the full URL and proxy through our worker
-    let path;
-    try {
-      const u = new URL(url);
-      path = u.pathname + u.search;
-    } catch {
-      path = url;
-    }
-    const proxyUrl = WORKER + path;
-    const r = await fetch(proxyUrl);
-    if (!r.ok) throw new Error('Worker returned ' + r.status);
-    return r.text();
-  }
-
-
-  const NEWS_URL    = BASE + '/uutiset/';
-
-  const FALLBACK    = 'https://images.unsplash.com/photo-1615213612138-4d1195b1c0e8?w=700&auto=format&fit=crop&q=60';
-
-  function guessTag(title) {
-    const t = title.toLowerCase();
-    if (t.includes('pool') || t.includes('viikkis')) return 'Pool';
-    if (t.includes('kaisa'))   return 'Kaisa';
-    if (t.includes('snooker')) return 'Snooker';
-    if (t.includes('kara'))    return 'Kara';
-    if (t.includes('sm') || t.includes('mm') || t.includes('kisa')) return 'Kilpailu';
-    return 'Uutinen';
-  }
-
-  function parseArticles(html) {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    // Each article is <a class="d4-widget-news-article" href="/uutiset/slug/">
-    return Array.from(doc.querySelectorAll('a.d4-widget-news-article')).slice(0, 3).map(a => {
-      const href    = a.getAttribute('href') || '';
-      const fullUrl = href.startsWith('http') ? href : BASE + href;
-      const link    = 'uutinen.html?url=' + encodeURIComponent(fullUrl);
-      const title   = a.querySelector('.d4-widget-news-article-heading')?.textContent
-                        ?.replace(/›/g, '').trim() || '';
-      const date    = a.querySelector('.d4-widget-news-article-date')?.textContent?.trim() || '';
-      const excerpt = a.querySelector('.d4-widget-news-article-description')?.textContent?.trim() || '';
-      const img     = a.querySelector('img')?.getAttribute('src') || FALLBACK;
-      return { link, title, date, excerpt, img };
-    });
-  }
-
-  function buildCard({ link, title, date, excerpt, img }) {
-    const tag = guessTag(title);
-    const safeTitle   = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const safeExcerpt = excerpt.slice(0, 140).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function buildCard({ slug, href, title, date, excerpt, img, body }) {
+    const tag = (() => {
+      const t = (title||'').toLowerCase();
+      if (t.includes('pool') || t.includes('viikkis')) return 'Pool';
+      if (t.includes('kaisa'))   return 'Kaisa';
+      if (t.includes('snooker')) return 'Snooker';
+      if (t.includes('kara'))    return 'Kara';
+      return 'Uutinen';
+    })();
+    const safeTitle   = (title||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const safeExcerpt = (excerpt||'').slice(0, 140).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const imgSrc = img || FALLBACK;
+    const link = body
+      ? 'uutinen.html?slug=' + encodeURIComponent(slug)
+      : 'uutinen.html?url=' + encodeURIComponent(
+          (href||'').startsWith('http') ? (href||'') : 'https://espoonbiljardikerho.yhdistysavain.fi' + (href||'')
+        );
     return `
       <a href="${link}" class="news-card">
         <div class="news-img-wrap">
-          <img src="${img}" alt="${safeTitle}" onerror="this.src='${FALLBACK}'" loading="lazy">
+          <img src="${imgSrc}" alt="${safeTitle}" onerror="this.src='${FALLBACK}'" loading="lazy">
         </div>
         <div class="news-body">
           ${date ? `<div class="news-date">${date}</div>` : ''}
@@ -1160,28 +1125,16 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
       </a>`;
   }
 
-  async function fetchHTML(url) {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(res.status);
-    return res.text();
-  }
-
   const grid = document.getElementById('news-grid');
 
   try {
-    let html;
-    try {
-      html = await fetchHTML(NEWS_URL);
-    } catch {
-      html = await fetchWithFallback(NEWS_URL);
-    }
-
-    const articles = parseArticles(html);
-    if (!articles.length) throw new Error('No articles found');
-    grid.innerHTML = articles.map(buildCard).join('');
-
-  } catch (err) {
-    console.warn('News fetch failed:', err);
+    const resp = await fetch('data/uutiset.json');
+    const articles = await resp.json();
+    const latest = articles.slice(0, 3);
+    if (!latest.length) throw new Error('No articles');
+    grid.innerHTML = latest.map(buildCard).join('');
+  } catch(err) {
+    console.warn('News load failed:', err);
     grid.innerHTML = `
       <a href="uutiset.html" class="news-card">
         <div class="news-img-wrap"><img src="${FALLBACK}" alt="Uutiset"></div>
@@ -1190,24 +1143,6 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
           <h3 class="news-title">Lue viimeisimmät uutiset</h3>
           <p class="news-excerpt">Klikkaa lukeaksesi tuoreimmat uutiset EBK:n sivuilta.</p>
           <span class="news-tag">Uutiset</span>
-        </div>
-      </a>
-      <a href="esittely.html" class="news-card">
-        <div class="news-img-wrap" style="background:var(--green-felt);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:32px;">🎱</div>
-        <div class="news-body">
-          <div class="news-date">EBK</div>
-          <h3 class="news-title">Espoon Biljardikerho</h3>
-          <p class="news-excerpt">Yksityisklubi biljardista intohimoisille vuodesta 1980.</p>
-          <span class="news-tag">Klubi</span>
-        </div>
-      </a>
-      <a href="tapahtumat.html" class="news-card">
-        <div class="news-img-wrap" style="background:var(--green-felt);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:32px;">🏆</div>
-        <div class="news-body">
-          <div class="news-date">Tapahtumat</div>
-          <h3 class="news-title">Tulevat kilpailut</h3>
-          <p class="news-excerpt">Katso kaikki tulevat tapahtumat ja kilpailut.</p>
-          <span class="news-tag">Kalenteri</span>
         </div>
       </a>`;
   }

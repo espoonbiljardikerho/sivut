@@ -985,20 +985,13 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 (async function() {
   const BASE     = 'https://espoonbiljardikerho.yhdistysavain.fi';
 
-  const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
 
   async function fetchWithFallback(url) {
-    // Extract just the path from the full URL and proxy through our worker
+    const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
     let path;
-    try {
-      const u = new URL(url);
-      path = u.pathname + u.search;
-    } catch {
-      path = url;
-    }
-    const proxyUrl = WORKER + path;
-    const r = await fetch(proxyUrl);
-    if (!r.ok) throw new Error('Worker returned ' + r.status);
+    try { const u = new URL(url); path = u.pathname + u.search; } catch { path = url; }
+    const r = await fetch(WORKER + path);
+    if (!r.ok) throw new Error('Worker ' + r.status);
     return r.text();
   }
 
@@ -1258,60 +1251,42 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   async function loadRelated(currentTag) {
     try {
-      const html = await fetchWithFallback(BASE + '/uutiset/');
-      const doc  = new DOMParser().parseFromString(html, 'text/html');
-      const all  = Array.from(doc.querySelectorAll('a.d4-widget-news-article')).map(a => {
-        const href    = a.getAttribute('href') || '';
-        const title   = a.querySelector('.d4-widget-news-article-heading')?.textContent?.replace(/›/g,'').trim() || '';
-        const date    = a.querySelector('.d4-widget-news-article-date')?.textContent?.trim() || '';
-        const img     = a.querySelector('img')?.getAttribute('src') || FALLBACK;
-        return { href, title, date, img, tag: guessTag(title) };
-      });
+      const resp = await fetch('data/uutiset.json');
+      const all  = await resp.json();
 
       // Filter out current article; prefer same tag, fill with others
-      const currentHref = articleUrl;
-      const candidates  = all.filter(a => a.href !== currentHref);
+      const currentSlug = new URLSearchParams(location.search).get('slug') || '';
+      const currentUrl  = new URLSearchParams(location.search).get('url') || '';
+      const candidates  = all.filter(a => a.slug !== currentSlug && !currentUrl.includes(a.slug));
       const sameTag     = candidates.filter(a => a.tag === currentTag);
       const others      = candidates.filter(a => a.tag !== currentTag);
-      const related     = [...sameTag, ...others].slice(0, 3);
+      const related     = [...sameTag, ...others].slice(0, 4);
 
       if (!related.length) return;
 
-      // "Lue myös" grid
       const grid = document.getElementById('read-more-grid');
       grid.innerHTML = related.map(a => {
-        const url = 'uutinen.html?url=' + encodeURIComponent(a.href.startsWith('http') ? a.href : BASE + a.href);
-        const imgSrc = a.img.startsWith('/') ? BASE + a.img : a.img;
-        const safeTitle = a.title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        const link = a.body
+          ? 'uutinen.html?slug=' + encodeURIComponent(a.slug)
+          : 'uutinen.html?url=' + encodeURIComponent(
+              (a.href||'').startsWith('http') ? (a.href||'') : BASE + (a.href||'')
+            );
+        const imgSrc = a.img || FALLBACK;
+        const safeTitle = (a.title||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return `
-          <a href="${url}" class="news-card">
+          <a href="${link}" class="news-card">
             <div class="news-img-wrap">
               <img src="${imgSrc}" alt="${safeTitle}" onerror="this.src='${FALLBACK}'" loading="lazy">
             </div>
             <div class="news-body">
-              ${a.date ? `<div class="news-date">${a.date}</div>` : ''}
+              <div class="news-date">${a.date||''}</div>
               <h3 class="news-title">${safeTitle}</h3>
-              <div class="news-tag"><span>${a.tag}</span></div>
             </div>
           </a>`;
       }).join('');
-      document.getElementById('read-more-section').style.display = 'block';
 
-      // Sidebar recent news
-      const sidebarNews = document.getElementById('sidebar-news');
-      sidebarNews.innerHTML = candidates.slice(0, 5).map(a => {
-        const url = 'uutinen.html?url=' + encodeURIComponent(a.href.startsWith('http') ? a.href : BASE + a.href);
-        const safeTitle = a.title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return `
-          <a href="${url}" class="sidebar-nav-link">
-            <div class="sidebar-nav-title">${safeTitle}</div>
-            ${a.date ? `<div class="sidebar-nav-date">${a.date}</div>` : ''}
-          </a>`;
-      }).join('');
-
-    } catch (e) {
-      // Related articles are non-critical — fail silently
-      console.warn('Related articles failed:', e);
+    } catch(e) {
+      console.warn('Related news failed:', e);
     }
   }
 

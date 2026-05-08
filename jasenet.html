@@ -1026,23 +1026,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function () {
-  const BASE  = 'https://espoonbiljardikerho.yhdistysavain.fi';
 
-  const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
 
-  async function fetchWithFallback(url) {
-    let path;
-    try {
-      const u = new URL(url);
-      path = u.pathname + u.search;
-    } catch {
-      path = url.startsWith('/') ? url : '/' + url;
-    }
-    const proxyUrl = WORKER + path;
-    const r = await fetch(proxyUrl);
-    if (!r.ok) throw new Error('Worker ' + r.status + ' for ' + path);
-    return r.text();
-  }
 
 
 
@@ -1212,7 +1197,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     const batch = 3;
     const nmSource = Object.keys(memberData).length ? Object.values(memberData) : MEMBERS;
     for (let i = 0; i < nmSource.length; i += batch) {
-      const slice = MEMBERS.slice(i, i + batch);
+      const slice = nmSource.slice(i, i + batch);
       await Promise.all(slice.map(async member => {
         try {
           const profile = await fetchProfile(member.slug);
@@ -1256,24 +1241,10 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   async function loadPhoto(slug) {
     if (photoCache[slug] !== undefined) return photoCache[slug];
-    try {
-      const url = BASE + '/jasenet/' + slug + '/';
-      const html = await fetchWithFallback(url);
-      const doc = new DOMParser().parseFromString(html, 'text/html');
-      const imgUrl = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || null;
-      // Also grab sports while we're here — cache for profile panel too
-      const sportsText = extractField(doc, 'biljardilajit');
-      profileCache[slug] = profileCache[slug] || {};
-      profileCache[slug].sports = parseSports(sportsText);
-      profileCache[slug].raw = html;
-      profileCache[slug].doc = doc;
-      photoCache[slug] = imgUrl;
-      return imgUrl;
-    } catch {
-      photoCache[slug] = null;
-      return null;
-    }
+    photoCache[slug] = memberData[slug]?.photo || null;
+    return photoCache[slug];
   }
+
 
   // Intersection observer: load photos as cards scroll into view
 
@@ -1320,53 +1291,9 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
       return profileCache[slug];
     }
 
-    // ── Fallback: live scrape if not in JSON ───────────────────────────────
-    profileCache[slug] = {};
-    try {
-      const url = BASE + '/jasenet/' + slug + '/';
-      const html = await fetchWithFallback(url);
-      const doc  = new DOMParser().parseFromString(html, 'text/html');
-      const main = doc.querySelector('main, .content main, article') || doc.body;
-      const fullText = main.textContent || '';
+    // Member not in JSON — return empty profile
+    profileCache[slug] = { loaded: true, photo: null, sports: [], joined: null, started: null, nickname: null, achievements: [], records: [], motto: null, bio: null };
 
-      const h1Text   = doc.querySelector('h1')?.textContent || '';
-      const nickMatch = h1Text.match(/\(([^)]+)\)/);
-
-      function parseSection(text, startLabel, endLabels) {
-        const lower = text.toLowerCase();
-        const si = lower.indexOf(startLabel.toLowerCase());
-        if (si === -1) return [];
-        let ei = text.length;
-        for (const e of endLabels) {
-          const ix = lower.indexOf(e.toLowerCase(), si + startLabel.length);
-          if (ix !== -1 && ix < ei) ei = ix;
-        }
-        return text.slice(si + startLabel.length, ei).trim()
-          .split(/\s*[–-]\s+(?=[A-ZÄÖÅ"0-9"'])/g)
-          .map(s => s.replace(/^[–\-\s]+/, '').trim())
-          .filter(s => s.length > 3 && !s.toLowerCase().includes('ei tiedossa'));
-      }
-
-      const STOP = ['Ennätykset','Tavoitteet','Lempipelaajat','Pelivälineet'];
-      profileCache[slug] = {
-        loaded:       true,
-        photo:        doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || null,
-        sports:       parseSports(extractField(doc, 'biljardilajit')),
-        joined:       (extractField(doc,'liittynyt')?.match(/\d{4}/) || [])[0] || null,
-        started:      (extractField(doc,'aloittanut biljardin')?.match(/\d{4}/) || [])[0] || null,
-        nickname:     nickMatch ? nickMatch[1] : null,
-        achievements: parseSection(fullText, 'Parhaat saavutukset:', STOP),
-        records:      parseSection(fullText, 'Ennätykset:', ['Tavoitteet','Lempipelaajat']),
-        motto:        extractField(doc, 'motto') || null,
-        bio:          null,
-      };
-    } catch(err) {
-      console.warn('fetchProfile failed for', slug, err);
-      profileCache[slug] = {
-        loaded: true, photo: null, sports: [], joined: null, started: null,
-        nickname: null, achievements: [], records: [], motto: null, bio: null
-      };
-    }
     return profileCache[slug];
   }
 

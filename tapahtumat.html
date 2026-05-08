@@ -869,28 +869,12 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function () {
-  const BASE  = 'https://espoonbiljardikerho.yhdistysavain.fi';
-
-  const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
-
-  async function fetchWithFallback(url) {
-    // Extract just the path from the full URL and proxy through our worker
-    let path;
-    try {
-      const u = new URL(url);
-      path = u.pathname + u.search;
-    } catch {
-      path = url;
-    }
-    const proxyUrl = WORKER + path;
-    const r = await fetch(proxyUrl);
-    if (!r.ok) throw new Error('Worker returned ' + r.status);
-    return r.text();
-  }
 
 
 
-  const REG_URL = BASE + '/ilmoittautuminen/';
+
+
+  const REG_URL = 'https://espoonbiljardikerho.yhdistysavain.fi/ilmoittautuminen/';
 
   // Finnish month abbreviations
   const MONTHS = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'];
@@ -1017,7 +1001,11 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   async function fetchEventDetail(slug) {
     const url = BASE + '/tapahtumat/' + slug + '/';
-    const html = await fetchWithFallback(url);
+    const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
+      let path; try { const u = new URL(url); path = u.pathname + u.search; } catch { path = url; }
+      const _r = await fetch(WORKER + path);
+      if (!_r.ok) throw new Error('Worker ' + _r.status);
+      const html = await _r.text();
     const doc  = new DOMParser().parseFromString(html, 'text/html');
 
     // og:image for the lead photo
@@ -1380,9 +1368,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
           }
         });
       } catch(jsonErr) {
-        console.warn('tapahtumat.json failed, falling back to live scrape', jsonErr);
-        const fetchedHtml = await fetchWithFallback(BASE + '/tapahtumat/');
-        allParsed = parseEventsList(fetchedHtml);
+        console.warn('tapahtumat.json load failed', jsonErr);
+        allParsed = [];
       }
 
       if (!allParsed.length) throw new Error('No events found');
