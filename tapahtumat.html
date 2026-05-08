@@ -904,12 +904,39 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   async function load() {
     try {
-      const html   = await fetchWithFallback(BASE + '/tapahtumat/');
-      const parsed = parseEventsList(html);
+      // ── Load from pre-scraped JSON ──────────────────────────────────────
+      let parsed = [];
+      try {
+        const resp = await fetch('data/tapahtumat.json');
+        const data = await resp.json();
+        // Convert JSON format back to internal format
+        parsed = data.map(e => ({
+          slug:     e.slug,
+          href:     e.href,
+          name:     e.name,
+          tag:      e.tag,
+          dateInfo: e.dateInfo,
+          time:     e.time,
+          fee:      e.fee,
+          isPast:   e.isPast || false,
+          raw:      e.raw || '',
+        }));
+        // Pre-populate detail cache from JSON
+        data.forEach(e => {
+          if (e.detail || e.img) {
+            detailCache[e.slug] = { img: e.img || null, detail: e.detail || {} };
+          }
+        });
+      } catch(jsonErr) {
+        console.warn('tapahtumat.json failed, falling back to live scrape', jsonErr);
+        const html = await fetchWithFallback(BASE + '/tapahtumat/');
+        parsed = parseEventsList(html);
+      }
 
       if (!parsed.length) throw new Error('No events found');
 
-      eventsData = parsed;
+      // Show only upcoming (non-past) by default
+      eventsData = parsed.filter(e => !e.isPast);
       const list = document.getElementById('event-list');
       list.innerHTML = parsed.map((e,i) => renderRow(e,i)).join('');
 
@@ -1255,7 +1282,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE = 'https://formspree.io/f/mykodovl';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();
@@ -1411,7 +1438,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE = 'https://formspree.io/f/mykodovl';
 
   window.openRegModal = function(evt) {
     evt = evt || window._activeEvt;
