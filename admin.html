@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EBK Admin</title>
+<style>
+  :root {
+    --bg:        #0f1a10;
+    --surface:   #162018;
+    --surface2:  #1e2d20;
+    --border:    #2a3d2c;
+    --border2:   #354a38;
+    --gold:      #c8a84b;
+    --gold-dim:  #8a7235;
+    --green:     #4a8c52;
+    --green-dim: #2d5c33;
+    --text:      #e8ede8;
+    --text2:     #9aaa9c;
+    --text3:     #6a7a6c;
+    --danger:    #c0392b;
+    --danger-bg: #2a1210;
+    --radius:    6px;
+    --font:      'DM Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Login ─────────────────────────────────────────────────────── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 50% 30%, #1a3020 0%, var(--bg) 70%);
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 40px;
+    width: 360px;
+  }
+  .login-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .login-sub { color: var(--text3); font-size: 12px; margin-bottom: 32px; }
+  .login-box label { display: block; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .login-box input {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-family: var(--font); font-size: 14px; margin-bottom: 16px;
+  }
+  .login-box input:focus { outline: none; border-color: var(--gold); }
+  .login-hint { font-size: 11px; color: var(--text3); margin-top: -10px; margin-bottom: 16px; line-height: 1.5; }
+
+  /* ── App layout ────────────────────────────────────────────────── */
+  #app { display: none; height: 100vh; flex-direction: row; }
+  #app.visible { display: flex; }
+
+  /* ── Sidebar ───────────────────────────────────────────────────── */
+  #sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 20px 0;
+  }
+  .sidebar-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 16px; color: var(--gold);
+    padding: 0 20px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .sidebar-logo span { display: block; font-size: 10px; color: var(--text3); font-family: var(--font); letter-spacing: 0.06em; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 20px; cursor: pointer;
+    color: var(--text2); font-size: 13px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--gold); border-left-color: var(--gold); background: rgba(200,168,75,0.06); }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .nav-section { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 20px 6px; }
+  .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+  .sidebar-user { font-size: 12px; color: var(--text3); margin-bottom: 10px; }
+  .sidebar-user strong { display: block; color: var(--text2); }
+
+  /* ── Main area ─────────────────────────────────────────────────── */
+  #main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .topbar {
+    padding: 16px 28px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); flex-shrink: 0;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .page-body { padding: 24px 28px; flex: 1; }
+
+  /* ── Buttons ───────────────────────────────────────────────────── */
+  .btn {
+    padding: 8px 16px; border-radius: var(--radius);
+    font-family: var(--font); font-size: 13px; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.15s; font-weight: 500;
+  }
+  .btn-primary { background: var(--gold); color: #0f1a10; border-color: var(--gold); }
+  .btn-primary:hover { background: #d4b45a; }
+  .btn-secondary { background: transparent; color: var(--text2); border-color: var(--border2); }
+  .btn-secondary:hover { color: var(--text); border-color: var(--text3); }
+  .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-bg); }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+  .btn-icon { padding: 6px 8px; }
+
+  /* ── Table ─────────────────────────────────────────────────────── */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; font-size: 11px; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* ── Toolbar ───────────────────────────────────────────────────── */
+  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+  .search-input {
+    flex: 1; max-width: 280px;
+    padding: 7px 12px; background: var(--surface2);
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    color: var(--text); font-family: var(--font); font-size: 13px;
+  }
+  .search-input:focus { outline: none; border-color: var(--gold); }
+  .search-input::placeholder { color: var(--text3); }
+
+  /* ── Badges ────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 500;
+  }
+  .badge-kaisa   { background: rgba(200,168,75,0.15);  color: #c8a84b; }
+  .badge-pool    { background: rgba(74,140,82,0.15);   color: #6ab872; }
+  .badge-snooker { background: rgba(100,149,237,0.15); color: #7aa8f0; }
+  .badge-kara    { background: rgba(220,100,80,0.15);  color: #e07868; }
+  .badge-pyramidi{ background: rgba(180,120,220,0.15); color: #c090e0; }
+  .badge-uutinen { background: rgba(150,150,150,0.15); color: #aaa; }
+  .badge-tays    { background: rgba(200,168,75,0.15);  color: #c8a84b; }
+  .badge-klubi   { background: rgba(74,140,82,0.15);   color: #6ab872; }
+  .badge-pelaa   { background: rgba(100,149,237,0.15); color: #7aa8f0; }
+
+  /* ── Form ──────────────────────────────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid.single { grid-template-columns: 1fr; }
+  .form-full { grid-column: 1 / -1; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+  .field input, .field select, .field textarea {
+    padding: 9px 12px; background: var(--surface2);
+    border: 1px solid var(--border2); border-radius: var(--radius);
+    color: var(--text); font-family: var(--font); font-size: 13px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--gold);
+  }
+  .field select option { background: var(--surface2); }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  /* Rich text toolbar */
+  .rte-toolbar {
+    display: flex; gap: 2px; padding: 6px 8px;
+    background: var(--bg); border: 1px solid var(--border2);
+    border-bottom: none; border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .rte-toolbar button {
+    padding: 4px 8px; background: transparent;
+    border: 1px solid transparent; border-radius: 4px;
+    color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 600;
+  }
+  .rte-toolbar button:hover { background: var(--surface2); color: var(--text); }
+  .rte-toolbar button.active { background: var(--surface2); color: var(--gold); border-color: var(--border2); }
+  .rte-content {
+    min-height: 200px; padding: 12px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 0 0 var(--radius) var(--radius);
+    color: var(--text); font-size: 14px; line-height: 1.7;
+    outline: none;
+  }
+  .rte-content:focus { border-color: var(--gold); }
+
+  /* Image upload */
+  .img-upload-area {
+    border: 2px dashed var(--border2); border-radius: var(--radius);
+    padding: 20px; text-align: center; cursor: pointer;
+    color: var(--text3); font-size: 12px; transition: all 0.15s;
+    position: relative;
+  }
+  .img-upload-area:hover { border-color: var(--gold); color: var(--text2); }
+  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .img-preview { max-height: 120px; max-width: 100%; border-radius: 4px; margin-top: 8px; }
+
+  /* ── Panel / Card ──────────────────────────────────────────────── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+  }
+  .panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .panel-title { font-size: 13px; font-weight: 600; }
+  .panel-body { padding: 16px; }
+
+  /* KPI cards */
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; }
+  .kpi-num { font-size: 28px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+  /* ── Modal ─────────────────────────────────────────────────────── */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center; z-index: 100;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; width: 640px; max-width: 95vw;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-header {
+    padding: 18px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; line-height: 1; }
+  .modal-close:hover { color: var(--text); }
+
+  /* ── Toast ─────────────────────────────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 12px 18px;
+    font-size: 13px; color: var(--text);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.25s; z-index: 200;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.success { border-left: 3px solid var(--green); }
+  #toast.error   { border-left: 3px solid var(--danger); }
+
+  /* ── Misc ──────────────────────────────────────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .text-muted { color: var(--text3); font-size: 12px; }
+  .text-sm { font-size: 12px; }
+  .saving-indicator { color: var(--text3); font-size: 12px; display: none; }
+  .saving-indicator.show { display: inline; }
+  .tabs { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .tab-btn {
+    padding: 8px 14px; background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 13px; font-family: var(--font);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text2); }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text3); }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; }
+  .confirm-dialog { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 200; }
+  .confirm-dialog.open { display: flex; }
+  .confirm-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; max-width: 360px; width: 90%; }
+  .confirm-title { font-weight: 600; margin-bottom: 8px; }
+  .confirm-msg { color: var(--text2); font-size: 13px; margin-bottom: 20px; }
+  .confirm-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  a { color: var(--gold); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap');
+</style>
+</head>
+<body>
+
+<!-- ── Login ─────────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">EBK Admin</div>
+    <div class="login-sub">Espoon Biljardikerho · Hallintapaneeli</div>
+    <label>Salasana</label>
+    <input type="password" id="login-pass" placeholder="••••••••" />
+    <label>GitHub Token</label>
+    <input type="password" id="login-token" placeholder="ghp_..." />
+    <p class="login-hint">Token tallennetaan vain selaimeen. Tarvitaan repo-oikeus.</p>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Kirjaudu sisään</button>
+    <p id="login-error" style="color:var(--danger);font-size:12px;margin-top:10px;display:none"></p>
+  </div>
+</div>
+
+<!-- ── App ───────────────────────────────────────────────────────── -->
+<div id="app">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-logo">EBK<span>Admin Panel</span></div>
+    <div class="nav-section">Sisältö</div>
+    <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">⊞</span> Dashboard</div>
+    <div class="nav-item" onclick="showPage('news')"><span class="nav-icon">📰</span> Uutiset</div>
+    <div class="nav-item" onclick="showPage('events')"><span class="nav-icon">📅</span> Tapahtumat</div>
+    <div class="nav-item" onclick="showPage('members')"><span class="nav-icon">👤</span> Jäsenet</div>
+    <div class="nav-section">Data</div>
+    <div class="nav-item" onclick="showPage('sync')"><span class="nav-icon">↻</span> Synkronointi</div>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user"><strong id="sidebar-user-name">—</strong>kirjautunut</div>
+      <button class="btn btn-secondary btn-sm" onclick="doLogout()" style="width:100%">Kirjaudu ulos</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions" id="topbar-actions"></div>
+    </div>
+    <div class="page-body">
+
+      <!-- Dashboard -->
+      <div class="page active" id="page-dashboard">
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-num" id="kpi-news">—</div><div class="kpi-label">Uutista</div></div>
+          <div class="kpi-card"><div class="kpi-num" id="kpi-events">—</div><div class="kpi-label">Tulevaa tapahtumaa</div></div>
+          <div class="kpi-card"><div class="kpi-num" id="kpi-members">—</div><div class="kpi-label">Jäsentä</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Viimeisimmät uutiset</div></div>
+          <div id="dashboard-news"></div>
+        </div>
+      </div>
+
+      <!-- News -->
+      <div class="page" id="page-news">
+        <div class="toolbar">
+          <input class="search-input" id="news-search" placeholder="Hae uutisia…" oninput="filterNews()">
+          <select class="search-input" style="max-width:140px" id="news-tag-filter" onchange="filterNews()">
+            <option value="">Kaikki lajit</option>
+            <option>Kaisa</option><option>Pool</option><option>Snooker</option>
+            <option>Kara</option><option>Pyramidi</option><option>Uutinen</option>
+          </select>
+        </div>
+        <div class="panel">
+          <table class="data-table" id="news-table">
+            <thead><tr>
+              <th>Otsikko</th><th>Laji</th><th>Päivämäärä</th><th style="width:100px"></th>
+            </tr></thead>
+            <tbody id="news-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="page" id="page-events">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="filterEvents('upcoming', this)">Tulevat</button>
+          <button class="tab-btn" onclick="filterEvents('past', this)">Menneet</button>
+        </div>
+        <div class="panel">
+          <table class="data-table" id="events-table">
+            <thead><tr>
+              <th>Nimi</th><th>Laji</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
+            </tr></thead>
+            <tbody id="events-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Members -->
+      <div class="page" id="page-members">
+        <div class="toolbar">
+          <input class="search-input" id="member-search" placeholder="Hae jäseniä…" oninput="filterMembers()">
+          <select class="search-input" style="max-width:140px" id="member-type-filter" onchange="filterMembers()">
+            <option value="">Kaikki</option>
+            <option value="tays">Täysjäsen</option>
+            <option value="klubi">Klubijäsen</option>
+            <option value="pelaa">Pelaajajäsen</option>
+          </select>
+        </div>
+        <div class="panel">
+          <table class="data-table">
+            <thead><tr>
+              <th>Nimi</th><th>Tyyppi</th><th>Lajit</th><th>Liittynyt</th><th style="width:100px"></th>
+            </tr></thead>
+            <tbody id="members-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sync -->
+      <div class="page" id="page-sync">
+        <div class="panel" style="max-width:560px">
+          <div class="panel-header"><div class="panel-title">Tietojen synkronointi</div></div>
+          <div class="panel-body">
+            <p style="color:var(--text2);font-size:13px;margin-bottom:16px;line-height:1.6">
+              Tietojen tallentaminen lähettää muutokset suoraan GitHub-repositorioon.
+              Sivusto päivittyy automaattisesti ~30 sekunnissa.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:var(--radius)">
+                <div><div style="font-weight:500">uutiset.json</div><div class="text-muted" id="sync-news-count">—</div></div>
+                <div id="sync-news-status" class="text-muted">—</div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:var(--radius)">
+                <div><div style="font-weight:500">tapahtumat.json</div><div class="text-muted" id="sync-events-count">—</div></div>
+                <div id="sync-events-status" class="text-muted">—</div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:var(--radius)">
+                <div><div style="font-weight:500">jasenet.json</div><div class="text-muted" id="sync-members-count">—</div></div>
+                <div id="sync-members-status" class="text-muted">—</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <button class="btn btn-secondary" onclick="checkSyncStatus()">Tarkista tila</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ── News Modal ─────────────────────────────────────────────────── -->
+<div class="modal-bg" id="news-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="news-modal-title">Uusi uutinen</div>
+      <button class="modal-close" onclick="closeModal('news-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field form-full">
+          <label>Otsikko *</label>
+          <input type="text" id="nf-title" oninput="autoSlug()" placeholder="Uutisen otsikko">
+        </div>
+        <div class="field">
+          <label>Slug (URL-tunniste)</label>
+          <input type="text" id="nf-slug" placeholder="uutisen-otsikko">
+        </div>
+        <div class="field">
+          <label>Päivämäärä *</label>
+          <input type="text" id="nf-date" placeholder="6.5.2026">
+        </div>
+        <div class="field">
+          <label>Laji</label>
+          <select id="nf-tag">
+            <option>Uutinen</option><option>Kaisa</option><option>Pool</option>
+            <option>Snooker</option><option>Kara</option><option>Pyramidi</option>
+          </select>
+        </div>
+        <div class="field form-full">
+          <label>Kuva</label>
+          <div class="img-upload-area" id="nf-img-area">
+            <input type="file" accept="image/*" onchange="handleImageUpload(this,'nf-img-preview','nf-img-path')">
+            <div>📷 Klikkaa ladataksesi kuva</div>
+            <div class="text-muted" style="margin-top:4px" id="nf-img-path"></div>
+            <img id="nf-img-preview" class="img-preview" style="display:none">
+          </div>
+        </div>
+        <div class="field form-full">
+          <label>Lyhyt kuvaus (excerpt)</label>
+          <textarea id="nf-excerpt" rows="2" placeholder="Lyhyt kuvaus uutisesta…"></textarea>
+        </div>
+        <div class="field form-full">
+          <label>Sisältö</label>
+          <div class="rte-toolbar">
+            <button onclick="rteCmd('bold')" title="Lihavointi"><b>B</b></button>
+            <button onclick="rteCmd('italic')" title="Kursiivi"><i>I</i></button>
+            <button onclick="rteCmd('insertUnorderedList')" title="Lista">≡</button>
+            <button onclick="rteLink()" title="Linkki">🔗</button>
+            <button onclick="rteCmd('removeFormat')" title="Poista muotoilu" style="font-size:11px;font-weight:400">Tyhjennä</button>
+          </div>
+          <div class="rte-content" id="nf-body" contenteditable="true"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('news-modal')">Peruuta</button>
+      <button class="btn btn-primary" onclick="saveNews()" id="news-save-btn">Tallenna</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Event Modal ─────────────────────────────────────────────────── -->
+<div class="modal-bg" id="event-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="event-modal-title">Uusi tapahtuma</div>
+      <button class="modal-close" onclick="closeModal('event-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field form-full">
+          <label>Nimi *</label>
+          <input type="text" id="ef-name" placeholder="Tapahtuman nimi">
+        </div>
+        <div class="field">
+          <label>Laji</label>
+          <select id="ef-tag">
+            <option>Kaisa</option><option>Pool</option><option>Snooker</option>
+            <option>Kara</option><option>Pyramidi</option><option>Uutinen</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Alkamisaika</label>
+          <input type="text" id="ef-time" placeholder="klo 18:00">
+        </div>
+        <div class="field">
+          <label>Päivämäärä</label>
+          <input type="text" id="ef-date" placeholder="13.6.2026">
+        </div>
+        <div class="field">
+          <label>Osallistumismaksu</label>
+          <input type="text" id="ef-fee" placeholder="30 €">
+        </div>
+        <div class="field">
+          <label>Ilmoittautuminen mennessä</label>
+          <input type="text" id="ef-deadline" placeholder="Pe.14.8. klo 12:00 mennessä">
+        </div>
+        <div class="field">
+          <label>Pelipaikka</label>
+          <input type="text" id="ef-venue" placeholder="Espoon Biljardikerhon klubi">
+        </div>
+        <div class="field">
+          <label>Ilmoittautumislinkki</label>
+          <input type="text" id="ef-signup" placeholder="https://...">
+        </div>
+        <div class="field form-full">
+          <label>Kuvaus</label>
+          <textarea id="ef-desc" rows="3" placeholder="Tapahtuman kuvaus…"></textarea>
+        </div>
+        <div class="field form-full">
+          <label>Kuva</label>
+          <div class="img-upload-area">
+            <input type="file" accept="image/*" onchange="handleImageUpload(this,'ef-img-preview','ef-img-path')">
+            <div>📷 Klikkaa ladataksesi kuva</div>
+            <div class="text-muted" style="margin-top:4px" id="ef-img-path"></div>
+            <img id="ef-img-preview" class="img-preview" style="display:none">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('event-modal')">Peruuta</button>
+      <button class="btn btn-primary" onclick="saveEvent()">Tallenna</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Member Modal ───────────────────────────────────────────────── -->
+<div class="modal-bg" id="member-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="member-modal-title">Muokkaa jäsentä</div>
+      <button class="modal-close" onclick="closeModal('member-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field">
+          <label>Nimi *</label>
+          <input type="text" id="mf-name" placeholder="Etunimi Sukunimi">
+        </div>
+        <div class="field">
+          <label>Lempinimi</label>
+          <input type="text" id="mf-nickname" placeholder="Lempinimi">
+        </div>
+        <div class="field">
+          <label>Jäsentyyppi</label>
+          <select id="mf-type">
+            <option value="tays">Täysjäsen</option>
+            <option value="klubi">Klubijäsen</option>
+            <option value="pelaa">Pelaajajäsen</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Liittynyt</label>
+          <input type="text" id="mf-joined" placeholder="1997">
+        </div>
+        <div class="field">
+          <label>Aloitti biljardin</label>
+          <input type="text" id="mf-started" placeholder="1995">
+        </div>
+        <div class="field">
+          <label>Lajit (pilkulla eroteltu)</label>
+          <input type="text" id="mf-sports" placeholder="Kaisa, Pool, Snooker">
+        </div>
+        <div class="field form-full">
+          <label>Motto</label>
+          <input type="text" id="mf-motto" placeholder="Jäsenen motto">
+        </div>
+        <div class="field form-full">
+          <label>Bio</label>
+          <textarea id="mf-bio" rows="4" placeholder="Jäsenen esittely…"></textarea>
+        </div>
+        <div class="field form-full">
+          <label>Kuva</label>
+          <div class="img-upload-area">
+            <input type="file" accept="image/*" onchange="handleImageUpload(this,'mf-img-preview','mf-img-path','members')">
+            <div>📷 Klikkaa ladataksesi kuva</div>
+            <div class="text-muted" style="margin-top:4px" id="mf-img-path"></div>
+            <img id="mf-img-preview" class="img-preview" style="display:none">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" id="member-delete-btn" onclick="deleteMember()">Poista</button>
+      <button class="btn btn-secondary" onclick="closeModal('member-modal')">Peruuta</button>
+      <button class="btn btn-primary" onclick="saveMember()">Tallenna</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Confirm dialog ─────────────────────────────────────────────── -->
+<div class="confirm-dialog" id="confirm-dialog">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Oletko varma?</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn btn-secondary" onclick="closeConfirm()">Peruuta</button>
+      <button class="btn btn-danger" id="confirm-ok">Poista</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ──────────────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const REPO_OWNER  = 'espoonbiljardikerho';
+const REPO_NAME   = 'sivut';
+const ADMIN_PASS  = 'ebk2024admin'; // Change this!
+const BRANCH      = 'main';
+
+// ── State ───────────────────────────────────────────────────────────────────
+let ghToken    = '';
+let newsData   = [];
+let eventsData = [];
+let membersData= [];
+let editingIdx = null; // index of item being edited
+let editingType= null; // 'news'|'event'|'member'
+let pendingImg = null; // { file, folder, filename }
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+function doLogin() {
+  const pass  = document.getElementById('login-pass').value;
+  const token = document.getElementById('login-token').value.trim();
+  const err   = document.getElementById('login-error');
+
+  if (pass !== ADMIN_PASS) {
+    err.textContent = 'Väärä salasana.'; err.style.display = 'block'; return;
+  }
+  if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+    err.textContent = 'Token näyttää virheelliseltä (pitäisi alkaa ghp_ tai github_pat_).';
+    err.style.display = 'block'; return;
+  }
+
+  ghToken = token;
+  localStorage.setItem('ebk_token', token);
+  err.style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('sidebar-user-name').textContent = 'Admin · ';
+  loadAllData();
+}
+
+function doLogout() {
+  localStorage.removeItem('ebk_token');
+  location.reload();
+}
+
+// Auto-login if token in storage
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('ebk_token');
+  if (saved) {
+    document.getElementById('login-token').value = saved;
+  }
+});
+
+// ── GitHub API ──────────────────────────────────────────────────────────────
+async function ghGet(path) {
+  const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
+    headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github.v3+json' }
+  });
+  if (!r.ok) throw new Error(`GitHub GET ${path}: ${r.status}`);
+  return r.json();
+}
+
+async function ghPut(path, content, message, sha) {
+  const body = { message, content: btoa(unescape(encodeURIComponent(content))), branch: BRANCH };
+  if (sha) body.sha = sha;
+  const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+    method: 'PUT',
+    headers: { Authorization: `token ${ghToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json(); throw new Error(e.message || r.status); }
+  return r.json();
+}
+
+async function saveJSON(path, data, msg) {
+  try {
+    const existing = await ghGet(path).catch(() => null);
+    const sha = existing?.sha;
+    await ghPut(path, JSON.stringify(data, null, 2), msg, sha);
+    return true;
+  } catch(e) {
+    toast('Virhe: ' + e.message, 'error'); return false;
+  }
+}
+
+async function uploadImage(file, folder, filename) {
+  const reader = new FileReader();
+  return new Promise((resolve, reject) => {
+    reader.onload = async () => {
+      try {
+        const b64 = reader.result.split(',')[1];
+        const path = `images/${folder}/${filename}`;
+        const existing = await ghGet(path).catch(() => null);
+        const body = {
+          message: `Upload image: ${filename}`,
+          content: b64,
+          branch: BRANCH,
+        };
+        if (existing?.sha) body.sha = existing.sha;
+        const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+          method: 'PUT',
+          headers: { Authorization: `token ${ghToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!r.ok) { const e = await r.json(); throw new Error(e.message); }
+        const result = await r.json();
+        resolve(result.content?.download_url || `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/images/${folder}/${filename}`);
+      } catch(e) { reject(e); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Load data ────────────────────────────────────────────────────────────────
+async function loadAllData() {
+  try {
+    const [nf, ef, mf] = await Promise.all([
+      ghGet('data/uutiset.json'),
+      ghGet('data/tapahtumat.json'),
+      ghGet('data/jasenet.json'),
+    ]);
+    newsData    = JSON.parse(decodeURIComponent(escape(atob(nf.content.replace(/\n/g,'')))));
+    eventsData  = JSON.parse(decodeURIComponent(escape(atob(ef.content.replace(/\n/g,'')))));
+    membersData = JSON.parse(decodeURIComponent(escape(atob(mf.content.replace(/\n/g,'')))));
+
+    renderDashboard();
+    renderNews();
+    renderEvents('upcoming');
+    renderMembers();
+    updateSyncCounts();
+    toast('Tiedot ladattu onnistuneesti', 'success');
+  } catch(e) {
+    toast('Tietojen lataus epäonnistui: ' + e.message, 'error');
+  }
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard: 'Dashboard', news: 'Uutiset', events: 'Tapahtumat',
+  members: 'Jäsenet', sync: 'Synkronointi'
+};
+const PAGE_ACTIONS = {
+  news:    '<button class="btn btn-primary btn-sm" onclick="openNewsModal()">+ Uusi uutinen</button>',
+  events:  '<button class="btn btn-primary btn-sm" onclick="openEventModal()">+ Uusi tapahtuma</button>',
+  members: '<button class="btn btn-primary btn-sm" onclick="openMemberModal()">+ Uusi jäsen</button>',
+};
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`.nav-item[onclick="showPage('${name}')"]`).classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
+  document.getElementById('topbar-actions').innerHTML = PAGE_ACTIONS[name] || '';
+}
+
+// ── Dashboard ────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  document.getElementById('kpi-news').textContent    = newsData.length;
+  document.getElementById('kpi-events').textContent  = eventsData.filter(e => !e.isPast).length;
+  document.getElementById('kpi-members').textContent = membersData.length;
+
+  const recent = newsData.slice(0, 8);
+  document.getElementById('dashboard-news').innerHTML = recent.length ? `
+    <table class="data-table">
+      ${recent.map(a => `
+        <tr>
+          <td>${a.title || '—'}</td>
+          <td><span class="badge badge-${(a.tag||'uutinen').toLowerCase()}">${a.tag||'Uutinen'}</span></td>
+          <td class="text-muted">${a.date||'—'}</td>
+          <td><button class="btn btn-secondary btn-sm" onclick="openNewsModal(${newsData.indexOf(a)})">Muokkaa</button></td>
+        </tr>`).join('')}
+    </table>` : '<div class="empty-state"><div class="empty-icon">📰</div><p>Ei uutisia</p></div>';
+}
+
+// ── News ─────────────────────────────────────────────────────────────────────
+function renderNews(filtered) {
+  const items = filtered || newsData;
+  const tbody = document.getElementById('news-tbody');
+  tbody.innerHTML = items.length ? items.map((a, i) => {
+    const realIdx = filtered ? newsData.indexOf(a) : i;
+    return `<tr>
+      <td><strong>${a.title || '—'}</strong><div class="text-muted text-sm">${(a.excerpt||'').slice(0,60)}${(a.excerpt||'').length > 60 ? '…' : ''}</div></td>
+      <td><span class="badge badge-${(a.tag||'uutinen').toLowerCase()}">${a.tag||'Uutinen'}</span></td>
+      <td class="text-muted">${a.date||'—'}</td>
+      <td style="text-align:right">
+        <button class="btn btn-secondary btn-sm" onclick="openNewsModal(${realIdx})">Muokkaa</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="4" class="empty-state">Ei uutisia</td></tr>';
+}
+
+function filterNews() {
+  const q   = document.getElementById('news-search').value.toLowerCase();
+  const tag = document.getElementById('news-tag-filter').value;
+  const filtered = newsData.filter(a =>
+    (!q   || (a.title||'').toLowerCase().includes(q) || (a.excerpt||'').toLowerCase().includes(q)) &&
+    (!tag || a.tag === tag)
+  );
+  renderNews(filtered);
+}
+
+function openNewsModal(idx) {
+  editingIdx  = idx !== undefined ? idx : null;
+  editingType = 'news';
+  const a = idx !== undefined ? newsData[idx] : null;
+  document.getElementById('news-modal-title').textContent = a ? 'Muokkaa uutista' : 'Uusi uutinen';
+  document.getElementById('nf-title').value   = a?.title   || '';
+  document.getElementById('nf-slug').value    = a?.slug    || '';
+  document.getElementById('nf-date').value    = a?.date    || '';
+  document.getElementById('nf-tag').value     = a?.tag     || 'Uutinen';
+  document.getElementById('nf-excerpt').value = a?.excerpt || '';
+  document.getElementById('nf-body').innerHTML = a?.body   || '';
+  document.getElementById('nf-img-path').textContent = a?.img ? '✓ ' + (a.img.split('/').pop() || 'kuva') : '';
+  document.getElementById('nf-img-preview').style.display = a?.img ? 'block' : 'none';
+  if (a?.img) document.getElementById('nf-img-preview').src = a.img;
+  pendingImg = null;
+  document.getElementById('news-modal').classList.add('open');
+}
+
+function autoSlug() {
+  const title = document.getElementById('nf-title').value;
+  const slug  = title.toLowerCase()
+    .replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  document.getElementById('nf-slug').value = slug;
+}
+
+async function saveNews() {
+  const title   = document.getElementById('nf-title').value.trim();
+  const slug    = document.getElementById('nf-slug').value.trim();
+  const date    = document.getElementById('nf-date').value.trim();
+  const tag     = document.getElementById('nf-tag').value;
+  const excerpt = document.getElementById('nf-excerpt').value.trim();
+  const body    = document.getElementById('nf-body').innerHTML;
+
+  if (!title) { toast('Otsikko on pakollinen', 'error'); return; }
+
+  const btn = document.getElementById('news-save-btn');
+  btn.textContent = 'Tallennetaan…'; btn.disabled = true;
+
+  let imgUrl = editingIdx !== null ? newsData[editingIdx]?.img : null;
+  if (pendingImg) {
+    try {
+      imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename);
+    } catch(e) { toast('Kuvan lataus epäonnistui: ' + e.message, 'error'); btn.textContent = 'Tallenna'; btn.disabled = false; return; }
+  }
+
+  const item = { slug: slug || autoSlugFrom(title), href: `/uutiset/${slug}/`, title, date, excerpt, img: imgUrl || null, tag, body };
+
+  if (editingIdx !== null) {
+    newsData[editingIdx] = { ...newsData[editingIdx], ...item };
+  } else {
+    newsData.unshift(item);
+  }
+
+  const ok = await saveJSON('data/uutiset.json', newsData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} uutinen: ${title}`);
+  btn.textContent = 'Tallenna'; btn.disabled = false;
+  if (ok) { closeModal('news-modal'); renderNews(); renderDashboard(); toast('Uutinen tallennettu ✓', 'success'); }
+}
+
+// ── Events ───────────────────────────────────────────────────────────────────
+function renderEvents(view) {
+  const items = eventsData.filter(e => view === 'past' ? e.isPast : !e.isPast);
+  const tbody = document.getElementById('events-tbody');
+  tbody.innerHTML = items.length ? items.map(e => {
+    const realIdx = eventsData.indexOf(e);
+    const dateStr = e.dateInfo ? `${e.dateInfo.day}. ${e.dateInfo.month} ${e.dateInfo.year}` : '—';
+    const fee     = e.fee || e.detail?.fee || '—';
+    return `<tr>
+      <td><strong>${e.name||'—'}</strong></td>
+      <td><span class="badge badge-${(e.tag||'').toLowerCase()}">${e.tag||'—'}</span></td>
+      <td class="text-muted">${dateStr}</td>
+      <td class="text-muted">${fee}</td>
+      <td style="text-align:right">
+        <button class="btn btn-secondary btn-sm" onclick="openEventModal(${realIdx})">Muokkaa</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty-state">Ei tapahtumia</td></tr>';
+}
+
+function filterEvents(view, btn) {
+  document.querySelectorAll('#page-events .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEvents(view);
+}
+
+function openEventModal(idx) {
+  editingIdx  = idx !== undefined ? idx : null;
+  editingType = 'event';
+  const e = idx !== undefined ? eventsData[idx] : null;
+  document.getElementById('event-modal-title').textContent = e ? 'Muokkaa tapahtumaa' : 'Uusi tapahtuma';
+  document.getElementById('ef-name').value     = e?.name || '';
+  document.getElementById('ef-tag').value      = e?.tag  || 'Kaisa';
+  document.getElementById('ef-time').value     = e?.time || '';
+  document.getElementById('ef-fee').value      = e?.fee  || e?.detail?.fee || '';
+  document.getElementById('ef-deadline').value = e?.detail?.deadline || '';
+  document.getElementById('ef-venue').value    = e?.detail?.venue    || '';
+  document.getElementById('ef-signup').value   = e?.detail?.signup   || '';
+  document.getElementById('ef-desc').value     = e?.detail?.description || '';
+  // Date
+  if (e?.dateInfo) {
+    const d = e.dateInfo;
+    document.getElementById('ef-date').value = d.startLabel || `${d.day}.${MONTHS_FI.indexOf(d.month)+1}.${d.year}`;
+  } else {
+    document.getElementById('ef-date').value = '';
+  }
+  pendingImg = null;
+  document.getElementById('event-modal').classList.add('open');
+}
+
+const MONTHS_FI = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
+
+async function saveEvent() {
+  const name = document.getElementById('ef-name').value.trim();
+  if (!name) { toast('Nimi on pakollinen', 'error'); return; }
+
+  const dateRaw = document.getElementById('ef-date').value.trim();
+  let dateInfo  = null;
+  const dm = dateRaw.match(/^(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+  if (dm) {
+    dateInfo = { day: dm[1], month: MONTHS_FI[parseInt(dm[2])-1], year: dm[3] || new Date().getFullYear(), isSeries: false };
+  }
+
+  let imgUrl = editingIdx !== null ? eventsData[editingIdx]?.img : null;
+  if (pendingImg) {
+    try { imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
+    catch(e) { toast('Kuvan lataus epäonnistui', 'error'); return; }
+  }
+
+  const item = {
+    slug:    autoSlugFrom(name),
+    href:    `/tapahtumat/${autoSlugFrom(name)}/`,
+    name,
+    tag:     document.getElementById('ef-tag').value,
+    dateInfo,
+    time:    document.getElementById('ef-time').value.trim() || null,
+    fee:     document.getElementById('ef-fee').value.trim()  || null,
+    isPast:  editingIdx !== null ? eventsData[editingIdx].isPast : false,
+    img:     imgUrl,
+    detail: {
+      deadline:    document.getElementById('ef-deadline').value.trim() || null,
+      venue:       document.getElementById('ef-venue').value.trim()    || null,
+      signup:      document.getElementById('ef-signup').value.trim()   || null,
+      description: document.getElementById('ef-desc').value.trim()     || null,
+    }
+  };
+
+  if (editingIdx !== null) eventsData[editingIdx] = { ...eventsData[editingIdx], ...item };
+  else eventsData.unshift(item);
+
+  const ok = await saveJSON('data/tapahtumat.json', eventsData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`);
+  if (ok) {
+    closeModal('event-modal');
+    renderEvents(eventsData[editingIdx||0]?.isPast ? 'past' : 'upcoming');
+    toast('Tapahtuma tallennettu ✓', 'success');
+  }
+}
+
+// ── Members ──────────────────────────────────────────────────────────────────
+function renderMembers(filtered) {
+  const items = filtered || membersData;
+  document.getElementById('members-tbody').innerHTML = items.length ? items.map(m => {
+    const realIdx = membersData.indexOf(m);
+    const typeMap = { tays: 'Täysjäsen', klubi: 'Klubijäsen', pelaa: 'Pelaajajäsen' };
+    const sports  = (m.sports||[]).map(s => `<span class="badge badge-${s.toLowerCase()}">${s}</span>`).join(' ');
+    return `<tr>
+      <td>
+        ${m.photo ? `<img src="${m.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px">` : ''}
+        <strong>${m.name}</strong>${m.nickname ? ` <span class="text-muted">"${m.nickname}"</span>` : ''}
+      </td>
+      <td><span class="badge badge-${m.type||'tays'}">${typeMap[m.type]||m.type}</span></td>
+      <td>${sports||'<span class="text-muted">—</span>'}</td>
+      <td class="text-muted">${m.joined||'—'}</td>
+      <td style="text-align:right">
+        <button class="btn btn-secondary btn-sm" onclick="openMemberModal(${realIdx})">Muokkaa</button>
+      </td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="5" class="empty-state">Ei jäseniä</td></tr>';
+}
+
+function filterMembers() {
+  const q    = document.getElementById('member-search').value.toLowerCase();
+  const type = document.getElementById('member-type-filter').value;
+  const filtered = membersData.filter(m =>
+    (!q    || (m.name||'').toLowerCase().includes(q) || (m.nickname||'').toLowerCase().includes(q)) &&
+    (!type || m.type === type)
+  );
+  renderMembers(filtered);
+}
+
+function openMemberModal(idx) {
+  editingIdx  = idx !== undefined ? idx : null;
+  editingType = 'member';
+  const m = idx !== undefined ? membersData[idx] : null;
+  document.getElementById('member-modal-title').textContent = m ? 'Muokkaa jäsentä' : 'Uusi jäsen';
+  document.getElementById('mf-name').value     = m?.name     || '';
+  document.getElementById('mf-nickname').value = m?.nickname || '';
+  document.getElementById('mf-type').value     = m?.type     || 'tays';
+  document.getElementById('mf-joined').value   = m?.joined   || '';
+  document.getElementById('mf-started').value  = m?.started  || '';
+  document.getElementById('mf-sports').value   = (m?.sports||[]).join(', ');
+  document.getElementById('mf-motto').value    = m?.motto    || '';
+  document.getElementById('mf-bio').value      = m?.bio      || '';
+  document.getElementById('mf-img-path').textContent = m?.photo ? '✓ ' + (m.photo.split('/').pop() || 'kuva') : '';
+  document.getElementById('mf-img-preview').style.display = m?.photo ? 'block' : 'none';
+  if (m?.photo) document.getElementById('mf-img-preview').src = m.photo;
+  document.getElementById('member-delete-btn').style.display = m ? 'inline-flex' : 'none';
+  pendingImg = null;
+  document.getElementById('member-modal').classList.add('open');
+}
+
+async function saveMember() {
+  const name = document.getElementById('mf-name').value.trim();
+  if (!name) { toast('Nimi on pakollinen', 'error'); return; }
+
+  let photoUrl = editingIdx !== null ? membersData[editingIdx]?.photo : null;
+  if (pendingImg) {
+    try { photoUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
+    catch(e) { toast('Kuvan lataus epäonnistui', 'error'); return; }
+  }
+
+  const sportsRaw = document.getElementById('mf-sports').value;
+  const sports    = sportsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+  const item = {
+    slug:      editingIdx !== null ? membersData[editingIdx].slug : autoSlugFrom(name),
+    name,
+    nickname:  document.getElementById('mf-nickname').value.trim() || null,
+    type:      document.getElementById('mf-type').value,
+    joined:    document.getElementById('mf-joined').value.trim()   || null,
+    started:   document.getElementById('mf-started').value.trim()  || null,
+    sports,
+    motto:     document.getElementById('mf-motto').value.trim()    || null,
+    bio:       document.getElementById('mf-bio').value.trim()      || null,
+    photo:     photoUrl,
+    achievements: editingIdx !== null ? membersData[editingIdx].achievements : [],
+    records:      editingIdx !== null ? membersData[editingIdx].records      : [],
+  };
+
+  if (editingIdx !== null) membersData[editingIdx] = item;
+  else membersData.push(item);
+
+  const ok = await saveJSON('data/jasenet.json', membersData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} jäsen: ${name}`);
+  if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen tallennettu ✓', 'success'); }
+}
+
+function deleteMember() {
+  if (editingIdx === null) return;
+  confirm('Poista jäsen', `Poistetaanko "${membersData[editingIdx].name}"? Tätä ei voi peruuttaa.`, async () => {
+    membersData.splice(editingIdx, 1);
+    const ok = await saveJSON('data/jasenet.json', membersData, `Admin: poista jäsen`);
+    if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen poistettu', 'success'); }
+  });
+}
+
+// ── Image upload ─────────────────────────────────────────────────────────────
+function handleImageUpload(input, previewId, pathId, folder) {
+  const file = input.files[0];
+  if (!file) return;
+
+  folder = folder || (editingType === 'member' ? 'members' : editingType === 'event' ? 'events' : 'news');
+  const ext  = file.name.split('.').pop();
+  const base = editingType === 'member' && editingIdx !== null
+    ? (membersData[editingIdx]?.slug || autoSlugFrom(document.getElementById('mf-name').value))
+    : editingType === 'news'
+    ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value))
+    : (document.getElementById('ef-name').value ? autoSlugFrom(document.getElementById('ef-name').value) : 'image');
+  const filename = `${base}.${ext}`;
+
+  pendingImg = { file, folder, filename };
+  document.getElementById(pathId).textContent = `📎 ${filename} (ladataan tallennettaessa)`;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Rich text editor ─────────────────────────────────────────────────────────
+function rteCmd(cmd) { document.execCommand(cmd, false, null); document.getElementById('nf-body').focus(); }
+function rteLink() {
+  const url = prompt('Linkki URL:');
+  if (url) { document.execCommand('createLink', false, url); document.getElementById('nf-body').focus(); }
+}
+
+// ── Sync status ──────────────────────────────────────────────────────────────
+function updateSyncCounts() {
+  document.getElementById('sync-news-count').textContent    = newsData.length    + ' artikkelia';
+  document.getElementById('sync-events-count').textContent  = eventsData.length  + ' tapahtumaa';
+  document.getElementById('sync-members-count').textContent = membersData.length + ' jäsentä';
+}
+
+async function checkSyncStatus() {
+  const files = [
+    { path: 'data/uutiset.json',    statusId: 'sync-news-status' },
+    { path: 'data/tapahtumat.json', statusId: 'sync-events-status' },
+    { path: 'data/jasenet.json',    statusId: 'sync-members-status' },
+  ];
+  for (const f of files) {
+    try {
+      const info = await ghGet(f.path);
+      const d = new Date(info.last_modified || info.commit?.committer?.date || Date.now());
+      document.getElementById(f.statusId).textContent = '✓ OK';
+      document.getElementById(f.statusId).style.color = 'var(--green)';
+    } catch(e) {
+      document.getElementById(f.statusId).textContent = '✗ Virhe';
+      document.getElementById(f.statusId).style.color = 'var(--danger)';
+    }
+  }
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function autoSlugFrom(title) {
+  return (title||'').toLowerCase()
+    .replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); pendingImg = null; }
+
+let confirmCallback = null;
+function confirm(title, msg, cb) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent   = msg;
+  confirmCallback = cb;
+  document.getElementById('confirm-dialog').classList.add('open');
+  document.getElementById('confirm-ok').onclick = () => { closeConfirm(); cb(); };
+}
+function closeConfirm() { document.getElementById('confirm-dialog').classList.remove('open'); }
+
+let toastTimer;
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// Close modals on bg click
+document.querySelectorAll('.modal-bg').forEach(bg => {
+  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
