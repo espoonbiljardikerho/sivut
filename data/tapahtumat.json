@@ -1,5 +1,27 @@
 [
   {
+    "slug": "pyris-testi",
+    "href": "/tapahtumat/pyris-testi/",
+    "name": "pyris testi",
+    "tag": "Pyramidi",
+    "dateInfo": {
+      "day": "09",
+      "month": "Touko",
+      "year": "2026",
+      "isSeries": false
+    },
+    "time": "08:00",
+    "fee": "1500€",
+    "isPast": false,
+    "img": null,
+    "detail": {
+      "deadline": "HETI",
+      "venue": "klubilla",
+      "signup": "mikä linkki?",
+      "description": "pyris testi"
+    }
+  },
+  {
     "slug": "espoon-8-pallon-tasoitussarja-2",
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja-2/",
     "name": "Espoon 8-pallon tasoitussarja",
