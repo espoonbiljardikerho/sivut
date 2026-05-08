@@ -541,15 +541,15 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   </button>
   <button class="type-tab" data-type="tays" style="--dot-color:var(--c-tays)">
     <div class="type-tab-dot" style="background:var(--c-tays);"></div>
-    Täysvaltaiset <span class="tab-count">(44)</span>
+    Täysvaltaiset <span class="tab-count" id="tab-count-tays">(44)</span>
   </button>
   <button class="type-tab" data-type="klubi" style="--dot-color:var(--c-klubi)">
     <div class="type-tab-dot" style="background:var(--c-klubi);"></div>
-    Klubin jäsenet <span class="tab-count">(19)</span>
+    Klubin jäsenet <span class="tab-count" id="tab-count-klubi">(19)</span>
   </button>
   <button class="type-tab" data-type="pelaa" style="--dot-color:var(--c-pelaa)">
     <div class="type-tab-dot" style="background:var(--c-pelaa);"></div>
-    Seuran jäsenet <span class="tab-count">(18)</span>
+    Seuran jäsenet <span class="tab-count" id="tab-count-pelaa">(18)</span>
   </button>
 </div>
 
@@ -820,6 +820,12 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     ['tays','klubi','pelaa'].forEach(type => {
       document.getElementById('grid-' + type).innerHTML = groups[type].map(buildCard).join('');
     });
+    // Update tab counts dynamically
+    const total = source.length;
+    document.getElementById('tab-count-all').textContent   = `(${total})`;
+    document.getElementById('tab-count-tays').textContent  = `(${groups.tays.length})`;
+    document.getElementById('tab-count-klubi').textContent = `(${groups.klubi.length})`;
+    document.getElementById('tab-count-pelaa').textContent = `(${groups.pelaa.length})`;
     // Lazily fetch nicknames for members not already in JSON
     loadNicknames();
   }
