@@ -485,7 +485,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   const FALLBACK = 'https://images.unsplash.com/photo-1615213612138-4d1195b1c0e8?w=700&auto=format&fit=crop&q=60';
   const PER_PAGE = 9;
-  const TOTAL_PAGES = 42; // Yhdistysavain has 42 pages
+  const TOTAL_PAGES = 83; // 825 articles, 10 per page
 
   let currentPage = 1;
   let activeTag   = 'all';
@@ -599,31 +599,58 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   // ── Fetch & load ─────────────────────────────────────────────────────────────
 
+  // ── Load all articles from JSON at startup ───────────────────────────────
+  let jsonArticles = [];
+  (async () => {
+    try {
+      const resp = await fetch('data/uutiset.json');
+      jsonArticles = await resp.json();
+      console.log(`Loaded ${jsonArticles.length} articles from JSON`);
+      loadPage(1);
+    } catch(e) {
+      console.warn('uutiset.json failed, falling back to live scrape', e);
+      loadPage(1);
+    }
+  })();
+
   async function loadPage(page) {
     currentPage = page;
     const grid = document.getElementById('news-grid');
-    // Show skeletons while loading
+
+    // ── Serve from local JSON if available ──────────────────────────────
+    if (jsonArticles.length) {
+      const filtered = activeTag === 'all'
+        ? jsonArticles
+        : jsonArticles.filter(a => a.tag === activeTag);
+
+      const totalPages = Math.ceil(filtered.length / 10);
+      const slice = filtered.slice((page - 1) * 10, page * 10);
+
+      allArticles = slice;
+      renderGrid(slice);
+      renderPagination(totalPages);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // ── Fallback: live scrape ────────────────────────────────────────────
     grid.className = 'news-grid has-featured';
     grid.innerHTML = Array.from({length: 9}, (_, i) => i === 0
-      ? `<div class="news-card news-skeleton" style="grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1fr;"><div class="skel-img" style="aspect-ratio:unset;min-height:240px;"></div><div class="news-body"><div class="skel-line skel-date"></div><div class="skel-line skel-title"></div><div class="skel-line skel-title" style="width:75%"></div><div class="skel-line skel-body" style="margin-top:8px;"></div><div class="skel-line skel-body"></div></div></div>`
-      : `<div class="news-card news-skeleton"><div class="skel-img"></div><div class="news-body"><div class="skel-line skel-date"></div><div class="skel-line skel-title"></div><div class="skel-line skel-body"></div></div></div>`
+      ? `<div class="news-card news-skeleton" style="grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1fr;"><div class="skel-img"></div><div class="news-body"><div class="skel-line skel-title"></div><div class="skel-line"></div></div></div>`
+      : `<div class="news-card news-skeleton"><div class="skel-img"></div><div class="news-body"><div class="skel-line skel-title"></div><div class="skel-line"></div></div></div>`
     ).join('');
     document.getElementById('pagination').style.display = 'none';
 
     const url = BASE + '/uutiset/' + (page > 1 ? '?p=' + page : '');
-
     try {
       let html;
       try { html = await fetchHTML(url); }
       catch { html = await fetchWithFallback(url); }
-
       allArticles = parseArticles(html);
       if (!allArticles.length) throw new Error('No articles');
-
       renderGrid(allArticles);
       renderPagination(TOTAL_PAGES);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-
     } catch (err) {
       console.warn('News fetch failed:', err);
       grid.className = 'news-grid';
@@ -644,7 +671,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     document.querySelectorAll('.filter-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.tag === tag);
     });
-    renderGrid(allArticles);
+    // Re-load from page 1 with new filter
+    loadPage(1);
   };
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -977,7 +1005,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE = 'https://formspree.io/f/mykodovl';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();
