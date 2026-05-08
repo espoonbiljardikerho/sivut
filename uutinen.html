@@ -583,6 +583,220 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 }
 [data-theme="light"] .hero-content { position: relative; z-index: 2; }
 
+
+/* ── FILTER/TAB BARS in light mode ──────────────────────────────────────── */
+[data-theme="light"] .filter-bar {
+  background: rgba(255,255,255,0.92) !important;
+  border-bottom: 1px solid rgba(28,26,20,0.1) !important;
+}
+[data-theme="light"] .filter-btn { 
+  color: var(--text-secondary) !important;
+  border-color: rgba(28,26,20,0.15) !important;
+}
+[data-theme="light"] .filter-btn:hover { color: var(--text-primary) !important; }
+[data-theme="light"] .filter-btn.active { 
+  background: #F2EAD0 !important; 
+  border-color: rgba(138,111,30,0.35) !important; 
+  color: #6B5612 !important; 
+}
+[data-theme="light"] .filter-label { color: var(--text-muted) !important; }
+
+/* Type tabs (jasenet) */
+[data-theme="light"] .type-tabs {
+  background: rgba(255,255,255,0.92) !important;
+  border-bottom: 1px solid rgba(28,26,20,0.1) !important;
+}
+[data-theme="light"] .type-tab {
+  color: var(--text-secondary) !important;
+  border-color: rgba(28,26,20,0.15) !important;
+}
+[data-theme="light"] .type-tab:hover { color: var(--text-primary) !important; }
+[data-theme="light"] .type-tab.active {
+  color: #1C1A14 !important;
+  border-color: rgba(28,26,20,0.3) !important;
+  background: rgba(28,26,20,0.06) !important;
+}
+
+/* Hero section in light mode */
+[data-theme="light"] .hero {
+  background: linear-gradient(160deg, #1F3A22 0%, #2D5A32 100%) !important;
+}
+[data-theme="light"] .hero-gradient {
+  background: linear-gradient(120deg, rgba(31,58,34,0.85) 0%, rgba(31,58,34,0.2) 60%) !important;
+}
+[data-theme="light"] .hero-content h1,
+[data-theme="light"] .hero-content p,
+[data-theme="light"] .hero-content .hero-label,
+[data-theme="light"] .hero-content .hero-stat-label,
+[data-theme="light"] .hero-content .hero-stat-num {
+  color: #FAF7F1 !important;
+}
+[data-theme="light"] h1 em,
+[data-theme="light"] .hero-emphasis { color: var(--gold-light, #C8A84B) !important; }
+
+/* Profile panel left side (jasenet) */
+[data-theme="light"] .panel-photo-left {
+  background: #1F3A22 !important;
+}
+[data-theme="light"] .panel-photo-left .panel-name,
+[data-theme="light"] .panel-photo-left .panel-nickname,
+[data-theme="light"] .panel-name-overlay .panel-name,
+[data-theme="light"] .panel-name-overlay .panel-nickname { color: #FAF7F1 !important; }
+[data-theme="light"] .panel-type-badge { 
+  background: rgba(200,168,75,0.2) !important;
+  border-color: rgba(200,168,75,0.4) !important;
+  color: #C8A84B !important;
+}
+
+/* Monogram cards in light mode */
+[data-theme="light"] .panel-monogram,
+[data-theme="light"] .member-card-mono {
+  background: radial-gradient(ellipse at 60% 40%, #2D5A32 0%, #1F3A22 100%) !important;
+}
+
+/* Article hero in light mode */
+[data-theme="light"] .article-hero {
+  background: linear-gradient(160deg, #1F3A22 0%, #2D5A32 100%) !important;
+}
+[data-theme="light"] .article-hero-img::before,
+[data-theme="light"] .article-hero-img::after {
+  background: linear-gradient(to bottom, rgba(31,58,34,0.2) 0%, rgba(31,58,34,0.85) 100%) !important;
+}
+
+/* Events panel right side (index) */
+[data-theme="light"] .hero-right {
+  background: rgba(255,255,255,0.85) !important;
+  border: 1px solid rgba(28,26,20,0.1) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px) !important;
+}
+[data-theme="light"] .hero-events-hdr { border-bottom-color: rgba(28,26,20,0.08) !important; }
+[data-theme="light"] .h-evt { border-bottom-color: rgba(28,26,20,0.08) !important; }
+[data-theme="light"] .evt-name { color: var(--text-primary) !important; }
+[data-theme="light"] .evt-sub  { color: var(--text-muted) !important; }
+[data-theme="light"] .evt-day  { color: var(--text-primary) !important; }
+[data-theme="light"] .evt-month{ color: var(--text-muted) !important; }
+
+/* Panel detail (tapahtumat) */
+[data-theme="light"] .detail-panel {
+  background: #FFFFFF !important;
+  border-left-color: rgba(28,26,20,0.1) !important;
+}
+[data-theme="light"] .summary-card { background: #F2EDE3 !important; }
+[data-theme="light"] .summary-detail-label { color: var(--text-muted) !important; }
+[data-theme="light"] .summary-detail-value { color: var(--text-primary) !important; }
+
+/* EVT row (tapahtumat list) */
+[data-theme="light"] .evt-row { 
+  border-bottom-color: rgba(28,26,20,0.08) !important;
+}
+[data-theme="light"] .evt-row:hover { background: #F2EDE3 !important; }
+[data-theme="light"] .evt-row.selected { background: #EDE5D4 !important; }
+[data-theme="light"] .evt-date-block { 
+  background: #F2EDE3 !important; 
+  border-color: rgba(28,26,20,0.12) !important;
+}
+
+/* News grid (uutiset) */
+[data-theme="light"] .news-card { 
+  background: #FFFFFF !important;
+  border-color: rgba(28,26,20,0.08) !important;
+  box-shadow: 0 2px 8px rgba(60,45,15,0.06) !important;
+}
+[data-theme="light"] .news-card:hover { box-shadow: 0 4px 16px rgba(60,45,15,0.10) !important; }
+[data-theme="light"] .news-title { color: var(--text-primary) !important; }
+[data-theme="light"] .news-excerpt { color: var(--text-secondary) !important; }
+[data-theme="light"] .news-date { color: var(--text-muted) !important; }
+
+/* Scroll area backgrounds */
+[data-theme="light"] .evt-list { background: #FAF7F1 !important; }
+[data-theme="light"] .members-panel { background: #FAF7F1 !important; }
+
+/* Member card in light mode */
+[data-theme="light"] .member-card { 
+  background: #FFFFFF !important;
+  border-color: rgba(28,26,20,0.08) !important;
+}
+[data-theme="light"] .member-card:hover { box-shadow: 0 4px 16px rgba(60,45,15,0.10) !important; }
+[data-theme="light"] .member-card-name { color: var(--text-primary) !important; }
+
+
+/* ── ISSUE 2: Jasenet member cards - dark green monogram bg so gold initials are visible ── */
+[data-theme="light"] .member-monogram {
+  background: radial-gradient(ellipse at 50% 40%, #2D5A32 0%, #1F3A22 100%) !important;
+}
+[data-theme="light"] .member-monogram-text { color: #C8A84B !important; opacity: 0.8 !important; }
+[data-theme="light"] .member-card-name { color: var(--text-primary) !important; }
+[data-theme="light"] .member-card {
+  background: #F5F2EA !important;
+  border-color: rgba(28,26,20,0.1) !important;
+}
+
+/* ── ISSUE 5: Placeholder/fallback image in profile panel ── */
+[data-theme="light"] .panel-monogram {
+  background: radial-gradient(ellipse at 60% 40%, #2D5A32 0%, #1F3A22 100%) !important;
+}
+[data-theme="light"] .panel-monogram-text { color: #C8A84B !important; opacity: 0.6 !important; }
+[data-theme="light"] .panel-photo-right { background: #1F3A22 !important; }
+
+/* ── ISSUE 7: Discipline cards - add border so white balls visible ── */
+[data-theme="light"] .table-card {
+  background: #FAF7F1 !important;
+  border: 1px solid rgba(28,26,20,0.15) !important;
+  box-shadow: 0 1px 4px rgba(60,45,15,0.06) !important;
+}
+[data-theme="light"] .table-card:hover {
+  border-color: rgba(28,26,20,0.25) !important;
+  box-shadow: 0 3px 10px rgba(60,45,15,0.10) !important;
+}
+[data-theme="light"] .table-name { color: var(--text-primary) !important; }
+[data-theme="light"] .table-count { color: var(--text-muted) !important; }
+
+/* ── ISSUE 8: Index hero - more transparent, greyer, blends to background ── */
+[data-theme="light"] .hero-photo {
+  filter: grayscale(1) brightness(0.75) !important;
+  opacity: 0.35 !important;
+}
+[data-theme="light"] .hero-gradient {
+  background: linear-gradient(
+    120deg,
+    rgba(250,247,241,0.92) 0%,
+    rgba(250,247,241,0.75) 35%,
+    rgba(250,247,241,0.45) 60%,
+    rgba(250,247,241,0.2) 100%
+  ) !important;
+}
+[data-theme="light"] .hero-felt { opacity: 0.06 !important; }
+
+/* Hero text readable on light bg */
+[data-theme="light"] .hero-left h1 { color: #1C1A14 !important; }
+[data-theme="light"] .hero-left h1 em { color: #1F3A22 !important; }
+[data-theme="light"] .hero-left p,
+[data-theme="light"] .hero-badge,
+[data-theme="light"] .hero-stat-num { color: #1C1A14 !important; }
+[data-theme="light"] .hero-stat-label { color: #595449 !important; }
+[data-theme="light"] .hero-badge { 
+  background: rgba(31,58,34,0.08) !important;
+  border-color: rgba(31,58,34,0.2) !important;
+  color: #1F3A22 !important;
+}
+
+
+/* ── White billiard balls - add dark stroke in light mode ── */
+[data-theme="light"] .table-icon-wrap svg circle[fill="#F0EDE4"],
+[data-theme="light"] .table-icon-wrap svg circle[fill="#f0ede4"],
+[data-theme="light"] .table-icon-wrap svg circle[fill="#F5F5F5"],
+[data-theme="light"] .table-icon-wrap svg circle[fill="#ffffff"],
+[data-theme="light"] .table-icon-wrap svg circle[fill="#FFFFFF"] {
+  stroke: rgba(28,26,20,0.35) !important;
+  stroke-width: 1.5 !important;
+}
+/* Also for cue/white balls in Kara SVG */
+[data-theme="light"] .table-icon-wrap svg circle[fill="#E8E4DC"] {
+  stroke: rgba(28,26,20,0.3) !important;
+  stroke-width: 1.5 !important;
+}
+
 </style>
 </head>
 <body>
