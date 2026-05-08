@@ -756,7 +756,10 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <!-- FILTER BAR -->
 <div class="filter-bar">
-  <span class="filter-label">Laji:</span>
+  <span class="filter-label">Näytä:</span>
+  <button class="filter-btn active" id="view-upcoming" onclick="setView('upcoming',this)">Tulevat</button>
+  <button class="filter-btn" id="view-past" onclick="setView('past',this)">Menneet</button>
+  <span class="filter-label" style="margin-left:8px">Laji:</span>
   <button class="filter-btn active" data-tag="all">Kaikki</button>
   <button class="filter-btn" data-tag="Kaisa">Kaisa</button>
   <button class="filter-btn" data-tag="Pool">Pool</button>
@@ -764,6 +767,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   <button class="filter-btn" data-tag="Kara">Kara</button>
   <button class="filter-btn" data-tag="Pyramidi">Pyramidi</button>
   <button class="filter-btn" data-tag="Klubi">Klubi</button>
+  <span id="event-count" class="filter-label" style="margin-left:auto;opacity:0.6"></span>
 </div>
 
 <!-- EVENTS SECTION -->
@@ -1089,6 +1093,12 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     let dateBlock;
     if (!dateInfo) {
       dateBlock = `<div class="evt-date-block"><div class="evt-day" style="font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-muted);">TBA</div></div>`;
+    } else if (dateInfo.raw) {
+      // Raw date string from admin — split if it contains a dot pattern, else show as label
+      const rawParts = dateInfo.raw.match(/^(\d{1,2})\.?(\d{0,2})/);
+      const rawDay = rawParts ? rawParts[1] : '—';
+      const rawMo = dateInfo.raw.replace(/^\d{1,2}\.\d{1,2}\.?\d*\s*/, '').trim() || dateInfo.raw;
+      dateBlock = `<div class="evt-date-block"><div class="evt-day">${rawDay}</div><div class="evt-month" style="font-size:9px">${rawMo.slice(0,4).toUpperCase()}</div></div>`;
     } else if (isSeries) {
       dateBlock = `<div class="evt-date-block" style="border-style:dashed;"><div class="evt-day" style="font-size:10px;font-family:'DM Sans',sans-serif;color:var(--text-muted);letter-spacing:0.01em;">Sarja</div><div class="evt-month">${dateInfo.month}</div></div>`;
     } else {
@@ -1096,7 +1106,9 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     }
 
     let dateStr = '';
-    if (dateInfo && !isSeries) {
+    if (dateInfo?.raw) {
+      dateStr = dateInfo.raw;
+    } else if (dateInfo && !isSeries) {
       const mo = (MONTHS.indexOf(dateInfo.month)+1).toString().padStart(2,'0');
       dateStr = dateInfo.day + '.' + mo + '.' + (dateInfo.year||'2026');
     } else if (isSeries && dateInfo) {
@@ -1131,7 +1143,14 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
     return `
       ${img ? `<img class="summary-event-img" src="${img}" alt="${name}" style="display:block;" onerror="this.style.display='none'">` : ''}
-      <div style="margin-bottom:10px;"><span class="ebadge ${cls}">${tag}</span></div>
+      <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+        <span class="ebadge ${cls}">${tag}</span>
+        ${detail.participation ? `<span class="ebadge" style="background:rgba(150,150,150,0.12);color:var(--text-muted);border:1px solid var(--border);">${
+          detail.participation === 'jasenet' ? '🔒 Jäsenille' :
+          detail.participation === 'avoin' ? '🌐 Avoin' :
+          detail.participation === 'kutsu' ? '✉️ Kutsu' : detail.participation
+        }</span>` : ''}
+      </div>
       <div class="summary-event-name">${name}</div>
       ${membersOnly ? `<div class="members-only-note">🔒 Jäsenille / klubilaisille</div>` : ''}
       <div class="summary-details">
@@ -1280,15 +1299,71 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   // ── Load events ───────────────────────────────────────────────────────────
 
+  // ── All events store ─────────────────────────────────────────────────────
+  let allParsed   = [];
+  let currentView = 'upcoming';
+  let evtPage     = 1;
+  const EVT_PAGE_SIZE = 10;
+
+  window.setView = function(view, btn) {
+    currentView = view;
+    evtPage = 1;
+    document.querySelectorAll('#view-upcoming, #view-past').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderList();
+  };
+
+  function renderList() {
+    const filtered = allParsed.filter(e => currentView === 'past' ? e.isPast : !e.isPast);
+    const activeTag = document.querySelector('.filter-btn[data-tag].active')?.dataset.tag || 'all';
+    const tagged = activeTag === 'all' ? filtered : filtered.filter(e => e.tag === activeTag);
+
+    const total = tagged.length;
+    const totalPages = Math.ceil(total / EVT_PAGE_SIZE);
+    const slice = tagged.slice((evtPage - 1) * EVT_PAGE_SIZE, evtPage * EVT_PAGE_SIZE);
+
+    const list = document.getElementById('event-list');
+    eventsData = slice;
+    list.innerHTML = slice.map((e) => renderRow(e, allParsed.indexOf(e))).join('');
+
+    const countEl = document.getElementById('event-count');
+    if (countEl) countEl.textContent = total + ' tapahtumaa';
+
+    // Pagination
+    let paginationEl = document.getElementById('events-pagination');
+    if (!paginationEl) {
+      paginationEl = document.createElement('div');
+      paginationEl.id = 'events-pagination';
+      list.parentNode.appendChild(paginationEl);
+    }
+    if (totalPages > 1) {
+      let pg = '<div style="display:flex;gap:6px;justify-content:center;padding:16px;border-top:1px solid var(--border);flex-wrap:wrap;">';
+      for (let p = 1; p <= totalPages; p++) {
+        pg += '<button onclick="goEventsPage(' + p + ')" style="padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:' + (p===evtPage?'rgba(200,168,75,0.15)':'transparent') + ';color:' + (p===evtPage?'var(--gold)':'var(--text-muted)') + ';cursor:pointer;font-size:12px;font-family:var(--font);">' + p + '</button>';
+      }
+      pg += '</div>';
+      paginationEl.innerHTML = pg;
+    } else {
+      paginationEl.innerHTML = '';
+    }
+
+    if (window.innerWidth > 900 && slice.length) {
+      list.querySelector('.evt-row')?.click();
+    }
+  }
+
+  window.goEventsPage = function(p) {
+    evtPage = p;
+    renderList();
+    document.getElementById('event-list').scrollIntoView({ behavior:'smooth', block:'start' });
+  };
+
   async function load() {
     try {
-      // ── Load from pre-scraped JSON ──────────────────────────────────────
-      let parsed = [];
       try {
         const resp = await fetch('data/tapahtumat.json');
         const data = await resp.json();
-        // Convert JSON format back to internal format
-        parsed = data.map(e => ({
+        allParsed = data.map(e => ({
           slug:     e.slug,
           href:     e.href,
           name:     e.name,
@@ -1299,7 +1374,6 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
           isPast:   e.isPast || false,
           raw:      e.raw || '',
         }));
-        // Pre-populate detail cache from JSON
         data.forEach(e => {
           if (e.detail || e.img) {
             detailCache[e.slug] = { img: e.img || null, detail: e.detail || {} };
@@ -1307,46 +1381,41 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
         });
       } catch(jsonErr) {
         console.warn('tapahtumat.json failed, falling back to live scrape', jsonErr);
-        const html = await fetchWithFallback(BASE + '/tapahtumat/');
-        parsed = parseEventsList(html);
+        const fetchedHtml = await fetchWithFallback(BASE + '/tapahtumat/');
+        allParsed = parseEventsList(fetchedHtml);
       }
 
-      if (!parsed.length) throw new Error('No events found');
+      if (!allParsed.length) throw new Error('No events found');
 
-      // Show only upcoming (non-past) by default
-      eventsData = parsed.filter(e => !e.isPast);
-      const list = document.getElementById('event-list');
-      list.innerHTML = parsed.map((e,i) => renderRow(e,i)).join('');
+      // Hook tag filter buttons
+      document.querySelectorAll('.filter-btn[data-tag]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn[data-tag]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          evtPage = 1;
+          renderList();
+        });
+      });
 
-      // Auto-select: check URL hash first, then first event on desktop
+      renderList();
+
       const hashSlug = location.hash.replace('#','');
       if (hashSlug) {
-        const hashRow = list.querySelector(`.evt-row[data-slug="${hashSlug}"]`);
+        const list = document.getElementById('event-list');
+        const hashRow = list.querySelector('.evt-row[data-slug="' + hashSlug + '"]');
         if (hashRow) {
           hashRow.scrollIntoView({ behavior:'smooth', block:'center' });
           setTimeout(() => hashRow.click(), 200);
-        } else if (window.innerWidth > 900) {
-          const first = list.querySelector('.evt-row');
-          if (first) first.click();
         }
-      } else if (window.innerWidth > 900) {
-        const first = list.querySelector('.evt-row');
-        if (first) first.click();
       }
 
     } catch(err) {
       console.warn('Events load failed:', err);
-      document.getElementById('event-list').innerHTML = `
-        <div style="text-align:center;padding:clamp(40px,6vw,80px) 0;">
-          <div style="font-size:36px;margin-bottom:12px;opacity:0.4;">📅</div>
-          <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Tapahtumia ei voitu ladata.</p>
-          <a href="${BASE}/tapahtumat/" target="_blank" class="btn-secondary" style="font-size:12px;">Avaa tapahtumat →</a>
-        </div>`;
+      document.getElementById('event-list').innerHTML = '<div style="text-align:center;padding:clamp(40px,6vw,80px) 0;"><div style="font-size:36px;margin-bottom:12px;opacity:0.4;">📅</div><p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Tapahtumia ei voitu ladata.</p></div>';
     }
   }
 
-  load();
-})();
+  load();})();
 </script>
 
 
@@ -1826,7 +1895,9 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     document.getElementById('rm-subject').value = 'Ilmoittautuminen: ' + (evt.name || 'Tapahtuma');
 
     let dateStr = '';
-    if (evt.dateInfo && !evt.dateInfo.isSeries) {
+    if (evt.dateInfo?.raw) {
+      dateStr = evt.dateInfo.raw;
+    } else if (evt.dateInfo && !evt.dateInfo.isSeries) {
       const MONTHS_FI = ['','tammikuuta','helmikuuta','maaliskuuta','huhtikuuta','toukokuuta','kesäkuuta','heinäkuuta','elokuuta','syyskuuta','lokakuuta','marraskuuta','joulukuuta'];
       const mo = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'].indexOf(evt.dateInfo.month) + 1;
       dateStr = evt.dateInfo.day + '. ' + MONTHS_FI[mo] + ' ' + (evt.dateInfo.year || '2026');

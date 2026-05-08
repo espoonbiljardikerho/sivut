@@ -560,6 +560,14 @@
           <input type="text" id="ef-venue" placeholder="Espoon Biljardikerhon klubi">
         </div>
         <div class="field">
+          <label>Kenelle</label>
+          <select id="ef-participation">
+            <option value="jasenet">Jäsenille</option>
+            <option value="avoin">Avoin kaikille</option>
+            <option value="kutsu">Kutsuvierasturnaus</option>
+          </select>
+        </div>
+        <div class="field">
           <label>Ilmoittautumislinkki</label>
           <input type="text" id="ef-signup" placeholder="https://...">
         </div>
@@ -976,6 +984,7 @@ function openEventModal(idx) {
   document.getElementById('ef-fee').value      = e?.fee  || e?.detail?.fee || '';
   document.getElementById('ef-deadline').value = e?.detail?.deadline || '';
   document.getElementById('ef-venue').value    = e?.detail?.venue    || '';
+  document.getElementById('ef-participation').value = e?.detail?.participation || 'jasenet';
   document.getElementById('ef-signup').value   = e?.detail?.signup   || '';
   document.getElementById('ef-desc').value     = e?.detail?.description || '';
   // Date
@@ -996,15 +1005,8 @@ async function saveEvent() {
   if (!name) { toast('Nimi on pakollinen', 'error'); return; }
 
   const dateRaw = document.getElementById('ef-date').value.trim();
-  let dateInfo  = null;
-  const dm = dateRaw.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
-  if (dm) {
-    const monthIdx = parseInt(dm[2], 10) - 1;
-    const month = MONTHS_FI[monthIdx] || MONTHS_FI[0];
-    dateInfo = { day: dm[1], month, year: String(dm[3] || new Date().getFullYear()), isSeries: false };
-  } else if (dateRaw) {
-    toast('Päivämäärä väärässä muodossa. Käytä: 13.6.2026', 'error'); return;
-  }
+  // Store date as raw text — no parsing, display as-is
+  const dateInfo = dateRaw ? { raw: dateRaw, day: null, month: null, year: null, isSeries: false } : null;
 
   let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url : (editingIdx !== null ? eventsData[editingIdx]?.img : null);
   window._pickedImgUrl = null;
