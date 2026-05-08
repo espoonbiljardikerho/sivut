@@ -303,7 +303,10 @@
     <div class="login-sub">Espoon Biljardikerho · Hallintapaneeli</div>
     <label>Salasana</label>
     <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
-    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="doLogin()">Kirjaudu sisään</button>
+    <label style="margin-top:8px">GitHub Token</label>
+    <input type="password" id="login-token" placeholder="ghp_..." />
+    <p class="login-hint">Token tallennetaan selaimeen — syötä vain kerran.</p>
+    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Kirjaudu sisään</button>
     <p id="login-error" style="color:var(--danger);font-size:12px;margin-top:10px;display:none"></p>
   </div>
 </div>
@@ -647,8 +650,7 @@
 // ── Config ──────────────────────────────────────────────────────────────────
 const REPO_OWNER  = 'espoonbiljardikerho';
 const REPO_NAME   = 'sivut';
-const ADMIN_PASS  = 'Ebk4923!';
-const GH_TOKEN    = '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';
+const ADMIN_PASS  = 'ebk2024admin'; // Change this!
 const BRANCH      = 'main';
 
 // ── State ───────────────────────────────────────────────────────────────────
@@ -662,18 +664,19 @@ let pendingImg = null; // { file, folder, filename }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 function doLogin() {
-  const pass = document.getElementById('login-pass').value;
-  const err  = document.getElementById('login-error');
+  const pass  = document.getElementById('login-pass').value;
+  const token = document.getElementById('login-token').value.trim();
+  const err   = document.getElementById('login-error');
 
   if (pass !== ADMIN_PASS) {
     err.textContent = 'Väärä salasana.'; err.style.display = 'block'; return;
   }
-  if (GH_TOKEN === 'PASTE_YOUR_TOKEN_HERE') {
-    err.textContent = 'GitHub token ei ole asetettu admin.html tiedostossa.';
-    err.style.display = 'block'; return;
+  if (!token) {
+    err.textContent = 'Syötä GitHub token.'; err.style.display = 'block'; return;
   }
 
-  ghToken = GH_TOKEN;
+  ghToken = token;
+  localStorage.setItem('ebk_token', token);
   localStorage.setItem('ebk_authed', '1');
   err.style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
@@ -683,16 +686,19 @@ function doLogin() {
 }
 
 function doLogout() {
+  localStorage.removeItem('ebk_token');
   localStorage.removeItem('ebk_authed');
   location.reload();
 }
 
 // Auto-login if token in storage
 window.addEventListener('DOMContentLoaded', () => {
+  const savedToken  = localStorage.getItem('ebk_token');
   const savedAuthed = localStorage.getItem('ebk_authed');
+  if (savedToken) document.getElementById('login-token').value = savedToken;
   // Auto-login if previously authenticated
-  if (savedAuthed && GH_TOKEN !== 'PASTE_YOUR_TOKEN_HERE') {
-    ghToken = GH_TOKEN;
+  if (savedToken && savedAuthed) {
+    ghToken = savedToken;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     document.getElementById('sidebar-user-name').textContent = 'Admin · ';
