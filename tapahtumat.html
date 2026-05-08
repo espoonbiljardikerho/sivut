@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fi">
+<html lang="fi" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -322,6 +322,168 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   .footer-grid { grid-template-columns:1fr; }
   .evt-row { grid-template-columns:50px 1fr auto; gap:10px; padding:11px 10px; }
 }
+
+/* ── Theme toggle button ─────────────────────────────────────────────────── */
+.theme-toggle {
+  background: none; border: 1px solid var(--border-strong);
+  color: var(--text-muted); cursor: pointer;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 15px; line-height: 1; padding: 0;
+  transition: all 0.2s; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.theme-toggle:hover { border-color: var(--gold); color: var(--gold); }
+[data-theme="light"] .theme-toggle { color: var(--text-muted); }
+
+/* ── LIGHT THEME ──────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --gold:          #8A6F1E;
+  --gold-light:    #A68A2A;
+  --gold-dim:      #6B5612;
+  --gold-soft:     #F2EAD0;
+  --green-dark:    #FAF7F1;
+  --green-mid:     #F2EDE3;
+  --green-felt:    #EDE5D4;
+  --surface:       #FFFFFF;
+  --surface-card:  #F2EDE3;
+  --surface-alt:   #EDE5D4;
+  --text-primary:  #1C1A14;
+  --text-secondary:#595449;
+  --text-muted:    #8A8475;
+  --border:        rgba(28,26,20,0.08);
+  --border-strong: rgba(28,26,20,0.16);
+  --border-gold:   rgba(138,111,30,0.28);
+  --green-ink:     #1F3A22;
+  --shadow-sm:     0 1px 2px rgba(60,45,15,0.05);
+  --shadow-md:     0 4px 14px rgba(60,45,15,0.07);
+  --shadow-lg:     0 18px 40px rgba(60,45,15,0.10);
+}
+
+/* Nav */
+[data-theme="light"] nav {
+  background: rgba(255,255,255,0.88) !important;
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+[data-theme="light"] nav a,
+[data-theme="light"] .nav-links a { color: var(--text-secondary); }
+[data-theme="light"] .nav-links a:hover,
+[data-theme="light"] .nav-links a.active { color: var(--green-ink); font-weight: 500; }
+[data-theme="light"] .nav-logo-text { color: var(--text-primary); }
+[data-theme="light"] .nav-logo-sub  { color: var(--text-muted); }
+[data-theme="light"] .nav-logo-img  {
+  filter: brightness(0) saturate(100%) invert(42%) sepia(35%) saturate(800%) hue-rotate(20deg) brightness(85%) contrast(95%);
+}
+
+/* Buttons */
+[data-theme="light"] .btn-primary,
+[data-theme="light"] .nav-cta {
+  background: #1F3A22 !important;
+  color: #FAF7F1 !important;
+  border-color: #1F3A22 !important;
+}
+[data-theme="light"] .btn-primary:hover,
+[data-theme="light"] .nav-cta:hover { background: #142A17 !important; border-color: #142A17 !important; }
+[data-theme="light"] .btn-secondary {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-strong) !important;
+}
+[data-theme="light"] .btn-secondary:hover {
+  border-color: #1F3A22 !important;
+  color: #1F3A22 !important;
+}
+
+/* Hero */
+[data-theme="light"] .hero-photo {
+  filter: saturate(0.85) brightness(1.02) !important;
+}
+[data-theme="light"] .hero-gradient {
+  background: linear-gradient(120deg, rgba(242,234,208,0.72) 0%, rgba(255,255,255,0) 60%) !important;
+}
+[data-theme="light"] .hero-felt {
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 39px,
+    rgba(31,58,34,0.04) 39px, rgba(31,58,34,0.04) 40px
+  ), repeating-linear-gradient(
+    90deg, transparent, transparent 39px,
+    rgba(31,58,34,0.04) 39px, rgba(31,58,34,0.04) 40px
+  ) !important;
+}
+[data-theme="light"] h1 em,
+[data-theme="light"] .hero-emphasis { color: #1F3A22 !important; }
+
+/* Skeleton shimmer */
+[data-theme="light"] .skel-line,
+[data-theme="light"] .skel-img,
+[data-theme="light"] .skel-title {
+  background: linear-gradient(90deg, var(--surface-card) 25%, #F2EAD0 50%, var(--surface-card) 75%) !important;
+  background-size: 200% 100% !important;
+}
+
+/* News images */
+[data-theme="light"] .news-img-wrap img { filter: none !important; }
+[data-theme="light"] .news-img-wrap::after {
+  background: linear-gradient(to bottom, rgba(250,247,241,0) 50%, rgba(250,247,241,0.7) 100%) !important;
+}
+
+/* Discipline badges */
+[data-theme="light"] .b-kaisa   { background:#F2EAD0 !important; color:#6B5612 !important; border-color:rgba(138,111,30,0.28) !important; }
+[data-theme="light"] .b-pool    { background:#DCEDE3 !important; color:#1A6B47 !important; border-color:rgba(26,107,71,0.25) !important; }
+[data-theme="light"] .b-snooker { background:#E5E0F0 !important; color:#4D3F8A !important; border-color:rgba(77,63,138,0.25) !important; }
+[data-theme="light"] .b-kara    { background:#F4DDD1 !important; color:#9C4318 !important; border-color:rgba(156,67,24,0.25) !important; }
+[data-theme="light"] .b-pyramidi{ background:#EDE0F5 !important; color:#6B3A8A !important; border-color:rgba(107,58,138,0.25) !important; }
+[data-theme="light"] .b-uutinen { background:#EBEBEB !important; color:#595449 !important; border-color:rgba(89,84,73,0.2) !important; }
+
+/* Member type badges */
+[data-theme="light"] .badge-tays   { background:#F2EAD0 !important; color:#6B5612 !important; }
+[data-theme="light"] .badge-klubi  { background:#DCEDE3 !important; color:#1A6B47 !important; }
+[data-theme="light"] .badge-pelaa  { background:#E5E0F0 !important; color:#4D3F8A !important; }
+
+/* Footer */
+[data-theme="light"] footer {
+  background: #EDE5D4 !important;
+  border-top: 1px solid var(--border);
+}
+[data-theme="light"] footer h4 { color: var(--text-primary) !important; }
+[data-theme="light"] footer a   { color: var(--text-secondary) !important; }
+[data-theme="light"] footer a:hover { color: #6B5612 !important; }
+
+/* Modal */
+[data-theme="light"] .jm-overlay { background: rgba(28,26,20,0.45) !important; }
+[data-theme="light"] .jm-modal   { background: #FFFFFF !important; box-shadow: 0 18px 40px rgba(60,45,15,0.10) !important; }
+
+/* Form inputs */
+[data-theme="light"] input, [data-theme="light"] select, [data-theme="light"] textarea {
+  background: #FFFFFF !important;
+  border-color: rgba(28,26,20,0.16) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="light"] input:focus, [data-theme="light"] select:focus, [data-theme="light"] textarea:focus {
+  border-color: #1F3A22 !important;
+  box-shadow: 0 0 0 3px rgba(31,58,34,0.12) !important;
+}
+[data-theme="light"] input::placeholder, [data-theme="light"] textarea::placeholder {
+  color: #8A8475 !important;
+}
+
+/* Mobile menu */
+[data-theme="light"] .mobile-menu { background: rgba(255,255,255,0.97) !important; }
+[data-theme="light"] .hamburger span { background: var(--text-primary) !important; }
+
+/* Panels / cards */
+[data-theme="light"] .panel-left { background: #FFFFFF !important; }
+[data-theme="light"] .panel-right { background: #F2EDE3 !important; }
+
+/* Hero photo overlay for readability */
+[data-theme="light"] .hero-wrap::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(250,247,241,0.45);
+  pointer-events: none; z-index: 1;
+}
+[data-theme="light"] .hero-content { position: relative; z-index: 2; }
+
 </style>
 </head>
 <body>
@@ -1506,5 +1668,22 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
       }
     });
   });
+})();
+
+// ── Theme toggle ──────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.querySelector('.theme-toggle');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀';
+  localStorage.setItem('ebk-theme', theme);
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+// Apply saved theme immediately
+(function() {
+  const saved = localStorage.getItem('ebk-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
 })();
 </script>
