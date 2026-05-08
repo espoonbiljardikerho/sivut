@@ -1233,6 +1233,80 @@ function toast(msg, type = 'success') {
 document.querySelectorAll('.modal-bg').forEach(bg => {
   bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
 });
+
+// ── Image Picker ─────────────────────────────────────────────────────────────
+let pickerContext   = 'news';
+let pickerAllImages = [];
+
+function openImgPicker(context) {
+  pickerContext = context;
+  const folder = context === 'news' ? 'images/news'
+               : context === 'events' ? 'images/events'
+               : 'images/members';
+  document.getElementById('picker-folder').value = folder;
+  document.getElementById('picker-search').value = '';
+  document.getElementById('img-picker-modal').classList.add('open');
+  loadPickerFolder();
+}
+
+async function loadPickerFolder() {
+  const folder = document.getElementById('picker-folder').value;
+  const grid   = document.getElementById('picker-grid');
+  grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⏳</div><p>Ladataan…</p></div>';
+  document.getElementById('picker-count').textContent = '';
+
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${folder}?ref=${BRANCH}`, {
+      headers: { Authorization: `token ${ghToken}` }
+    });
+    if (!r.ok) throw new Error(`${r.status} - ${await r.text()}`);
+    const files = await r.json();
+    pickerAllImages = files.filter(f => f.name.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+    document.getElementById('picker-count').textContent = pickerAllImages.length + ' kuvaa';
+    renderPickerGrid(pickerAllImages);
+  } catch(e) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><p>Lataus epäonnistui: ${e.message}</p></div>`;
+  }
+}
+
+function filterPickerImages() {
+  const q = document.getElementById('picker-search').value.toLowerCase();
+  const filtered = q ? pickerAllImages.filter(f => f.name.toLowerCase().includes(q)) : pickerAllImages;
+  renderPickerGrid(filtered);
+}
+
+function renderPickerGrid(images) {
+  const grid = document.getElementById('picker-grid');
+  if (!images.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🖼</div><p>Ei kuvia</p></div>';
+    return;
+  }
+  grid.innerHTML = images.map(f => `
+    <div class="picker-thumb" onclick="selectPickerImage('${f.download_url}','${f.name}')">
+      <img class="picker-img" src="${f.download_url}" alt="${f.name}" loading="lazy">
+      <div class="picker-thumb-name">${f.name}</div>
+    </div>`).join('');
+}
+
+function selectPickerImage(url, filename) {
+  if (pickerContext === 'news') {
+    document.getElementById('nf-img-path').textContent = '✓ ' + filename;
+    document.getElementById('nf-img-preview').src = url;
+    document.getElementById('nf-img-preview').style.display = 'block';
+  } else if (pickerContext === 'events') {
+    document.getElementById('ef-img-path').textContent = '✓ ' + filename;
+    document.getElementById('ef-img-preview').src = url;
+    document.getElementById('ef-img-preview').style.display = 'block';
+  } else if (pickerContext === 'members') {
+    document.getElementById('mf-img-path').textContent = '✓ ' + filename;
+    document.getElementById('mf-img-preview').src = url;
+    document.getElementById('mf-img-preview').style.display = 'block';
+  }
+  pendingImg = null;
+  window._pickedImgUrl = { context: pickerContext, url };
+  closeModal('img-picker-modal');
+  toast('Kuva valittu: ' + filename, 'success');
+}
 </script>
 
 <!-- ── Image Picker Modal ──────────────────────────────────────────────────── -->
