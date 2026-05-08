@@ -1,5 +1,15 @@
 [
   {
+    "slug": "toinen-testi",
+    "href": "/uutiset/toinen-testi/",
+    "title": "toinen testi",
+    "date": "6.5.2026",
+    "excerpt": "lyhyt kuvaus",
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/toinen-testi.png",
+    "tag": "Snooker",
+    "body": "sisältöä"
+  },
+  {
     "slug": "testi-uutinen",
     "href": "/uutiset/testi-uutinen/",
     "title": "testi uutinen",
