@@ -394,7 +394,7 @@
         <div class="panel">
           <table class="data-table" id="events-table">
             <thead><tr>
-              <th>Nimi</th><th>Laji</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
+              <th title="Näytä etusivulla" style="width:30px">★</th><th>Nimi</th><th>Laji</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
             </tr></thead>
             <tbody id="events-tbody"></tbody>
           </table>
@@ -544,7 +544,7 @@
           <input type="text" id="ef-time" placeholder="klo 18:00">
         </div>
         <div class="field">
-          <label>Päivämäärä</label>
+          <label>Päivämäärä <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:10px">(pv.kk.vvvv tai vapaateksti)</span></label>
           <input type="text" id="ef-date" placeholder="13.6.2026">
         </div>
         <div class="field">
@@ -565,6 +565,13 @@
             <option value="jasenet">Jäsenille</option>
             <option value="avoin">Avoin kaikille</option>
             <option value="kutsu">Kutsuvierasturnaus</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tila</label>
+          <select id="ef-ispast">
+            <option value="false">Tuleva / Käynnissä</option>
+            <option value="true">Mennyt</option>
           </select>
         </div>
         <div class="field">
@@ -955,7 +962,14 @@ function renderEvents(view) {
     const realIdx = eventsData.indexOf(e);
     const dateStr = e.dateInfo ? `${e.dateInfo.day}. ${e.dateInfo.month} ${e.dateInfo.year}` : '—';
     const fee     = e.fee || e.detail?.fee || '—';
+    const featured = e.featured || false;
     return `<tr>
+      <td>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer" title="Näytä etusivulla">
+          <input type="checkbox" ${featured?'checked':''} onchange="toggleFeatured(${realIdx},this.checked)"
+            style="width:14px;height:14px;accent-color:var(--gold)">
+        </label>
+      </td>
       <td><strong>${e.name||'—'}</strong></td>
       <td><span class="badge badge-${(e.tag||'').toLowerCase()}">${e.tag||'—'}</span></td>
       <td class="text-muted">${dateStr}</td>
@@ -985,6 +999,7 @@ function openEventModal(idx) {
   document.getElementById('ef-deadline').value = e?.detail?.deadline || '';
   document.getElementById('ef-venue').value    = e?.detail?.venue    || '';
   document.getElementById('ef-participation').value = e?.detail?.participation || 'jasenet';
+  document.getElementById('ef-ispast').value = String(e?.isPast || false);
   document.getElementById('ef-signup').value   = e?.detail?.signup   || '';
   document.getElementById('ef-desc').value     = e?.detail?.description || '';
   // Date
@@ -1036,11 +1051,32 @@ async function saveEvent() {
   if (editingIdx !== null) eventsData[editingIdx] = { ...eventsData[editingIdx], ...item };
   else eventsData.unshift(item);
 
-  const ok = await saveJSON('data/tapahtumat.json', eventsData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`);
-  if (ok) {
-    closeModal('event-modal');
-    renderEvents(eventsData[editingIdx||0]?.isPast ? 'past' : 'upcoming');
-    toast('Tapahtuma tallennettu ✓', 'success');
+  // Always reload fresh from GitHub before saving to avoid 409 conflict
+  btn_save = document.querySelector('#event-modal .btn-primary');
+  if (btn_save) { btn_save.textContent = 'Tallennetaan…'; btn_save.disabled = true; }
+  try {
+    const fresh = await ghGet('data/tapahtumat.json');
+    const allEvents = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+    if (editingIdx !== null) {
+      // Find the event in full array by slug and update it
+      const slug = eventsData[editingIdx]?.slug;
+      const fullIdx = allEvents.findIndex(e => e.slug === slug);
+      if (fullIdx >= 0) allEvents[fullIdx] = { ...allEvents[fullIdx], ...item };
+      else allEvents.unshift(item);
+    } else {
+      allEvents.unshift(item);
+    }
+    const ok = await saveJSON('data/tapahtumat.json', allEvents, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`);
+    if (ok) {
+      eventsData = allEvents;
+      closeModal('event-modal');
+      renderEvents('upcoming');
+      toast('Tapahtuma tallennettu ✓', 'success');
+    }
+  } catch(e) {
+    toast('Virhe tallennuksessa: ' + e.message, 'error');
+  } finally {
+    if (btn_save) { btn_save.textContent = 'Tallenna'; btn_save.disabled = false; }
   }
 }
 
@@ -1312,6 +1348,31 @@ function selectPickerImage(url, filename) {
   window._pickedImgUrl = { context: pickerContext, url };
   closeModal('img-picker-modal');
   toast('Kuva valittu: ' + filename, 'success');
+}
+
+// ── Featured events toggle ────────────────────────────────────────────────────
+async function toggleFeatured(idx, checked) {
+  eventsData[idx].featured = checked;
+  const featured = eventsData.filter(e => e.featured);
+  if (featured.length > 5) {
+    toast('Maksimissaan 5 tapahtumaa etusivulla', 'error');
+    eventsData[idx].featured = false;
+    renderEvents(eventsData[idx]?.isPast ? 'past' : 'upcoming');
+    return;
+  }
+  // Save immediately
+  try {
+    const fresh = await ghGet('data/tapahtumat.json');
+    const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+    const slug = eventsData[idx]?.slug;
+    const fi = all.findIndex(e => e.slug === slug);
+    if (fi >= 0) all[fi].featured = checked;
+    await saveJSON('data/tapahtumat.json', all, `Admin: ${checked?'lisää':'poista'} etusivu: ${eventsData[idx]?.name}`);
+    eventsData = all;
+    toast((checked ? '★ Lisätty etusivulle' : 'Poistettu etusivulta'), 'success');
+  } catch(e) {
+    toast('Virhe: ' + e.message, 'error');
+  }
 }
 </script>
 
