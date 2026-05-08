@@ -527,7 +527,10 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   function buildCard(article, featured = false) {
     const { slug, href, title, date, excerpt, img, tag } = article;
-    const articleUrl = 'uutinen.html?url=' + encodeURIComponent(href.startsWith('http') ? href : BASE + href);
+    // For admin-created articles, use slug param so uutinen.html reads from JSON
+    const articleUrl = (a.body || !href || href === '/')
+      ? 'uutinen.html?slug=' + encodeURIComponent(a.slug)
+      : 'uutinen.html?url=' + encodeURIComponent(href.startsWith('http') ? href : BASE + href);
     const safeTitle   = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const safeExcerpt = (excerpt || '').slice(0, featured ? 220 : 120).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     return `
@@ -644,8 +647,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
     const url = BASE + '/uutiset/' + (page > 1 ? '?p=' + page : '');
     try {
       let html;
-      try { html = await fetchHTML(url); }
-      catch { html = await fetchWithFallback(url); }
+      html = await fetchWithFallback(url); // goes through CORS proxy
       allArticles = parseArticles(html);
       if (!allArticles.length) throw new Error('No articles');
       renderGrid(allArticles);

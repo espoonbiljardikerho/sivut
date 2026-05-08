@@ -720,15 +720,70 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
   const params    = new URLSearchParams(location.search);
   const articleUrl = params.get('url'); // e.g. /uutiset/some-slug/
+  const articleSlug = params.get('slug'); // for admin-created articles
+
+  if (!articleUrl && !articleSlug) {
+    showError('Artikkelin osoitetta ei löydy.', true);
+    return;
+  }
+
+  // ── Check JSON first for admin-created articles ───────────────────────────────
+  try {
+    const jsonResp = await fetch('data/uutiset.json');
+    const articles = await jsonResp.json();
+    const slug = articleSlug || (articleUrl || '').replace(/.*\/uutiset\//, '').replace(/\/$/, '');
+    const jsonArticle = articles.find(a => a.slug === slug);
+
+    if (jsonArticle?.body) {
+      // Render directly from JSON — no Yhdistysavain fetch needed
+      document.getElementById('hero-skeleton').style.display = 'none';
+      document.getElementById('hero-content').style.opacity = '1';
+
+      const title   = jsonArticle.title || 'Artikkeli';
+      const date    = jsonArticle.date  || '';
+      const tag     = jsonArticle.tag   || 'Uutinen';
+      const imgSrc  = jsonArticle.img   || FALLBACK;
+
+      document.getElementById('article-title').textContent = title;
+      document.getElementById('article-date').textContent  = date;
+      document.getElementById('article-tag').textContent   = tag;
+      document.getElementById('article-tag').className     = 'article-tag tag-' + tag.toLowerCase();
+      document.title = title + ' — EBK';
+
+      const heroImg = document.createElement('img');
+      heroImg.src = imgSrc;
+      heroImg.alt = title;
+      heroImg.onerror = () => {
+        heroImg.remove();
+        document.getElementById('hero-img-wrap').classList.add('no-image');
+        document.getElementById('hero-fallback').style.display = 'block';
+      };
+      heroImg.onload = () => {
+        const ratio = heroImg.naturalWidth / heroImg.naturalHeight;
+        if (ratio > 2.5) {
+          heroImg.remove();
+          document.getElementById('hero-img-wrap').classList.add('no-image');
+          document.getElementById('hero-fallback').style.display = 'block';
+        }
+        document.getElementById('hero-skeleton').style.display = 'none';
+      };
+      document.getElementById('hero-img-wrap').prepend(heroImg);
+
+      document.getElementById('article-content').innerHTML = jsonArticle.body;
+      return; // done — no need to fetch from Yhdistysavain
+    }
+  } catch(e) {
+    // JSON check failed, fall through to live fetch
+  }
 
   if (!articleUrl) {
-    showError('Artikkelin osoitetta ei löydy.', true);
+    showError('Artikkelia ei löydy.', true);
     return;
   }
 
   const fullUrl = articleUrl.startsWith('http') ? articleUrl : BASE + articleUrl;
 
-  // ── Load article ──────────────────────────────────────────────────────────────
+  // ── Load article from Yhdistysavain ───────────────────────────────────────────
 
   try {
     const html = await fetchWithFallback(fullUrl);
@@ -1226,7 +1281,7 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/YOUR_FORM_ID';
+  const FORMSPREE = 'https://formspree.io/f/mykodovl';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();

@@ -997,9 +997,13 @@ async function saveEvent() {
 
   const dateRaw = document.getElementById('ef-date').value.trim();
   let dateInfo  = null;
-  const dm = dateRaw.match(/^(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
+  const dm = dateRaw.match(/(\d{1,2})\.(\d{1,2})\.?(\d{4})?/);
   if (dm) {
-    dateInfo = { day: dm[1], month: MONTHS_FI[parseInt(dm[2])-1], year: dm[3] || new Date().getFullYear(), isSeries: false };
+    const monthIdx = parseInt(dm[2], 10) - 1;
+    const month = MONTHS_FI[monthIdx] || MONTHS_FI[0];
+    dateInfo = { day: dm[1], month, year: String(dm[3] || new Date().getFullYear()), isSeries: false };
+  } else if (dateRaw) {
+    toast('Päivämäärä väärässä muodossa. Käytä: 13.6.2026', 'error'); return;
   }
 
   let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url : (editingIdx !== null ? eventsData[editingIdx]?.img : null);
