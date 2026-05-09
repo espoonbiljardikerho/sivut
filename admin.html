@@ -96,6 +96,43 @@
   .nav-icon { font-size: 15px; width: 18px; text-align: center; }
   .nav-section { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 20px 6px; }
   .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+
+  /* ── Global save lock ─────────────────────────────────────────────────────── */
+  #save-lock-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: rgba(200,168,75,0.10);
+    border-top: 1px solid rgba(200,168,75,0.25);
+    font-size: 12px;
+    color: var(--gold);
+    font-family: var(--font);
+  }
+  #save-lock-bar.visible { display: flex; }
+  .save-spinner {
+    width: 14px; height: 14px; flex-shrink: 0;
+    border: 2px solid rgba(200,168,75,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Dim nav items while locked */
+  #sidebar.locked .nav-item {
+    pointer-events: none;
+    opacity: 0.45;
+  }
+  /* Dim all modal save/delete buttons while locked */
+  body.save-locked .btn-primary,
+  body.save-locked .btn-danger,
+  body.save-locked .btn-secondary[onclick*="save"],
+  body.save-locked .btn-secondary[onclick*="delete"],
+  body.save-locked .btn-secondary[onclick*="approve"],
+  body.save-locked .btn-secondary[onclick*="reject"] {
+    pointer-events: none;
+    opacity: 0.45;
+  }
   .sidebar-user { font-size: 12px; color: var(--text3); margin-bottom: 10px; }
   .sidebar-user strong { display: block; color: var(--text2); }
 
@@ -336,9 +373,12 @@
     <div class="nav-item" onclick="showPage('news')"><span class="nav-icon">📰</span> Uutiset</div>
     <div class="nav-item" onclick="showPage('events')"><span class="nav-icon">📅</span> Tapahtumat</div>
     <div class="nav-item" onclick="showPage('members')"><span class="nav-icon">👤</span> Jäsenet</div>
-    <div class="nav-item" onclick="showPage('registrations')" id="nav-registrations"><span class="nav-icon">📋</span> Ilmoittautumiset <span id="reg-badge" style="display:none;background:var(--gold);color:#0D1F0F;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px;"></span></div>
     <div class="nav-section">Data</div>
     <div class="nav-item" onclick="showPage('sync')"><span class="nav-icon">↻</span> Synkronointi</div>
+    <div id="save-lock-bar">
+      <div class="save-spinner"></div>
+      <span id="save-lock-msg">Tallennetaan…</span>
+    </div>
     <div class="sidebar-bottom">
       <div class="sidebar-user"><strong id="sidebar-user-name">—</strong>kirjautunut</div>
       <button class="btn btn-secondary btn-sm" onclick="doLogout()" style="width:100%">Kirjaudu ulos</button>
@@ -452,16 +492,6 @@
         </div>
       </div>
 
-      <!-- Registrations -->
-      <div class="page" id="page-registrations">
-        <div class="panel">
-          <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;">
-            <div class="panel-title">Ilmoittautumiset</div>
-            <button class="btn btn-secondary btn-sm" onclick="loadRegistrations()">↻ Päivitä</button>
-          </div>
-          <div id="reg-list"><div class="text-muted" style="padding:20px">Ladataan…</div></div>
-        </div>
-      </div>
 
     </div><!-- /page-body -->
   </div><!-- /main -->
@@ -860,7 +890,30 @@ async function ghPut(path, content, message, sha) {
   return r.json();
 }
 
+// ── Global save lock ──────────────────────────────────────────────────────────
+let _saveLockCount = 0; // support nested/parallel saves (e.g. approveReg saves two files)
+
+function adminLock(msg) {
+  _saveLockCount++;
+  if (_saveLockCount === 1) {
+    document.getElementById('save-lock-msg').textContent = msg || 'Tallennetaan…';
+    document.getElementById('save-lock-bar').classList.add('visible');
+    document.getElementById('sidebar').classList.add('locked');
+    document.body.classList.add('save-locked');
+  }
+}
+
+function adminUnlock() {
+  _saveLockCount = Math.max(0, _saveLockCount - 1);
+  if (_saveLockCount === 0) {
+    document.getElementById('save-lock-bar').classList.remove('visible');
+    document.getElementById('sidebar').classList.remove('locked');
+    document.body.classList.remove('save-locked');
+  }
+}
+
 async function saveJSON(path, data, msg) {
+  adminLock(msg ? 'Tallennetaan…' : 'Tallennetaan…');
   try {
     const existing = await ghGet(path).catch(() => null);
     const sha = existing?.sha;
@@ -868,6 +921,8 @@ async function saveJSON(path, data, msg) {
     return true;
   } catch(e) {
     toast('Virhe: ' + e.message, 'error'); return false;
+  } finally {
+    adminUnlock();
   }
 }
 
@@ -928,14 +983,7 @@ async function loadAllData() {
     renderEvents('upcoming');
     renderMembers();
     updateSyncCounts();
-    // Load registration badge count silently
-    try {
-      const rawReg = await ghGet('data/registrations.json');
-      const regs = parseBase64Json(rawReg.content);
-      const pending = regs.filter(r => r.status === 'pending').length;
-      const badge = document.getElementById('reg-badge');
-      if (badge && pending > 0) { badge.textContent = pending; badge.style.display = ''; }
-    } catch(_) {}
+
     toast('Tiedot ladattu onnistuneesti', 'success');
   } catch(e) {
     toast('Tietojen lataus epäonnistui: ' + e.message, 'error');
@@ -945,7 +993,7 @@ async function loadAllData() {
 // ── Navigation ───────────────────────────────────────────────────────────────
 const PAGE_TITLES = {
   dashboard: 'Dashboard', news: 'Uutiset', events: 'Tapahtumat',
-  members: 'Jäsenet', sync: 'Synkronointi', registrations: 'Ilmoittautumiset'
+  members: 'Jäsenet', sync: 'Synkronointi'
 };
 const PAGE_ACTIONS = {
   news:    '<button class="btn btn-primary btn-sm" onclick="openNewsModal()">+ Uusi uutinen</button>',
@@ -960,7 +1008,6 @@ function showPage(name) {
   document.querySelector(`.nav-item[onclick="showPage('${name}')"]`).classList.add('active');
   document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
   document.getElementById('topbar-actions').innerHTML = PAGE_ACTIONS[name] || '';
-  if (name === 'registrations') loadRegistrations();
 }
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
@@ -1585,122 +1632,6 @@ function rteLink2() {
   if (url) document.execCommand('createLink', false, url);
 }
 
-// ── Registrations page ────────────────────────────────────────────────────────
-let registrationsData = [];
-
-async function loadRegistrations() {
-  const el = document.getElementById('reg-list');
-  el.innerHTML = '<div class="text-muted" style="padding:20px">Ladataan…</div>';
-  try {
-    const raw = await ghGet('data/registrations.json');
-    registrationsData = parseBase64Json(raw.content);
-  } catch(e) {
-    // File may not exist yet
-    registrationsData = [];
-  }
-
-  // Update badge
-  const pending = registrationsData.filter(r => r.status === 'pending').length;
-  const badge = document.getElementById('reg-badge');
-  if (pending > 0) { badge.textContent = pending; badge.style.display = ''; }
-  else { badge.style.display = 'none'; }
-
-  if (!registrationsData.length) {
-    el.innerHTML = '<div class="text-muted" style="padding:20px;text-align:center">Ei ilmoittautumisia</div>';
-    return;
-  }
-
-  // Group by event
-  const byEvent = {};
-  registrationsData.forEach(r => {
-    if (!byEvent[r.eventSlug]) byEvent[r.eventSlug] = [];
-    byEvent[r.eventSlug].push(r);
-  });
-
-  el.innerHTML = Object.entries(byEvent).map(([slug, regs]) => `
-    <div style="margin-bottom:24px">
-      <div style="font-weight:600;color:var(--text2);margin-bottom:8px;font-size:13px">📅 ${slug}</div>
-      <table class="data-table">
-        <thead><tr><th>Nimi</th><th>Sähköposti</th><th>Tila</th><th>Aika</th><th style="width:140px"></th></tr></thead>
-        <tbody>
-          ${regs.map(r => `<tr style="opacity:${r.status==='pending'?1:0.55}">
-            <td>${r.name}</td>
-            <td style="font-size:11px">${r.email}</td>
-            <td><span style="font-size:10px;padding:2px 7px;border-radius:10px;background:${
-              r.status==='pending'?'rgba(200,168,75,0.15)':
-              r.status==='approved'?'rgba(29,158,117,0.15)':
-              'rgba(150,150,150,0.1)'};color:${
-              r.status==='pending'?'var(--gold)':
-              r.status==='approved'?'#4ECBA0':
-              'var(--text3)'}">${r.status}</span></td>
-            <td style="font-size:11px;color:var(--text3)">${new Date(r.submittedAt).toLocaleDateString('fi-FI')}</td>
-            <td style="display:flex;gap:6px">
-              ${r.status==='pending'?`
-                <button class="btn btn-primary btn-sm" onclick="approveReg('${r.id}')">Hyväksy</button>
-                <button class="btn btn-secondary btn-sm" onclick="rejectReg('${r.id}')">Hylkää</button>
-              `:'—'}
-            </td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`).join('');
-}
-
-async function approveReg(id) {
-  const reg = registrationsData.find(r => r.id === id);
-  if (!reg) return;
-  try {
-    // 1. Load both files fresh
-    const [rawReg, rawEvt] = await Promise.all([
-      ghGet('data/registrations.json'),
-      ghGet('data/tapahtumat.json')
-    ]);
-    const allReg = parseBase64Json(rawReg.content);
-    const allEvt = parseBase64Json(rawEvt.content);
-
-    // 2. Update registration status
-    const ri = allReg.findIndex(r => r.id === id);
-    if (ri >= 0) allReg[ri].status = 'approved';
-
-    // 3. Add to event participants
-    const ei = allEvt.findIndex(e => e.slug === reg.eventSlug);
-    if (ei >= 0) {
-      if (!allEvt[ei].participants) allEvt[ei].participants = [];
-      // Check capacity
-      const cap = allEvt[ei].capacity;
-      const count = allEvt[ei].participants.length;
-      if (cap && count >= cap) {
-        if (ri >= 0) allReg[ri].status = 'waitlist';
-        toast('Tapahtuma täynnä — merkitty jonotuslistalle', 'error');
-      } else {
-        allEvt[ei].participants.push({ name: reg.name, registeredAt: reg.submittedAt });
-      }
-    }
-
-    // 4. Save both
-    await Promise.all([
-      saveJSON('data/registrations.json', allReg, `Admin: hyväksy ilmoittautuminen: ${reg.name}`),
-      saveJSON('data/tapahtumat.json', allEvt, `Admin: lisää osallistuja: ${reg.name} → ${reg.eventSlug}`)
-    ]);
-    eventsData = allEvt;
-    toast('Hyväksytty ✓', 'success');
-    loadRegistrations();
-  } catch(e) { toast('Virhe: ' + e.message, 'error'); }
-}
-
-async function rejectReg(id) {
-  const reg = registrationsData.find(r => r.id === id);
-  if (!reg) return;
-  try {
-    const rawReg = await ghGet('data/registrations.json');
-    const allReg = parseBase64Json(rawReg.content);
-    const ri = allReg.findIndex(r => r.id === id);
-    if (ri >= 0) allReg[ri].status = 'rejected';
-    await saveJSON('data/registrations.json', allReg, `Admin: hylkää ilmoittautuminen: ${reg.name}`);
-    toast('Hylätty', 'success');
-    loadRegistrations();
-  } catch(e) { toast('Virhe: ' + e.message, 'error'); }
-}
 
 // ── Featured events toggle ────────────────────────────────────────────────────
 let _featuredSaveQueue = Promise.resolve();
