@@ -1,15 +1,5 @@
 [
   {
-    "slug": "testi-uutinen",
-    "href": "/uutiset/testi-uutinen/",
-    "title": "testi uutinen",
-    "date": "",
-    "excerpt": "lyhyt kuvaus on",
-    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/testi-uutinen.jpg",
-    "tag": "Kaisa",
-    "body": "pidempää sisältöä on"
-  },
-  {
     "slug": "poolviikkis-6-5-2026",
     "href": "/uutiset/poolviikkis-6-5-2026/",
     "title": "Poolviikkis  6.5 2026",
