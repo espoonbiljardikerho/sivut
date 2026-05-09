@@ -994,7 +994,8 @@ html { font-size: 112%; }
 <script>
 (async function() {
   const BASE     = 'https://espoonbiljardikerho.yhdistysavain.fi';
-
+  // Fetch JSON from raw.githubusercontent.com — always live, bypasses GitHub Pages CDN cache
+  const RAW_BASE = 'https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main';
 
   async function fetchWithFallback(url) {
     const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
@@ -1110,7 +1111,7 @@ html { font-size: 112%; }
 
   // ── Check JSON first for admin-created articles ───────────────────────────────
   try {
-    const jsonResp = await fetch('data/uutiset.json?v=' + Date.now());
+    const jsonResp = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
     const articles = await jsonResp.json();
     const slug = articleSlug || (articleUrl || '').replace(/.*\/uutiset\//, '').replace(/\/$/, '');
     const jsonArticle = articles.find(a => a.slug === slug);
@@ -1164,6 +1165,7 @@ html { font-size: 112%; }
       document.getElementById('hero-img-wrap').prepend(heroImg);
 
       document.getElementById('article-content').innerHTML = jsonArticle.body || '<p style="color:var(--text-muted);font-style:italic">Artikkelin sisältöä ei ole vielä lisätty.</p>';
+      loadSidebar(tag);
       return; // done — no need to fetch from Yhdistysavain
     }
   } catch(e) {
@@ -1264,6 +1266,7 @@ html { font-size: 112%; }
 
     // ── Load "Lue myös" and sidebar ──────────────────────────────────────────────
     loadRelated(tag);
+    loadSidebar(tag);
 
   } catch (err) {
     console.error('Article load failed:', err);
@@ -1274,7 +1277,7 @@ html { font-size: 112%; }
 
   async function loadRelated(currentTag) {
     try {
-      const resp = await fetch('data/uutiset.json');
+      const resp = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
       const all  = await resp.json();
 
       // Filter out current article; prefer same tag, fill with others
@@ -1310,6 +1313,40 @@ html { font-size: 112%; }
 
     } catch(e) {
       console.warn('Related news failed:', e);
+    }
+  }
+
+  // ── Sidebar: Viimeisimmät uutiset ─────────────────────────────────────────────
+  async function loadSidebar(currentTag) {
+    const el = document.getElementById('sidebar-news');
+    if (!el) return;
+    try {
+      const resp = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
+      const all  = await resp.json();
+
+      // Only show admin-created articles (have body) — they're the only ones that open
+      const currentSlug = new URLSearchParams(location.search).get('slug') || '';
+      const withBody = all.filter(a => a.body && a.slug !== currentSlug);
+
+      if (!withBody.length) {
+        // No admin articles yet — hide the sidebar card entirely
+        el.closest('.sidebar-card')?.style.setProperty('display', 'none');
+        return;
+      }
+
+      // Show 5 most recent (JSON is newest-first)
+      const recent = withBody.slice(0, 5);
+      el.innerHTML = recent.map(a => {
+        const safeTitle = (a.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const url = 'uutinen.html?slug=' + encodeURIComponent(a.slug);
+        return `<a href="${url}" class="sidebar-nav-link">
+          <span class="sidebar-nav-title">${safeTitle}</span>
+          <span class="sidebar-nav-date">${a.date || ''}</span>
+        </a>`;
+      }).join('');
+    } catch(e) {
+      // Fail silently — sidebar is optional
+      document.getElementById('sidebar-news')?.closest('.sidebar-card')?.style.setProperty('display', 'none');
     }
   }
 
