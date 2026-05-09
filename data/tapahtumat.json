@@ -20,7 +20,8 @@
       "venue": "ebk",
       "signup": null,
       "description": "pyris kuvaus"
-    }
+    },
+    "featured": true
   },
   {
     "slug": "pyris-testi",
