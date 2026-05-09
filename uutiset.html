@@ -971,7 +971,7 @@ html { font-size: 112%; }
   let jsonArticles = [];
   (async () => {
     try {
-      const resp = await fetch('data/uutiset.json');
+      const resp = await fetch('data/uutiset.json?v=' + Date.now());
       jsonArticles = await resp.json();
       console.log(`Loaded ${jsonArticles.length} articles from JSON`);
       loadPage(1);

@@ -394,7 +394,7 @@
         <div class="panel">
           <table class="data-table" id="events-table">
             <thead><tr>
-              <th title="Näytä etusivulla" style="width:30px">★</th><th>Nimi</th><th>Laji</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
+              <th title="Näytä etusivulla" style="width:30px">★</th><th>Nimi</th><th>Laji</th><th>Kenelle</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
             </tr></thead>
             <tbody id="events-tbody"></tbody>
           </table>
@@ -974,6 +974,11 @@ function renderEvents(view) {
       </td>
       <td><strong>${e.name||'—'}</strong></td>
       <td><span class="badge badge-${(e.tag||'').toLowerCase()}">${e.tag||'—'}</span></td>
+      <td class="text-muted text-sm">${
+        e.detail?.participation === 'avoin' ? '🌐 Avoin'
+        : e.detail?.participation === 'kutsu' ? '✉️ Kutsu'
+        : '🔒 Jäsenille'
+      }</td>
       <td class="text-muted">${dateStr}</td>
       <td class="text-muted">${fee}</td>
       <td style="text-align:right">

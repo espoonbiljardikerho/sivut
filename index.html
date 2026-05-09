@@ -1567,7 +1567,7 @@ html { font-size: 112%; }
 // ── Load events from JSON ─────────────────────────────────────────────────
 (async () => {
   try {
-    const resp   = await fetch('data/tapahtumat.json');
+    const resp   = await fetch('data/tapahtumat.json?v=' + Date.now());
     const events = await resp.json();
     const MONTHS_SORT = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
     // Use featured events if any are marked, otherwise show 5 soonest upcoming

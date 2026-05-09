@@ -1107,7 +1107,11 @@ html { font-size: 112%; }
     } else if (isSeries && dateInfo) {
       dateStr = dateInfo.startLabel;
     }
-    const sub = [dateStr, time, evt.fee ? evt.fee : null].filter(Boolean).join(' · ');
+    const partLabel = evt.detail?.participation === 'avoin' ? 'Avoin'
+      : evt.detail?.participation === 'kutsu' ? 'Kutsu'
+      : evt.detail?.participation === 'jasenet' ? 'Jäsenille'
+      : null;
+    const sub = [dateStr, time, evt.fee ? evt.fee : null, partLabel].filter(Boolean).join(' · ');
 
     return `
       <div class="evt-row${isSeries?' is-series':''}" data-slug="${slug}" data-tag="${tag}" data-idx="${idx}" style="animation-delay:${idx*0.04}s" onclick="selectEvent(this)">
