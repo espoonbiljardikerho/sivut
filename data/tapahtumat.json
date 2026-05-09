@@ -1,49 +1,23 @@
 [
   {
-    "slug": "pyris-testi",
-    "href": "/tapahtumat/pyris-testi/",
-    "name": "pyris testi",
-    "tag": "Pyramidi",
-    "dateInfo": {
-      "day": "09",
-      "month": "Touko",
-      "year": "2026",
-      "isSeries": false
-    },
-    "time": "08:00",
-    "fee": "1500€",
-    "isPast": false,
-    "img": null,
-    "detail": {
-      "deadline": "HETI",
-      "venue": "klubilla",
-      "signup": "mikä linkki?",
-      "description": "pyris testi"
-    },
-    "featured": false
-  },
-  {
     "slug": "espoon-8-pallon-tasoitussarja-2",
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja-2/",
     "name": "Espoon 8-pallon tasoitussarja",
     "tag": "Pool",
     "dateInfo": {
       "day": "3",
-      "month": "Kesä",
-      "year": 2026,
+      "month": "Kes",
+      "year": "2026",
       "isSeries": true,
       "startLabel": "3.6–26.8.2026"
     },
-    "time": null,
-    "fee": null,
-    "raw": "Espoon 8-pallon tasoitussarja \n  \n\n 3.6.–26.8.2026Espoon Biljardikerhon klubiKlubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen…",
     "isPast": false,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
       "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "espoon-9-pallon-tasoitussarja-2",
@@ -52,21 +26,18 @@
     "tag": "Pool",
     "dateInfo": {
       "day": "3",
-      "month": "Kesä",
-      "year": 2026,
+      "month": "Kes",
+      "year": "2026",
       "isSeries": true,
       "startLabel": "3.6–26.8.2026"
     },
-    "time": null,
-    "fee": null,
-    "raw": "Espoon 9-pallon tasoitussarja \n  \n\n 3.6.–26.8.2026Espoon Biljardikerhon klubiKlubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen…",
     "isPast": false,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/6Yx4n9ZZo0E4iiiTBw0i0bulAE/PoolKuvaUutinen400.jpg",
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
       "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-n-kesakisat-2026-part-i",
@@ -75,20 +46,18 @@
     "tag": "Kaisa",
     "dateInfo": {
       "day": "13",
-      "month": "Kesä",
+      "month": "Kes",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": "30 €",
-    "raw": "EBK:n Kesäkaisa 2026 Part I \n  \n\nla 13.6.2026 klo 10–23Espoon klubiLaji: Kaisa Pelipaikka: Espoon Biljardikerhon klubi Pvm: lauantaina 13.6.2026 Alkamisaika: klo. 10:00 Osallistumismaksu: 30€ Osallistumisoikeus: kaikilla, 30 nopeinta pääsee mukaan Palkinnot: 100%…",
     "isPast": false,
+    "featured": true,
     "img": "https://bin.yhdistysavain.fi/1604389/yEYp6MuJU1PpXVzqu8I50dKDrQ/KaisaKuvaUutinen.jpg",
+    "fee": "30 €",
     "detail": {
       "deadline": "To.11.6. klo 21:00 mennessä",
       "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)Tillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)Klubin puhelin: 04578382201"
-    },
-    "featured": true
+    }
   },
   {
     "slug": "espoon-kesakaisa-2026-part-ii",
@@ -96,24 +65,21 @@
     "name": "Espoon Kesäkaisa 2026 Part II",
     "tag": "Kaisa",
     "dateInfo": {
-      "raw": "15.8.2026",
-      "day": null,
-      "month": null,
-      "year": null,
+      "day": "15",
+      "month": "Elo",
+      "year": "2026",
       "isSeries": false
     },
-    "time": "klo 10",
-    "fee": "30 €",
-    "raw": "Espoon Kesäkaisa 2026 Part II \n  \n\nla 15.8.2026 klo 10–23Espoon Biljardikerhon KlubiLaji: Kaisa Pelipaikka: Espoon Biljardikerhon klubi Pvm: lauantaina 15.8.2026 Alkamisaika: klo. 10:00 Osallistumismaksu: 30€ Osallistumisoikeus: kaikilla, 30 nopeinta pääsee mukaan Palkinnot: 100%…",
     "isPast": false,
+    "featured": true,
+    "time": "10:00",
     "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
+    "fee": "30 €",
     "detail": {
       "deadline": "Pe.14.8. klo 12:00 mennessä",
       "venue": "Tillinmäen klubi",
-      "signup": null,
       "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)\nTillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)\nKlubin puhelin: 04578382201"
-    },
-    "featured": true
+    }
   },
   {
     "slug": "snookermestaruus-2026",
@@ -123,19 +89,16 @@
     "dateInfo": {
       "day": "26",
       "month": "Elo",
-      "year": 2026,
+      "year": "2026",
       "isSeries": true,
       "startLabel": "26.8–30.11.2026"
     },
-    "time": null,
-    "fee": null,
-    "raw": "Snookermestaruus 2026 \n  \n\n 26.8.–30.11.2026Espoon KlubiViime vuoden tulospalvelu Ilmoittautuneet: 1. Pauli Wigelius 2. Jarno Ahola 3. 4. 5. 6.",
     "isPast": false,
+    "featured": true,
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
     "detail": {
       "description": "Ilmoittautuneet:1. Pauli Wigelius2. Jarno Ahola3.4.5.6."
-    },
-    "featured": true
+    }
   },
   {
     "slug": "klubin-karasarja-2026",
@@ -144,20 +107,17 @@
     "tag": "Kara",
     "dateInfo": {
       "day": "9",
-      "month": "Syys",
-      "year": 2026,
+      "month": "Syy",
+      "year": "2026",
       "isSeries": true,
       "startLabel": "9.9–31.10.2026"
     },
-    "time": null,
-    "fee": null,
-    "raw": "Klubin Karasarja 2026 \n  \n\n 9.9.–31.10.2026Espoon Biljardikerhon KlubiPelataan 9.9. - 31.10. + viimeistään marraskuussa cuppipelit Karasarja (klubin jäsenien kesken) jossa mestari ratkaistaan kaikki kaikkia- vastaan kaavalla sisältäen runkosarjan ja cupin. Mahdollisten…",
     "isPast": false,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Pelataan 9.9. - 31.10. + viimeistään marraskuussa cuppipelit"
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-pyramidimestaruus-2026",
@@ -166,20 +126,18 @@
     "tag": "Pyramidi",
     "dateInfo": {
       "day": "26",
-      "month": "Marras",
+      "month": "Mar",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": "30 €",
-    "raw": "EBK Pyramidimestaruus 2026 \n  \n\nto 26.11.2026 klo 17–23Espoon Biljardikerhon KlubiEBK:n (ja klubin) Pyramidimestaruus 2026 pelataan yhden päivän turnauksena torstaina 26.11.2026, kunhan kilpailuun saadaan vähintään 6 osallistujaa. Osallistumismaksu 30€ ja 100% palkintoihin ja…",
     "isPast": false,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/AE7woRDUMqsgKqnoNK3y0beoX8/pyres1.jpg",
+    "fee": "30 €",
     "detail": {
       "deadline": "in 26.11. klo 16:45 mennessä",
       "description": "EBK:n  (ja klubin) Pyramidimestaruus 2026 pelataan yhden päivän turnauksena torstaina 26.11.2026, kunhan kilpailuun saadaan vähintään 6 osallistujaa. Osallistumismaksu 30€ ja 100% palkintoihin ja osallistumisoikeus niin kerhon kuin klubin jäsenillä.Ilmoittautumiset (torstaihin 26.11. klo 16:45 mennessä, pelit arvotaan klo 17:00 ja aloitetaan sen jälkeen)."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-kaisamestaruus-2026",
@@ -188,20 +146,17 @@
     "tag": "Kaisa",
     "dateInfo": {
       "day": "4",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Kaisamestaruus 2026 \n  \n\npe 4.12.2026 klo 16–23Espoon Biljardikerhon KlubiEspoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 4.12.2026 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa) Turnauksen…",
     "isPast": false,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Z5DmKMsuotZFGganlCWO0beoJJ/KaisaKuvaUutinen.jpg",
     "detail": {
       "deadline": "in 4.12.  klo 16:00 mennessä",
       "description": "Espoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 4.12.2026 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa)"
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-poolmestaruus-2026",
@@ -210,19 +165,16 @@
     "tag": "Pool",
     "dateInfo": {
       "day": "5",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Poolmestaruus 2026 \n  \n\nla 5.12.2026 klo 11–22Espoon Biljardikerhon KlubiEBK:n poolmestaruus pelataan yhden päivän kilpailuna lauantaina 5.12.2026. Kilpailu aloitetaan klo 11:00. Ilmoittautumiset pe iltaan klo 21:00 mennessä. Lajina tulee olemaan 9-pallo ilman tasoituksia.…",
     "isPast": false,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
     "detail": {
       "description": "EBK:n poolmestaruus pelataan yhden päivän kilpailuna lauantaina 5.12.2026. Kilpailu aloitetaan klo 11:00. Ilmoittautumiset pe iltaan klo 21:00 mennessä."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-kinkkukisat-ja-pikkujoulut",
@@ -231,19 +183,15 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "12",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK kinkkukisat ja pikkujoulut \n  \n\nla 12.12.2026 Kinkkukilpailut klo 13:00 1. Jarno Ahola 2. 3. 4. 5. 6. 7. 8. 9. 10. Pikkujoulut (+ ruokailu) klo 18:00 1. Jarno Ahola 2. 3. 4. 5. 6. 7. 8. 9. 10.",
     "isPast": false,
-    "img": null,
+    "featured": false,
     "detail": {
       "description": "Kinkkukilpailut klo 13:001. Jarno Ahola2.3.4.5.6.7.8.9.10."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-n-saantomaarainen-vuosikokous-3",
@@ -252,19 +200,16 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "16",
-      "month": "Maalis",
+      "month": "Maa",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK:n sääntömääräinen vuosikokous \n  \n\nma 16.3.2026 klo 18–20Espoon klubiESPOON BILJARDIKERHO RY. VUOSIKOKOUS KUTSU EBK:n jäsenet ovat tervetulleita kerhon sääntömääräiseen vuosikokoukseemme joka pidetään maaliskuun 16. päivänä 2026 maanantai-iltana alkaen kello 18:00.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/fWL75Q2E2o5vT9pITPuC0dKDoc/ebk%20sportti.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "tahtis-40v-open",
@@ -273,63 +218,54 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "7",
-      "month": "Maalis",
+      "month": "Maa",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Tähtis 40v Open \n  \n\nla 7.3.2026 klo 12–23Espoon klubiAll around Tähtis 40v Open Pelataan kilpailukaaviolla jossa hyödynnetään tarvittaessa klubin kaikkia kymmentä pelipöytää riippuen osallistujamääristä. Osallistumisoikeus kaikilla EBK:n seura- tai…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/RVigWpcoBlE9mXXEGyPv0dd7ba@1200=axdwU4YW7o/T%C3%A4htis40v.jpg",
     "detail": {
       "deadline": "La.7.3. klo 11:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-n-karamestaruus-2026",
     "href": "/tapahtumat/ebk-n-karamestaruus-2026/",
-    "name": "EBK:n Karamestaruus 2026 \n  \n\nke-to 25.–26.2.2026Espoon KlubiEBK:n karamestaruus, jossa mestari ratkaistaan kaikki kaikkia- vastaan kaavalla sisältäen runkosarjan ja cupin. Mahdollisten lohkojen koot ja voittomäärät selviävät kun osallistujalista on selvillä.…",
+    "name": "EBK:n Karamestaruus 2026",
     "tag": "Kara",
     "dateInfo": {
       "day": "26",
-      "month": "Helmi",
+      "month": "Hel",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK:n Karamestaruus 2026 \n  \n\nke-to 25.–26.2.2026Espoon KlubiEBK:n karamestaruus, jossa mestari ratkaistaan kaikki kaikkia- vastaan kaavalla sisältäen runkosarjan ja cupin. Mahdollisten lohkojen koot ja voittomäärät selviävät kun osallistujalista on selvillä.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/vQ6v8q7GrqnxNCDqjOnY0dKDlA/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "snooker-talvisarja-2026",
     "href": "/tapahtumat/snooker-talvisarja-2026/",
-    "name": "Snooker talvisarja 2026 \n  \n\n 22.–31.1.2026Espoon klubi22.1",
+    "name": "Snooker talvisarja 2026",
     "tag": "Snooker",
     "dateInfo": {
       "day": "31",
-      "month": "Tammi",
+      "month": "Tam",
       "year": "2026",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Snooker talvisarja 2026 \n  \n\n 22.–31.1.2026Espoon klubi22.1. - 31.3. Snooker talvisarja on klubilaisille tarkoitettu oma tasoitussarja joka alkaa tammikuun lopulla. Ilmoittautumiset ke.21.1. klo 18:00 mennessä:…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/oQ6nvrxKTwZdHwHlt6zG0dKDfZ/SnookerKuvaUutinen.jpg",
     "detail": {
       "deadline": "ke.21.1. klo 18:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-kinkkukilpailut-pikkujoulut-202",
@@ -338,19 +274,16 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "13",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Kinkkukilpailut & Pikkujoulut 2025 \n  \n\nla 13.12.2025 klo 13–23Espoon Biljardikerhon KlubiLAUANTAI 13.12.2025 ESPOON KLUBI KINKKUKILPAILUT 13:00 / PIKKUJOULUT 18:00 EBK:n kinkkukilpailut pelataan perinteisesti pikkujoulupäivänä alkaen klo 13:00. Ilmoittautumiset pelipäivään mennessä.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/K6rvsABgJdG0cq0r3P7k0beoT8@1200=xWflWOfmxg/pikkujoulukuva.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-poolmestaruus-2025",
@@ -359,19 +292,16 @@
     "tag": "Pool",
     "dateInfo": {
       "day": "6",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Poolmestaruus 2025 \n  \n\nla 6.12.2025 klo 11–22Espoon Biljardikerhon KlubiEBK:n poolmestaruus pelataan yhden päivän kilpailuna lauantaina 6.12.2025. Kilpailu aloitetaan klo 11:00. Ilmoittautumiset pe iltaan klo 21:00 mennessä. Lajina tulee olemaan 9-pallo ilman tasoituksia.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-kaisamestaruus-2025",
@@ -380,20 +310,17 @@
     "tag": "Kaisa",
     "dateInfo": {
       "day": "5",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Kaisamestaruus 2025 \n  \n\npe 5.12.2025 klo 16–23Espoon Biljardikerhon KlubiEspoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 5.12.2025 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa) Turnauksen…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Z5DmKMsuotZFGganlCWO0beoJJ/KaisaKuvaUutinen.jpg",
     "detail": {
       "deadline": "in 5.12.  klo 16:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "finnish-masters-the-dynamic-pyramid",
@@ -402,19 +329,16 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "15",
-      "month": "Marras",
+      "month": "Mar",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Finnish Masters The Dynamic Pyramid RG4 Nevskaja Espoo Open \n  \n\nla 15.11.2025 klo 10–22Espoon klubiPäivämäärä ja aika: lauantaina 15.11.2025 alkaen kello 10:00 Paikka: Espoon Biljardikerho ry EBK Alkaa: Klo 10:00 (Espoon klubille pääsee sisään klo 9:00 eteenpäin) Lajimuoto: The Dynamic Pyramid…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/srvmVpGtc0ewb2ctfsvG0czlww@1200=bw461aP5q2/2024-11-16%2017.48.28.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-pyramidimestaruus-2025",
@@ -423,46 +347,41 @@
     "tag": "Pyramidi",
     "dateInfo": {
       "day": "13",
-      "month": "Marras",
+      "month": "Mar",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": "30 €",
-    "raw": "EBK Pyramidimestaruus 2025 \n  \n\nto 13.11.2025 klo 17–23Espoon Biljardikerhon KlubiEBK:n (ja klubin) Pyramidimestaruus 2025 pelataan yhden päivän turnauksena torstaina 13.11.2025, kunhan kilpailuun saadaan vähintään 6 osallistujaa. Osallistumismaksu 30€ ja 100% palkintoihin ja…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/AE7woRDUMqsgKqnoNK3y0beoX8/pyres1.jpg",
+    "fee": "30 €",
     "detail": {
       "deadline": "in 13.11. klo 16:45 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "klubin-karasarja-2025",
     "href": "/tapahtumat/klubin-karasarja-2025/",
-    "name": "Klubin Karasarja 2025 \n  \n\nti-pe 2.–5.9.2025Espoon Biljardikerhon KlubiPelataan",
+    "name": "Klubin Karasarja 2025",
     "tag": "Kara",
     "dateInfo": {
       "day": "5",
-      "month": "Syys",
+      "month": "Syy",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Klubin Karasarja 2025 \n  \n\nti-pe 2.–5.9.2025Espoon Biljardikerhon KlubiPelataan 2.9. - 31.10. + viimeistään marraskuussa cuppipelit Karasarja (klubin jäsenien kesken) jossa mestari ratkaistaan kaikki kaikkia- vastaan kaavalla sisältäen runkosarjan ja cupin. Mahdollisten…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "snookermestaruus-2025",
     "href": "/tapahtumat/snookermestaruus-2025/",
-    "name": "Snookermestaruus 2025 \n  \n\nke-su 27.–31.8.2025Espoon KlubiTulospalvelu Ilmoittautuneet: 1. Jarno Ahola 2. Joni Ahola 3. Lauri Kankkunen 4. Pauli Wigelius 5. Pekka Räisänen 6. Jari Jansson 7. Mikko Paajanen 8. Markku Ruuska 9. Tuomas Komi 10. Pekka Pesäkivi…",
+    "name": "Snookermestaruus 2025",
     "tag": "Snooker",
     "dateInfo": {
       "day": "31",
@@ -470,15 +389,12 @@
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Snookermestaruus 2025 \n  \n\nke-su 27.–31.8.2025Espoon KlubiTulospalvelu Ilmoittautuneet: 1. Jarno Ahola 2. Joni Ahola 3. Lauri Kankkunen 4. Pauli Wigelius 5. Pekka Räisänen 6. Jari Jansson 7. Mikko Paajanen 8. Markku Ruuska 9. Tuomas Komi 10. Pekka Pesäkivi…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "espoon-kesakaisa-part-ii",
@@ -491,16 +407,14 @@
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": "30 €",
-    "raw": "Espoon Kesäkaisa 2025 Part II \n  \n\nla 9.8.2025 klo 10–23Espoon Biljardikerhon KlubiLaji: Kaisa Pelipaikka: Espoon Biljardikerhon klubi Pvm: lauantaina 9.8.2025 Alkamisaika: klo. 10:00 Osallistumismaksu: 30€ Osallistumisoikeus: kaikilla, 30 nopeinta pääsee mukaan Palkinnot: 100%…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
+    "fee": "30 €",
     "detail": {
       "deadline": "Pe.8.8. klo 12:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "espoon-kesa-kaisa-2025-part-i",
@@ -509,64 +423,56 @@
     "tag": "Kaisa",
     "dateInfo": {
       "day": "14",
-      "month": "Kesä",
+      "month": "Kes",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": "30 €",
-    "raw": "Espoon Kesäkaisa 2025 Part I \n  \n\nla 14.6.2025 klo 10–23Espoon Biljardikerhon KlubiLaji: Kaisa Pelipaikka: Espoon Biljardikerhon klubi Pvm: lauantaina 14.6.2025 Alkamisaika: klo. 10:00 Osallistumismaksu: 30€ Osallistumisoikeus: kaikilla, 30 nopeinta pääsee mukaan Palkinnot: 100%…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/pGVIVYuLULnJPPoLZ0TD0beo1P/KaisaKuvaUutinen.jpg",
+    "fee": "30 €",
     "detail": {
       "deadline": "To.12.6. klo 21:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "espoon-8-pallon-tasoitussarja",
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja/",
-    "name": "Espoon 8-pallon tasoitussarja \n  \n\n 5.–12.6.2025Espoon Biljardikerhon klubiKlubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa",
+    "name": "Espoon 8-pallon tasoitussarja",
     "tag": "Pool",
     "dateInfo": {
       "day": "12",
-      "month": "Kesä",
+      "month": "Kes",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Espoon 8-pallon tasoitussarja \n  \n\n 5.–12.6.2025Espoon Biljardikerhon klubiKlubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "espoon-9-pallon-tasoitussarja",
     "href": "/tapahtumat/espoon-9-pallon-tasoitussarja/",
-    "name": "Espoon 9-pallon tasoitussarja \n  \n\n 5.–12.6.2025Espoon Biljardikerhon klubiKlubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa",
+    "name": "Espoon 9-pallon tasoitussarja",
     "tag": "Pool",
     "dateInfo": {
       "day": "12",
-      "month": "Kesä",
+      "month": "Kes",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Espoon 9-pallon tasoitussarja \n  \n\n 5.–12.6.2025Espoon Biljardikerhon klubiKlubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/6Yx4n9ZZo0E4iiiTBw0i0bulAE/PoolKuvaUutinen400.jpg",
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-n-saantomaarainen-vuosikokous-2-4",
@@ -575,62 +481,53 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "17",
-      "month": "Maalis",
+      "month": "Maa",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK:n sääntömääräinen vuosikokous 2025 \n  \n\nma 17.3.2025 klo 18–20Espoon Biljardikerhon klubiESPOON BILJARDIKERHO RY. VUOSIKOKOUS KUTSU EBK:n jäsenet ovat tervetulleita kerhon sääntömääräiseen vuosikokoukseemme joka pidetään maaliskuun 17. päivänä 2025 maanantai-iltana alkaen kello 18:00.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/tVDYdU0R9Yds6NvMPtBL0bSZJR/ebk%20sportti.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-karamestaruus-2025",
     "href": "/tapahtumat/ebk-karamestaruus-2025/",
-    "name": "EBK Karamestaruus 2025 \n  \n\nke-pe 26.–28.2.2025EBK:n karamestaruus, jossa mestari ratkaistaan kaikki kaikkia- vastaan kaavalla sisältäen runkosarjan ja cupin. Mahdollisten lohkojen koot ja voittomäärät selviävät kun osallistujalista on selvillä.…",
+    "name": "EBK Karamestaruus 2025",
     "tag": "Kara",
     "dateInfo": {
       "day": "28",
-      "month": "Helmi",
+      "month": "Hel",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Karamestaruus 2025 \n  \n\nke-pe 26.–28.2.2025EBK:n karamestaruus, jossa mestari ratkaistaan kaikki kaikkia- vastaan kaavalla sisältäen runkosarjan ja cupin. Mahdollisten lohkojen koot ja voittomäärät selviävät kun osallistujalista on selvillä.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/r1IBvpxeA0CQGKljjnip0bSZEz/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "snooker-talvisarja-2025",
     "href": "/tapahtumat/snooker-talvisarja-2025/",
-    "name": "Snooker talvisarja 2025 \n  \n\nto-pe 23.–24.1.202523.1",
+    "name": "Snooker talvisarja 2025",
     "tag": "Snooker",
     "dateInfo": {
       "day": "24",
-      "month": "Tammi",
+      "month": "Tam",
       "year": "2025",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "Snooker talvisarja 2025 \n  \n\nto-pe 23.–24.1.202523.1. - 31.3. Snooker talvisarja on klubilaisille tarkoitettu oma tasoitussarja joka alkaa tammikuun lopulla. Ilmoittautumiset ke.22.1. klo 18:00 mennessä:…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/wp99IskBBNHWzJzjLGub0bSZB9/SnookerKuvaUutinen.jpg",
     "detail": {
       "deadline": "ke.22.1. klo 18:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-kinkkukilpailut-ja-pikkujoulut-2",
@@ -639,19 +536,16 @@
     "tag": "Uutinen",
     "dateInfo": {
       "day": "14",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2024",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK kinkkukilpailut ja pikkujoulut \n  \n\nla 14.12.2024 klo 12–23:59Espoon Biljardikerhon klubiLAUANTAI 14.12.2024 ESPOON KLUBI KINKKUKILPAILUT 13:00 / PIKKUJOULUT 18:00 EBK:n kinkkukilpailut pelataan perinteisesti pikkujoulupäivänä alkaen klo 13:00. Ilmoittautumiset pelipäivään mennessä.…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/xXSBchYxauHB4WtNJpxP0_Yi4x@1200=MekZ7LgFWC/20231216_140308.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   },
   {
     "slug": "ebk-poolmestaruus-2024",
@@ -660,18 +554,15 @@
     "tag": "Pool",
     "dateInfo": {
       "day": "6",
-      "month": "Joulu",
+      "month": "Jou",
       "year": "2024",
       "isSeries": false
     },
-    "time": null,
-    "fee": null,
-    "raw": "EBK Poolmestaruus 2024 \n  \n\npe 6.12.2024 klo 11–23Espoon Biljardikerhon klubiEBK:n poolmestaruus pelataan yhden päivän kilpailuna perjantaina 6.12.2024. Kilpailu aloitetaan klo 11:00 tai mahdollisesti myöhemmin. Ilmoittautumiset klo 10:30 mennessä jonka jälkeen suoritetaan…",
     "isPast": true,
+    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/OqqQ0PMFBp9vVECYK9s40_Yi-_/PoolKuvaUutinen400.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    },
-    "featured": false
+    }
   }
 ]
