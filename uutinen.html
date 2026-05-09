@@ -809,6 +809,7 @@ html { font-size: 112%; }
 </style>
 </head>
 <body>
+<div id="reading-progress" style="position:fixed;top:0;left:0;right:0;height:2px;background:var(--gold);width:0%;z-index:9999;transition:width 0.1s linear;pointer-events:none;"></div>
 
 <!-- NAV -->
 <nav>
@@ -1736,6 +1737,16 @@ function toggleTheme() {
   const saved = localStorage.getItem('ebk-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
 })();
+
+// ── Reading progress bar ──────────────────────────────────────────────────────
+window.addEventListener('scroll', function() {
+  const bar = document.getElementById('reading-progress');
+  if (!bar) return;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+  bar.style.width = pct + '%';
+}, { passive: true });
 </script>
 
 </body>

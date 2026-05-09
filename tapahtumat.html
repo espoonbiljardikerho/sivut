@@ -191,12 +191,44 @@ section { padding: var(--spy) var(--px); }
 
 .evt-badge-wrap { flex-shrink:0; }
 
-/* Multi-day / series indicator */
-.evt-row.is-series .evt-date-block {
-  background: rgba(200,168,75,0.04);
-  border-style: dashed;
+/* ── Featured gold left-edge tick ─────────────────────────────────────────── */
+.evt-row.is-featured {
+  border-left: 3px solid var(--gold);
+  padding-left: 11px;
 }
-.evt-row.is-series .evt-day { font-size:11px; font-weight:500; color:var(--text-muted); font-family:'DM Sans',sans-serif; letter-spacing:0.02em; }
+
+/* ── Audience badge pill ──────────────────────────────────────────────────── */
+.aud-badge {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:9px; font-weight:600; letter-spacing:0.05em;
+  padding:2px 7px; border-radius:10px; flex-shrink:0; white-space:nowrap;
+}
+.aud-jasenet { background:rgba(200,168,75,0.15); color:var(--gold); border:1px solid rgba(200,168,75,0.3); }
+.aud-avoin   { background:rgba(111,191,140,0.15); color:#6FBF8C;   border:1px solid rgba(111,191,140,0.3); }
+.aud-kutsu   { background:rgba(157,143,232,0.15); color:#9D8FE8;   border:1px solid rgba(157,143,232,0.3); }
+
+/* ── Deadline urgency pill ────────────────────────────────────────────────── */
+.deadline-pill {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:9px; font-weight:600; padding:2px 7px;
+  border-radius:10px; flex-shrink:0; white-space:nowrap;
+}
+.deadline-soon  { background:rgba(217,168,92,0.18); color:#d9a85c; border:1px solid rgba(217,168,92,0.35); }
+.deadline-now   { background:rgba(217,111,111,0.18); color:#d96f6f; border:1px solid rgba(217,111,111,0.35); }
+.deadline-open  { background:rgba(150,150,150,0.1);  color:var(--text-muted); border:1px solid var(--border); }
+
+/* ── Capacity bar ─────────────────────────────────────────────────────────── */
+.cap-wrap { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+.cap-label { font-size:9.5px; color:var(--text-muted); white-space:nowrap; }
+.cap-bar   { width:36px; height:3px; border-radius:2px; background:rgba(200,168,75,0.15); overflow:hidden; }
+.cap-fill  { height:100%; border-radius:2px; background:var(--gold); transition:width 0.3s; }
+.cap-fill.warm { background:#d9a85c; }
+.cap-fill.full { background:#d96f6f; }
+
+/* ── Series: show start→end in month block ───────────────────────────────── */
+.evt-series-range { font-size:8px; color:var(--text-muted); letter-spacing:0.04em; margin-top:2px; line-height:1.2; }
+
+
 
 /* skeleton rows */
 .evt-skeleton { pointer-events:none; }
@@ -1022,49 +1054,109 @@ html { font-size: 112%; }
   let activeSlug = null;
   let eventsData = [];
 
-  function renderRow(evt, idx) {
-    const { slug, name, tag, dateInfo, time } = evt;
-    const cls   = tagClass(tag);
-    const isSeries = dateInfo?.isSeries;
+  // ── Deadline urgency helper ───────────────────────────────────────────────
+  function deadlinePill(deadlineStr) {
+    if (!deadlineStr) return '';
+    const m = deadlineStr.match(/(\d{1,2})\.(\d{1,2})\./);
+    if (!m) return '';
+    const now = new Date();
+    const dl = new Date(now.getFullYear(), parseInt(m[2])-1, parseInt(m[1]), 23, 59);
+    const diffDays = Math.ceil((dl - now) / (1000*60*60*24));
+    if (diffDays < 0) return '';
+    if (diffDays === 0) return `<span class="deadline-pill deadline-now">⏰ Sulkeutuu tänään</span>`;
+    if (diffDays === 1) return `<span class="deadline-pill deadline-now">⏰ Sulkeutuu huomenna</span>`;
+    if (diffDays <= 7) return `<span class="deadline-pill deadline-soon">⏰ ${diffDays} pv jäljellä</span>`;
+    return '';
+  }
 
+  function renderRow(evt, idx) {
+    const { slug, name, tag, dateInfo, time, featured, capacity, participants, detail } = evt;
+    const cls = tagClass(tag);
+    const isSeries  = dateInfo?.isSeries;
+    const isFeatured = !!featured;
+
+    // ── Date block ────────────────────────────────────────────────────────
     let dateBlock;
     if (!dateInfo) {
       dateBlock = `<div class="evt-date-block"><div class="evt-day" style="font-size:11px;font-family:'DM Sans',sans-serif;color:var(--text-muted);">TBA</div></div>`;
+    } else if (isSeries) {
+      const sl = dateInfo.startLabel || '';
+      const parts = sl.match(/(\d{1,2}\.\d{1,2})–(\d{1,2}\.\d{1,2})/);
+      const startMo = parts ? (() => { const mo = parseInt(parts[1].split('.')[1]); return MONTHS[mo-1]||''; })() : (dateInfo.month||'');
+      const endMo   = parts ? (() => { const mo = parseInt(parts[2].split('.')[1]); return MONTHS[mo-1]||''; })() : '';
+      const rangeStr = endMo && endMo !== startMo ? `${startMo} → ${endMo}` : startMo;
+      dateBlock = `<div class="evt-date-block" style="border-style:dashed;">
+        <div class="evt-day" style="font-size:10px;font-family:'DM Sans',sans-serif;color:var(--text-muted);letter-spacing:0.01em;">Sarja</div>
+        <div class="evt-series-range">${rangeStr}</div>
+      </div>`;
     } else if (dateInfo.raw) {
-      // Raw date string from admin — split if it contains a dot pattern, else show as label
       const rawParts = dateInfo.raw.match(/^(\d{1,2})\.?(\d{0,2})/);
       const rawDay = rawParts ? rawParts[1] : '—';
-      const rawMo = dateInfo.raw.replace(/^\d{1,2}\.\d{1,2}\.?\d*\s*/, '').trim() || dateInfo.raw;
+      const rawMo  = dateInfo.raw.replace(/^\d{1,2}\.\d{1,2}\.?\d*\s*/, '').trim() || dateInfo.raw;
       dateBlock = `<div class="evt-date-block"><div class="evt-day">${rawDay}</div><div class="evt-month" style="font-size:9px">${rawMo.slice(0,4).toUpperCase()}</div></div>`;
-    } else if (isSeries) {
-      dateBlock = `<div class="evt-date-block" style="border-style:dashed;"><div class="evt-day" style="font-size:10px;font-family:'DM Sans',sans-serif;color:var(--text-muted);letter-spacing:0.01em;">Sarja</div><div class="evt-month">${dateInfo.month}</div></div>`;
     } else {
-      dateBlock = `<div class="evt-date-block"><div class="evt-day">${dateInfo.day}</div><div class="evt-month">${dateInfo.month}</div></div>`;
+      const dowMap = ['Su','Ma','Ti','Ke','To','Pe','La'];
+      let dowStr = '';
+      try {
+        const mo = MONTHS.indexOf(dateInfo.month)+1;
+        if (mo > 0 && dateInfo.day && dateInfo.year) {
+          dowStr = dowMap[new Date(parseInt(dateInfo.year), mo-1, parseInt(dateInfo.day)).getDay()] || '';
+        }
+      } catch(_) {}
+      dateBlock = `<div class="evt-date-block">
+        ${dowStr ? `<div style="font-size:8px;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:1px;">${dowStr}</div>` : ''}
+        <div class="evt-day">${dateInfo.day}</div>
+        <div class="evt-month">${dateInfo.month}</div>
+      </div>`;
     }
 
+    // ── Sub row ───────────────────────────────────────────────────────────
     let dateStr = '';
-    if (dateInfo?.raw) {
-      dateStr = dateInfo.raw;
-    } else if (dateInfo && !isSeries) {
+    if (dateInfo?.raw) dateStr = dateInfo.raw;
+    else if (dateInfo && !isSeries) {
       const mo = (MONTHS.indexOf(dateInfo.month)+1).toString().padStart(2,'0');
       dateStr = dateInfo.day + '.' + mo + '.' + (dateInfo.year||'2026');
-    } else if (isSeries && dateInfo) {
-      dateStr = dateInfo.startLabel;
+    } else if (isSeries && dateInfo) dateStr = dateInfo.startLabel || '';
+    const sub = [dateStr, time, evt.fee || null].filter(Boolean).join(' · ');
+
+    // ── Audience badge ────────────────────────────────────────────────────
+    const part = detail?.participation;
+    const audBadge = part === 'jasenet' ? `<span class="aud-badge aud-jasenet">🔒 Jäsenille</span>`
+      : part === 'avoin' ? `<span class="aud-badge aud-avoin">🌐 Avoin</span>`
+      : part === 'kutsu' ? `<span class="aud-badge aud-kutsu">✉ Kutsu</span>`
+      : '';
+
+    // ── Deadline pill ─────────────────────────────────────────────────────
+    const pill = (!evt.isPast && !isSeries) ? deadlinePill(detail?.deadline) : '';
+
+    // ── Capacity bar ──────────────────────────────────────────────────────
+    let capHTML = '';
+    const capNum  = parseInt(capacity) || 0;
+    const capUsed = (participants || []).length;
+    if (capNum > 0) {
+      const pct = Math.min(100, Math.round(capUsed/capNum*100));
+      const fillCls = pct >= 100 ? 'full' : pct >= 75 ? 'warm' : '';
+      capHTML = `<div class="cap-wrap">
+        <span class="cap-label">${capUsed}/${capNum}</span>
+        <div class="cap-bar"><div class="cap-fill ${fillCls}" style="width:${pct}%"></div></div>
+      </div>`;
     }
-    const partLabel = evt.detail?.participation === 'avoin' ? 'Avoin'
-      : evt.detail?.participation === 'kutsu' ? 'Kutsu'
-      : evt.detail?.participation === 'jasenet' ? 'Jäsenille'
-      : null;
-    const sub = [dateStr, time, evt.fee ? evt.fee : null, partLabel].filter(Boolean).join(' · ');
+
+    const rightCol = `<div class="evt-badge-wrap" style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+      <span class="ebadge ${cls}">${tag}</span>
+      ${audBadge}
+      ${pill}
+      ${capHTML}
+    </div>`;
 
     return `
-      <div class="evt-row${isSeries?' is-series':''}" data-slug="${slug}" data-tag="${tag}" data-idx="${idx}" style="animation-delay:${idx*0.04}s" onclick="selectEvent(this)">
+      <div class="evt-row${isSeries?' is-series':''}${isFeatured?' is-featured':''}" data-slug="${slug}" data-tag="${tag}" data-idx="${idx}" style="animation-delay:${idx*0.04}s" onclick="selectEvent(this)">
         ${dateBlock}
         <div class="evt-info">
           <div class="evt-name">${name}</div>
           ${sub ? `<div class="evt-sub">${sub}</div>` : ''}
         </div>
-        <div class="evt-badge-wrap"><span class="ebadge ${cls}">${tag}</span></div>
+        ${rightCol}
       </div>`;
   }
 
@@ -1323,13 +1415,28 @@ html { font-size: 112%; }
 
       renderList();
 
+      // ── Hash deep-link: navigate to correct page first ──────────────────
       const hashSlug = location.hash.replace('#','');
       if (hashSlug) {
-        const list = document.getElementById('event-list');
-        const hashRow = list.querySelector('.evt-row[data-slug="' + hashSlug + '"]');
-        if (hashRow) {
-          hashRow.scrollIntoView({ behavior:'smooth', block:'center' });
-          setTimeout(() => hashRow.click(), 200);
+        const hashIdx = allParsed.findIndex(e => e.slug === hashSlug);
+        if (hashIdx >= 0) {
+          // Switch to correct tab (past vs upcoming)
+          const isHashPast = allParsed[hashIdx].isPast;
+          if (isHashPast !== (currentView === 'past')) {
+            currentView = isHashPast ? 'past' : 'upcoming';
+            document.querySelectorAll('#view-upcoming, #view-past').forEach(b => b.classList.remove('active'));
+            document.getElementById(isHashPast ? 'view-past' : 'view-upcoming').classList.add('active');
+          }
+          // Navigate to correct page
+          const filtered = allParsed.filter(e => currentView === 'past' ? e.isPast : !e.isPast);
+          const filteredIdx = filtered.findIndex(e => e.slug === hashSlug);
+          if (filteredIdx >= 0) {
+            const targetPage = Math.ceil((filteredIdx + 1) / EVT_PAGE_SIZE);
+            if (targetPage !== evtPage) { evtPage = targetPage; renderList(); }
+          }
+          // Click row
+          const hashRow = document.querySelector('.evt-row[data-slug="' + hashSlug + '"]');
+          if (hashRow) setTimeout(() => { hashRow.scrollIntoView({ behavior:'smooth', block:'center' }); hashRow.click(); }, 150);
         }
       }
 
