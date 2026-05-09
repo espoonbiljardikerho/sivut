@@ -858,7 +858,7 @@ html { font-size: 112%; }
 
 
 
-  const FALLBACK = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="700" height="400"><rect width="700" height="400" fill="%230D1F0F"/></svg>';
+  const FALLBACK = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22700%22 height=%22400%22><rect width=%22700%22 height=%22400%22 fill=%22%230D1F0F%22/></svg>';
   const PER_PAGE = 10;
   // TOTAL_PAGES is now computed dynamically per filter — see loadPage()
 
@@ -912,7 +912,7 @@ html { font-size: 112%; }
     const tagCls = `b-${(tag||'uutinen').toLowerCase().replace(/\s+/g,'')}`;
     const inner = `
         <div class="news-img-wrap">
-          <img src="${img}" alt="${safeTitle}" onerror="this.src='${FALLBACK}'" loading="lazy">
+          <img src="${img || FALLBACK}" alt="${safeTitle}" onerror="this.onerror=null;this.src=FALLBACK" loading="lazy">
           <span class="news-img-tag ebadge ${tagCls}">${tag}</span>
         </div>
         <div class="news-body">
