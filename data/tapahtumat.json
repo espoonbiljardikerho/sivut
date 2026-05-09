@@ -1,5 +1,28 @@
 [
   {
+    "slug": "testitesti",
+    "href": "/tapahtumat/testitesti/",
+    "name": "testitesti",
+    "tag": "Pyramidi",
+    "dateInfo": {
+      "raw": "30.06.2026",
+      "day": null,
+      "month": null,
+      "year": null,
+      "isSeries": false
+    },
+    "time": "19:00",
+    "fee": "5 €",
+    "isPast": false,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/events/image.jpg",
+    "detail": {
+      "deadline": "huomenna",
+      "venue": "ebk",
+      "signup": null,
+      "description": "pyris kuvaus"
+    }
+  },
+  {
     "slug": "ebk-n-kesakaisa-2026-part-i",
     "href": "/tapahtumat/ebk-n-kesakaisa-2026-part-i/",
     "name": "EBK:n Kesäkaisa 2026 Part I",
