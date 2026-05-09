@@ -894,14 +894,14 @@ html { font-size: 112%; }
 
   function buildCard(article, featured = false) {
     const { slug, href, title, date, excerpt, img, tag, body } = article;
-    // For admin-created articles (have body field), use slug param so uutinen.html reads from JSON
-    const articleUrl = (body || !href || href === '/')
-      ? 'uutinen.html?slug=' + encodeURIComponent(slug)
-      : 'uutinen.html?url=' + encodeURIComponent(href.startsWith('http') ? href : 'https://espoonbiljardikerho.yhdistysavain.fi' + href);
+    // Admin-created articles (body field present) → internal reader
+    // Old Yhdistysavain articles (no body) → no longer link out, show excerpt only
+    const hasBody = !!body;
+    const articleUrl = hasBody ? 'uutinen.html?slug=' + encodeURIComponent(slug) : null;
     const safeTitle   = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const safeExcerpt = (excerpt || '').slice(0, featured ? 220 : 120).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return `
-      <a href="${articleUrl}" class="news-card" data-tag="${tag}">
+    const tag_ = `<span class="news-tag">${tag}</span>`;
+    const inner = `
         <div class="news-img-wrap">
           <img src="${img}" alt="${safeTitle}" onerror="this.src='${FALLBACK}'" loading="lazy">
         </div>
@@ -910,11 +910,13 @@ html { font-size: 112%; }
           <h2 class="news-title">${safeTitle}</h2>
           ${safeExcerpt ? `<p class="news-excerpt">${safeExcerpt}${safeExcerpt.length >= (featured ? 220 : 120) ? '…' : ''}</p>` : ''}
           <div class="news-meta">
-            <span class="news-tag">${tag}</span>
-            <span class="news-read-more">Lue artikkeli →</span>
+            ${tag_}
+            ${articleUrl ? `<span class="news-read-more">Lue artikkeli →</span>` : `<span style="font-size:10px;color:var(--text-muted);opacity:0.6">Arkistoitu uutinen</span>`}
           </div>
-        </div>
-      </a>`;
+        </div>`;
+    return articleUrl
+      ? `<a href="${articleUrl}" class="news-card" data-tag="${tag}">${inner}</a>`
+      : `<div class="news-card" style="cursor:default;opacity:0.75" data-tag="${tag}">${inner}</div>`;
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
@@ -1001,34 +1003,14 @@ html { font-size: 112%; }
       return;
     }
 
-    // ── Fallback: live scrape ────────────────────────────────────────────
-    grid.className = 'news-grid has-featured';
-    grid.innerHTML = Array.from({length: 9}, (_, i) => i === 0
-      ? `<div class="news-card news-skeleton" style="grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1fr;"><div class="skel-img"></div><div class="news-body"><div class="skel-line skel-title"></div><div class="skel-line"></div></div></div>`
-      : `<div class="news-card news-skeleton"><div class="skel-img"></div><div class="news-body"><div class="skel-line skel-title"></div><div class="skel-line"></div></div></div>`
-    ).join('');
-    document.getElementById('pagination').style.display = 'none';
-
-    const url = 'uutiset.html'; // JSON failed - show error
-    try {
-      let html = '';
-      throw new Error('JSON unavailable');
-      allArticles = parseArticles(html);
-      if (!allArticles.length) throw new Error('No articles');
-      renderGrid(allArticles);
-      renderPagination(TOTAL_PAGES);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err) {
-      console.warn('News fetch failed:', err);
-      grid.className = 'news-grid';
-      grid.innerHTML = `
-        <div class="news-error">
-          <div class="news-error-icon">📡</div>
-          <h3>Uutisia ei voitu ladata</h3>
-          <p>Tarkista yhteytesi tai avaa uutiset suoraan kerhon sivulta.</p>
-          <a href="${BASE}/uutiset/" class="btn-primary" target="_blank" style="margin-top:4px;">Avaa uutiset →</a>
-        </div>`;
-    }
+    // ── JSON failed — show error ─────────────────────────────────────────
+    grid.className = 'news-grid';
+    grid.innerHTML = `
+      <div class="news-error">
+        <div class="news-error-icon">📡</div>
+        <h3>Uutisia ei voitu ladata</h3>
+        <p>Tarkista yhteytesi ja yritä hetken kuluttua uudelleen.</p>
+      </div>`;
   }
 
   // ── Filter ───────────────────────────────────────────────────────────────────

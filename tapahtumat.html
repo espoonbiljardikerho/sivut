@@ -261,6 +261,43 @@ section { padding: var(--spy) var(--px); }
   border-radius:4px; padding:3px 8px; margin-bottom:12px;
 }
 
+/* Description rich text */
+.summary-description {
+  font-size:12.5px; color:var(--text-secondary); line-height:1.7;
+  margin:14px 0; padding:12px 14px;
+  background:rgba(200,168,75,0.04); border-left:2px solid rgba(200,168,75,0.3);
+  border-radius:0 5px 5px 0;
+}
+.summary-description p { margin:0 0 8px; }
+.summary-description p:last-child { margin-bottom:0; }
+.summary-description ul { margin:4px 0 8px 18px; }
+
+/* Schedule */
+.summary-schedule { margin:14px 0; }
+.summary-schedule-title {
+  font-size:9.5px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase;
+  color:var(--text-muted); margin-bottom:8px;
+}
+.summary-schedule-row {
+  display:flex; gap:12px; align-items:baseline;
+  font-size:12px; color:var(--text-secondary); padding:4px 0;
+  border-bottom:1px solid var(--border);
+}
+.summary-schedule-row:last-child { border-bottom:none; }
+.summary-schedule-time {
+  font-family:'Playfair Display',serif; font-weight:600;
+  color:var(--gold); min-width:42px; flex-shrink:0;
+}
+
+/* Participants */
+.summary-participants { margin:14px 0; }
+.summary-participants-list { display:flex; flex-direction:column; gap:3px; }
+.summary-participant {
+  font-size:12px; color:var(--text-secondary); padding:3px 0;
+  border-bottom:1px solid var(--border);
+}
+.summary-participant:last-child { border-bottom:none; }
+
 /* ── FOOTER ── */
 footer { background:var(--green-dark); border-top:1px solid var(--border); padding:clamp(32px,4.5vw,52px) var(--px) 24px; }
 .footer-grid { display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:clamp(20px,3.5vw,44px); margin-bottom:30px; }
@@ -879,8 +916,6 @@ html { font-size: 112%; }
 
 
 
-  const REG_URL = 'https://espoonbiljardikerho.yhdistysavain.fi/ilmoittautuminen/';
-
   // Finnish month abbreviations
   const MONTHS = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'];
   const MONTHS_LONG = ['tammikuu','helmikuu','maaliskuu','huhtikuu','toukokuu','kesäkuu','heinäkuu','elokuu','syyskuu','lokakuu','marraskuu','joulukuu'];
@@ -925,26 +960,6 @@ html { font-size: 112%; }
     const mins = t[2] ? parseInt(t[2], 10) : 0;
     const roundedMins = mins <= 5 ? '00' : String(mins).padStart(2,'0');
     return `klo ${t[1]}:${roundedMins}`;
-  }
-
-  // Parse fee
-  function parseFee(text) {
-    const m = text.match(/(\d+)\s*€/);
-    return m ? m[1] + ' €' : null;
-  }
-
-  // Parse "Osallistumisoikeus" — members only?
-  function parseAccess(text) {
-    const t = text.toLowerCase();
-    if (t.includes('jäsenille') || t.includes('klubilaisille')) return 'members';
-    if (t.includes('kaikilla') || t.includes('avoin')) return 'open';
-    return null;
-  }
-
-  async function fetchHTML(url) {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(r.status);
-    return r.text();
   }
 
 
@@ -1002,77 +1017,6 @@ html { font-size: 112%; }
     });
   }
 
-  // ── Parse individual event detail page ───────────────────────────────────
-
-  async function fetchEventDetail(slug) {
-    const url = BASE + '/tapahtumat/' + slug + '/';
-    const WORKER = 'https://delicate-sky-be99.ebk-repo.workers.dev';
-      let path; try { const u = new URL(url); path = u.pathname + u.search; } catch { path = url; }
-      const _r = await fetch(WORKER + path);
-      if (!_r.ok) throw new Error('Worker ' + _r.status);
-      const html = await _r.text();
-    const doc  = new DOMParser().parseFromString(html, 'text/html');
-
-    // og:image for the lead photo
-    const img = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || null;
-
-    // Parse bold-label fields from main content
-    const main = doc.querySelector('main, .content main, article') || doc.body;
-    const detail = {};
-
-    // Walk through strong tags to find field:value pairs
-    main.querySelectorAll('strong, b').forEach(el => {
-      const label = el.textContent.replace(/:/g,'').trim().toLowerCase();
-      // Only use direct next text node — avoid grabbing the whole parent paragraph
-      const nextNode = el.nextSibling;
-      const next = (nextNode?.nodeType === 3 ? nextNode.textContent : null)?.trim()
-                   || el.nextElementSibling?.textContent?.trim()
-                   || '';
-      if (!next || next === ':') return;
-      if (label === 'laji')                   detail.sport    = next;
-      if (label === 'pelipaikka')             detail.venue    = next;
-      if (label.includes('alkamisaika')) {
-          const tm = next.match(/(\d+):(\d+)/);
-          if (tm) {
-            const m = parseInt(tm[2], 10);
-            detail.time = `klo ${parseInt(tm[1], 10)}:${m <= 5 ? '00' : String(m).padStart(2,'0')}`;
-          } else {
-            detail.time = next;
-          }
-        }
-      if (label === 'osallistumismaksu')      detail.fee     = next;
-      if (label === 'osallistumisoikeus')     detail.access  = next;
-      if (label === 'ilmoittautuminen' && next.match(/\d/)) detail.deadline = next;
-      // Capacity: only capture short values (not full description paragraphs)
-      if ((label === 'kapasiteetti' || label.includes('nopeinta') || label === 'paikkaluku')
-          && next.length < 60) detail.capacity = next;
-    });
-
-    // Capacity often embedded in "osallistumisoikeus" text
-    if (!detail.capacity) {
-      const oikeusEl = Array.from(main.querySelectorAll('strong,b')).find(el => el.textContent.toLowerCase().includes('oikeus'));
-      if (oikeusEl) {
-        const txt = oikeusEl.parentElement?.textContent || '';
-        const cap = txt.match(/(\d+)\s+nopeinta/);
-        if (cap) detail.capacity = cap[1] + ' paikkaa';
-      }
-    }
-
-    // Registration deadline — look for "To.XX.X. klo XX:XX mennessä" pattern
-    if (!detail.deadline) {
-      const bodyText = main.textContent;
-      const dl = bodyText.match(/[A-Za-z]{2}\.?\s*(\d+\.\d+\.)\s*klo\s*[\d:]+\s*mennessä/i);
-      if (dl) detail.deadline = dl[0];
-    }
-
-    // Signups count — count non-empty numbered items
-    const bodyText = main.textContent;
-    const signupLines = bodyText.match(/^\d+\.\s+\S/gm) || [];
-    detail.signupCount = signupLines.length;
-
-    return { img, detail };
-  }
-
   // ── Render event row ──────────────────────────────────────────────────────
 
   let activeSlug = null;
@@ -1126,48 +1070,47 @@ html { font-size: 112%; }
 
   // ── Render detail panel ───────────────────────────────────────────────────
 
-  function renderDetail(evt, fetched) {
-    const { name, tag, dateInfo, time, href, isPast } = evt;
-    const { img, detail } = fetched;
+  function renderDetail(evt) {
+    const { name, tag, dateInfo, time, fee, isPast, img, detail, capacity, schedule, organizer, participants } = evt;
     const cls = tagClass(tag);
 
-    const regUrl = REG_URL; // always go to the main registration page
-
-    const accessText = detail.access ? parseAccess(detail.access) : null;
-    const membersOnly = accessText === 'members';
-
-    const fee = detail.fee ? parseFee(detail.fee) || detail.fee : null;
+    const membersOnly = detail?.participation === 'jasenet';
+    const evtFee = fee || detail?.fee || null;
+    const approvedCount = (participants || []).length;
+    const capNum = parseInt(capacity) || 0;
+    const isFull = capNum > 0 && approvedCount >= capNum;
 
     return `
       ${img ? `<img class="summary-event-img" src="${img}" alt="${name}" style="display:block;" onerror="this.style.display='none'">` : ''}
       <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         <span class="ebadge ${cls}">${tag}</span>
-        ${detail.participation ? `<span class="ebadge" style="background:rgba(150,150,150,0.12);color:var(--text-muted);border:1px solid var(--border);">${
+        ${detail?.participation ? `<span class="ebadge" style="background:rgba(150,150,150,0.12);color:var(--text-muted);border:1px solid var(--border);">${
           detail.participation === 'jasenet' ? '🔒 Jäsenille' :
-          detail.participation === 'avoin' ? '🌐 Avoin' :
-          detail.participation === 'kutsu' ? '✉️ Kutsu' : detail.participation
+          detail.participation === 'avoin'   ? '🌐 Avoin' :
+          detail.participation === 'kutsu'   ? '✉️ Kutsu' : detail.participation
         }</span>` : ''}
+        ${capNum > 0 ? `<span class="ebadge" style="background:rgba(150,150,150,0.12);color:${isFull?'#e87c7c':'var(--text-muted)'};border:1px solid var(--border);">👥 ${approvedCount}/${capNum}</span>` : ''}
       </div>
       <div class="summary-event-name">${name}</div>
       ${membersOnly ? `<div class="members-only-note">🔒 Jäsenille / klubilaisille</div>` : ''}
       <div class="summary-details">
-        ${detail.date || dateInfo ? `
+        ${dateInfo ? `
         <div class="summary-detail-row">
           <span class="summary-detail-icon">📅</span>
           <div>
             <span class="summary-detail-label">Päivämäärä</span>
-            <span class="summary-detail-value"><strong>${detail.date || (dateInfo?.isSeries ? dateInfo.startLabel : (dateInfo?.day != null ? dateInfo.day+'. '+(MONTHS_LONG[MONTHS.indexOf(dateInfo?.month)] || dateInfo?.month || '') : ''))}</strong></span>
+            <span class="summary-detail-value"><strong>${dateInfo.isSeries ? dateInfo.startLabel : (dateInfo.raw || (dateInfo.day != null ? dateInfo.day+'. '+(MONTHS_LONG[MONTHS.indexOf(dateInfo.month)] || dateInfo.month || '') : ''))}</strong></span>
           </div>
         </div>` : ''}
-        ${detail.time || time ? `
+        ${time ? `
         <div class="summary-detail-row">
           <span class="summary-detail-icon">🕙</span>
           <div>
             <span class="summary-detail-label">Alkamisaika</span>
-            <span class="summary-detail-value"><strong>${detail.time || time}</strong></span>
+            <span class="summary-detail-value"><strong>${time}</strong></span>
           </div>
         </div>` : ''}
-        ${detail.venue ? `
+        ${detail?.venue ? `
         <div class="summary-detail-row">
           <span class="summary-detail-icon">📍</span>
           <div>
@@ -1175,53 +1118,51 @@ html { font-size: 112%; }
             <span class="summary-detail-value">${detail.venue}</span>
           </div>
         </div>` : ''}
-        ${fee ? `
+        ${evtFee ? `
         <div class="summary-detail-row">
           <span class="summary-detail-icon">💶</span>
           <div>
             <span class="summary-detail-label">Osallistumismaksu</span>
-            <span class="summary-detail-value"><strong>${fee}</strong> · 100% palkintoihin</span>
+            <span class="summary-detail-value"><strong>${evtFee}</strong> · 100% palkintoihin</span>
           </div>
         </div>` : ''}
-        ${detail.capacity ? `
+        ${detail?.deadline ? `
         <div class="summary-detail-row">
-          <span class="summary-detail-icon">👥</span>
+          <span class="summary-detail-icon">⏰</span>
           <div>
-            <span class="summary-detail-label">Info</span>
-            <span class="summary-detail-value">${detail.capacity}${detail.signupCount > 0 ? ` · <strong>${detail.signupCount} ilmoittautunut</strong>` : ''}</span>
+            <span class="summary-detail-label">Ilmoittautuminen viimeistään</span>
+            <span class="summary-detail-value">${detail.deadline}</span>
+          </div>
+        </div>` : ''}
+        ${organizer?.name ? `
+        <div class="summary-detail-row">
+          <span class="summary-detail-icon">👤</span>
+          <div>
+            <span class="summary-detail-label">Järjestäjä</span>
+            <span class="summary-detail-value">${organizer.name}${organizer.email ? ` · <a href="mailto:${organizer.email}" style="color:var(--gold)">${organizer.email}</a>` : ''}</span>
           </div>
         </div>` : ''}
       </div>
-      ${detail.deadline ? `
-      <div class="summary-reg-info">
-        <strong>Ilmoittautuminen</strong>
-        Viimeistään ${detail.deadline}
+      ${detail?.description ? `<div class="summary-description">${detail.description}</div>` : ''}
+      ${schedule?.length ? `
+      <div class="summary-schedule">
+        <div class="summary-schedule-title">Aikataulu</div>
+        ${schedule.map(s => `<div class="summary-schedule-row"><span class="summary-schedule-time">${s.time}</span><span>${s.label}</span></div>`).join('')}
+      </div>` : ''}
+      ${approvedCount > 0 ? `
+      <div class="summary-participants">
+        <div class="summary-schedule-title">Ilmoittautuneet (${approvedCount}${capNum ? '/'+capNum : ''})</div>
+        <div class="summary-participants-list">${(participants||[]).map((p,i) => `<span class="summary-participant">${i+1}. ${p.name}</span>`).join('')}</div>
       </div>` : ''}
       ${!isPast ? `
-      <button class="btn-primary summary-cta" id="reg-cta-btn" onclick="openRegModal(window._activeEvt)">
-        Ilmoittaudu →
+      <button class="btn-primary summary-cta" id="reg-cta-btn" onclick="openRegModal(window._activeEvt)" ${isFull ? 'disabled style="opacity:0.5;cursor:not-allowed"' : ''}>
+        ${isFull ? 'Tapahtuma täynnä' : 'Ilmoittaudu →'}
       </button>
-      <p class="summary-cta-note">Kuittausviesti lähetetään sähköpostiisi.</p>` : ''}
+      <p class="summary-cta-note">Ilmoittautumisesi tallennetaan ja admin vahvistaa sen.</p>` : ''}
     `;
   }
 
-  // ── Render loading state in panel ────────────────────────────────────────
-
-  function renderPanelLoading(name) {
-    return `
-      <div style="padding:8px 0;">
-        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--text-primary);margin-bottom:16px;line-height:1.3;">${name}</div>
-        <div class="skel" style="width:100%;height:140px;border-radius:7px;margin-bottom:14px;"></div>
-        <div class="skel" style="width:70%;height:11px;margin-bottom:10px;"></div>
-        <div class="skel" style="width:55%;height:11px;margin-bottom:10px;"></div>
-        <div class="skel" style="width:60%;height:11px;margin-bottom:18px;"></div>
-        <div class="skel" style="width:100%;height:42px;border-radius:6px;"></div>
-      </div>`;
-  }
-
   // ── Select event ──────────────────────────────────────────────────────────
-
-  const detailCache = {};
 
   window.selectEvent = async function(el) {
     const slug = el.dataset.slug;
@@ -1235,33 +1176,16 @@ html { font-size: 112%; }
     el.classList.add('active');
     activeSlug = slug;
 
-    const isMobile = window.innerWidth <= 900;
-    const loadingHTML = renderPanelLoading(evt.name);
+    const html = renderDetail(evt);
 
+    const isMobile = window.innerWidth <= 900;
     if (isMobile) {
-      document.getElementById('mobile-panel-body').innerHTML = loadingHTML;
+      document.getElementById('mobile-panel-body').innerHTML = html;
       document.getElementById('mobile-panel').classList.add('open');
       document.getElementById('mobile-overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     } else {
-      document.getElementById('summary-body').innerHTML = loadingHTML;
-    }
-
-    // Fetch detail (with cache)
-    if (!detailCache[slug]) {
-      try {
-        detailCache[slug] = await fetchEventDetail(slug);
-      } catch(e) {
-        detailCache[slug] = { img: null, detail: {} };
-      }
-    }
-
-    const html = renderDetail(evt, detailCache[slug]);
-
-    if (isMobile) {
-      if (activeSlug === slug) document.getElementById('mobile-panel-body').innerHTML = html;
-    } else {
-      if (activeSlug === slug) document.getElementById('summary-body').innerHTML = html;
+      document.getElementById('summary-body').innerHTML = html;
     }
   };
 
@@ -1362,21 +1286,23 @@ html { font-size: 112%; }
         const resp = await fetch('data/tapahtumat.json');
         const data = await resp.json();
         allParsed = data.map(e => ({
-          slug:     e.slug,
-          href:     e.href,
-          name:     e.name,
-          tag:      e.tag,
-          dateInfo: e.dateInfo,
-          time:     e.time,
-          fee:      e.fee,
-          isPast:   e.isPast || false,
-          raw:      e.raw || '',
+          slug:         e.slug,
+          href:         e.href,
+          name:         e.name,
+          tag:          e.tag,
+          dateInfo:     e.dateInfo,
+          time:         e.time,
+          fee:          e.fee,
+          isPast:       e.isPast || false,
+          featured:     e.featured || false,
+          img:          e.img || null,
+          detail:       e.detail || {},
+          capacity:     e.capacity || null,
+          schedule:     e.schedule || [],
+          organizer:    e.organizer || null,
+          participants: e.participants || [],
+          raw:          e.raw || '',
         }));
-        data.forEach(e => {
-          if (e.detail || e.img) {
-            detailCache[e.slug] = { img: e.img || null, detail: e.detail || {} };
-          }
-        });
       } catch(jsonErr) {
         console.warn('tapahtumat.json load failed', jsonErr);
         allParsed = [];
@@ -1808,35 +1734,22 @@ html { font-size: 112%; }
       </div>
 
       <form id="rm-form" class="jm-form">
-        <input type="hidden" name="_subject" id="rm-subject" value="Ilmoittautuminen — Espoon Biljardikerho">
-        <input type="hidden" name="tapahtuma" id="rm-hidden-event">
+        <input type="hidden" id="rm-event-slug" name="eventSlug">
+        <!-- honeypot -->
+        <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
 
-        <div class="jm-field-row">
-          <div class="jm-field">
-            <label class="jm-field-label" for="rm-fname">Etunimi *</label>
-            <input class="jm-input" type="text" id="rm-fname" name="etunimi" required placeholder="Etunimi">
-          </div>
-          <div class="jm-field">
-            <label class="jm-field-label" for="rm-lname">Sukunimi *</label>
-            <input class="jm-input" type="text" id="rm-lname" name="sukunimi" required placeholder="Sukunimi">
-          </div>
+        <div class="jm-field">
+          <label class="jm-field-label" for="rm-name">Nimi *</label>
+          <input class="jm-input" type="text" id="rm-name" name="name" required placeholder="Etunimi Sukunimi">
         </div>
         <div class="jm-field">
           <label class="jm-field-label" for="rm-email">Sähköposti *</label>
           <input class="jm-input" type="email" id="rm-email" name="email" required placeholder="sinä@example.com">
         </div>
-        <div class="jm-field">
-          <label class="jm-field-label" for="rm-phone">Puhelinnumero *</label>
-          <input class="jm-input" type="tel" id="rm-phone" name="puhelin" required placeholder="+358 40 123 4567">
-        </div>
-        <div class="jm-field">
-          <label class="jm-field-label" for="rm-msg">Lisätiedot <span class="jm-opt">(vapaaehtoinen)</span></label>
-          <textarea class="jm-input jm-textarea" id="rm-msg" name="lisatiedot" placeholder="Esim. tasoitusluokka tai muuta huomioitavaa…"></textarea>
-        </div>
 
         <div class="jm-error" id="rm-error" style="display:none;">Lähetys epäonnistui. Yritä uudelleen.</div>
         <button type="submit" class="jm-submit" id="rm-submit">Lähetä ilmoittautuminen →</button>
-        <p class="jm-privacy">Kuittausviesti lähetetään sähköpostiisi. Tietojasi käytetään vain tapahtuman järjestämiseen.</p>
+        <p class="jm-privacy">Ilmoittautumisesi tallennetaan ja admin vahvistaa sen.</p>
       </form>
 
       <div id="rm-success" class="jm-success" style="display:none;">
@@ -1882,14 +1795,13 @@ html { font-size: 112%; }
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/mykodovl';
+  const WORKER_URL = 'https://delicate-sky-be99.ebk-repo.workers.dev';
 
   window.openRegModal = function(evt) {
     evt = evt || window._activeEvt;
     if (!evt) return;
     document.getElementById('rm-event-name').textContent = evt.name || 'Tapahtuma';
-    document.getElementById('rm-hidden-event').value = evt.name || '';
-    document.getElementById('rm-subject').value = 'Ilmoittautuminen: ' + (evt.name || 'Tapahtuma');
+    document.getElementById('rm-event-slug').value = evt.slug || '';
 
     let dateStr = '';
     if (evt.dateInfo?.raw) {
@@ -1905,6 +1817,7 @@ html { font-size: 112%; }
     document.getElementById('rm-event-date').textContent = dateStr;
 
     document.getElementById('rm-form').reset();
+    document.getElementById('rm-event-slug').value = evt.slug || '';
     document.getElementById('rm-form').style.display = '';
     document.getElementById('rm-success').style.display = 'none';
     document.getElementById('rm-error').style.display = 'none';
@@ -1936,10 +1849,16 @@ html { font-size: 112%; }
       errEl.style.display = 'none';
 
       try {
-        const res = await fetch(FORMSPREE, {
+        const payload = {
+          eventSlug: document.getElementById('rm-event-slug').value,
+          name:      document.getElementById('rm-name').value.trim(),
+          email:     document.getElementById('rm-email').value.trim(),
+          website:   document.querySelector('[name="website"]').value, // honeypot
+        };
+        const res = await fetch(WORKER_URL + '/register', {
           method: 'POST',
-          body: new FormData(this),
-          headers: { 'Accept': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error('fail');
         this.style.display = 'none';
