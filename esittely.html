@@ -1105,7 +1105,7 @@ html { font-size: 112%; }
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/mykodovl';
+  const FORMSUBMIT = 'https://formsubmit.co/ebk.repo@gmail.com';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();
@@ -1150,10 +1150,13 @@ html { font-size: 112%; }
       errEl.style.display = 'none';
 
       try {
-        const res = await fetch(FORMSPREE, {
+        const formData = new FormData(this);
+        formData.append('_subject', 'Jäsenhakemus — Espoon Biljardikerho');
+        formData.append('_template', 'table');
+        formData.append('_captcha', 'false');
+        const res = await fetch(FORMSUBMIT, {
           method: 'POST',
-          body: new FormData(this),
-          headers: { 'Accept': 'application/json' }
+          body: formData
         });
         if (!res.ok) throw new Error('fail');
         this.style.display = 'none';

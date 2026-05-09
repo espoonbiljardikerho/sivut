@@ -799,7 +799,10 @@ html { font-size: 112%; }
     </div>
 
     <div class="contact-form">
-      <form id="contact-form" action="https://formspree.io/f/mykodovl" method="POST">
+      <form id="contact-form" action="https://formsubmit.co/ebk.repo@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="Yhteydenotto — Espoon Biljardikerho">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
         <div class="form-group">
           <label class="form-label" for="name">Nimi *</label>
           <input class="form-input" type="text" id="name" name="name" required placeholder="Etunimi Sukunimi">
@@ -873,8 +876,7 @@ document.getElementById('contact-form').addEventListener('submit', async functio
   try {
     const res = await fetch(this.action, {
       method: 'POST',
-      body: new FormData(this),
-      headers: { 'Accept': 'application/json' }
+      body: new FormData(this)
     });
     if (res.ok) {
       document.getElementById('contact-form').style.display = 'none';
@@ -1201,7 +1203,7 @@ document.getElementById('contact-form').addEventListener('submit', async functio
 
 <script>
 (function() {
-  const FORMSPREE = 'https://formspree.io/f/mykodovl';
+  const FORMSUBMIT = 'https://formsubmit.co/ebk.repo@gmail.com';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();
@@ -1246,10 +1248,13 @@ document.getElementById('contact-form').addEventListener('submit', async functio
       errEl.style.display = 'none';
 
       try {
-        const res = await fetch(FORMSPREE, {
+        const formData = new FormData(this);
+        formData.append('_subject', 'Jäsenhakemus — Espoon Biljardikerho');
+        formData.append('_template', 'table');
+        formData.append('_captcha', 'false');
+        const res = await fetch(FORMSUBMIT, {
           method: 'POST',
-          body: new FormData(this),
-          headers: { 'Accept': 'application/json' }
+          body: formData
         });
         if (!res.ok) throw new Error('fail');
         this.style.display = 'none';
