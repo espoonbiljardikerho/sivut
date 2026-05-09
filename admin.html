@@ -960,7 +960,9 @@ function renderEvents(view) {
   const tbody = document.getElementById('events-tbody');
   tbody.innerHTML = items.length ? items.map(e => {
     const realIdx = eventsData.indexOf(e);
-    const dateStr = e.dateInfo ? `${e.dateInfo.day}. ${e.dateInfo.month} ${e.dateInfo.year}` : '—';
+    const dateStr = !e.dateInfo ? '—'
+      : e.dateInfo.raw ? e.dateInfo.raw
+      : [e.dateInfo.day, e.dateInfo.month, e.dateInfo.year].filter(Boolean).join(' ') || '—';
     const fee     = e.fee || e.detail?.fee || '—';
     const featured = e.featured || false;
     return `<tr>
