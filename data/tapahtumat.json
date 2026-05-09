@@ -134,7 +134,8 @@
       "venue": "Tillinmäen klubi",
       "signup": null,
       "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)\nTillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)\nKlubin puhelin: 04578382201"
-    }
+    },
+    "featured": true
   },
   {
     "slug": "snookermestaruus-2026",
