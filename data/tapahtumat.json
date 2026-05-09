@@ -1,29 +1,5 @@
 [
   {
-    "slug": "ebk-n-kesakaisa-2026-part-i",
-    "href": "/tapahtumat/ebk-n-kesakaisa-2026-part-i/",
-    "name": "EBK:n Kesäkaisa 2026 Part I",
-    "tag": "Kaisa",
-    "dateInfo": {
-      "raw": "13.6.2026",
-      "day": null,
-      "month": null,
-      "year": null,
-      "isSeries": false
-    },
-    "time": null,
-    "fee": "30 €",
-    "isPast": false,
-    "img": "https://bin.yhdistysavain.fi/1604389/yEYp6MuJU1PpXVzqu8I50dKDrQ/KaisaKuvaUutinen.jpg",
-    "detail": {
-      "deadline": "To.11.6. klo 21:00 mennessä",
-      "venue": null,
-      "signup": null,
-      "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)Tillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)Klubin puhelin: 04578382201"
-    },
-    "featured": false
-  },
-  {
     "slug": "pyris-testi",
     "href": "/tapahtumat/pyris-testi/",
     "name": "pyris testi",
