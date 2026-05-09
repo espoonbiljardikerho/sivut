@@ -880,7 +880,7 @@ function renderNews(filtered) {
       <td class="text-muted">${a.date||'—'}</td>
       <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="openNewsModal(${realIdx})">Muokkaa</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteNews(${realIdx})">Poista</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteNews(this)" data-slug="${a.slug||''}" data-title="${(a.title||'').replace(/"/g,'&quot;')}">Poista</button>
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="4" class="empty-state">Ei uutisia</td></tr>';
@@ -937,6 +937,11 @@ async function saveNews() {
 
   let imgUrl = window._pickedImgUrl?.context === 'news' ? window._pickedImgUrl.url : (editingIdx !== null ? newsData[editingIdx]?.img : null);
   window._pickedImgUrl = null;
+  // Reload fresh from GitHub before saving to avoid SHA mismatch
+  try {
+    const freshNews = await ghGet('data/uutiset.json');
+    newsData = JSON.parse(decodeURIComponent(escape(atob(freshNews.content.replace(/\n/g,'')))));
+  } catch(e) { /* use cached data */ }
   if (pendingImg) {
     try {
       imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename);
@@ -985,7 +990,7 @@ function renderEvents(view) {
       <td class="text-muted">${fee}</td>
       <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="openEventModal(${realIdx})">Muokkaa</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteEvent(${realIdx})">Poista</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEvent(this)" data-slug="${e.slug||''}" data-name="${(e.name||'').replace(/"/g,'&quot;')}">Poista</button>
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="5" class="empty-state">Ei tapahtumia</td></tr>';
@@ -1386,23 +1391,36 @@ async function toggleFeatured(idx, checked) {
 }
 
 // ── Delete news ───────────────────────────────────────────────────────────────
-function deleteNews(idx) {
-  const title = newsData[idx]?.title || 'tämä uutinen';
+function deleteNews(elOrSlug, title) {
+  const slug = typeof elOrSlug === 'string' ? elOrSlug : elOrSlug.dataset.slug;
+  title = (typeof elOrSlug === 'string' ? title : elOrSlug.dataset.title) || 'tämä uutinen';
   confirm('Poista uutinen', `Poistetaanko "${title}"? Tätä ei voi peruuttaa.`, async () => {
-    newsData.splice(idx, 1);
-    const ok = await saveJSON('data/uutiset.json', newsData, `Admin: poista uutinen: ${title}`);
-    if (ok) { renderNews(); renderDashboard(); toast('Uutinen poistettu', 'success'); }
+    try {
+      const fresh = await ghGet('data/uutiset.json');
+      const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+      const fi = all.findIndex(a => a.slug === slug);
+      if (fi >= 0) all.splice(fi, 1);
+      const ok = await saveJSON('data/uutiset.json', all, `Admin: poista uutinen: ${title}`);
+      if (ok) {
+        newsData = all;
+        renderNews();
+        renderDashboard();
+        toast('Uutinen poistettu', 'success');
+      }
+    } catch(e) {
+      toast('Virhe: ' + e.message, 'error');
+    }
   });
 }
 
 // ── Delete event ──────────────────────────────────────────────────────────────
-function deleteEvent(idx) {
-  const name = eventsData[idx]?.name || 'tämä tapahtuma';
+function deleteEvent(elOrSlug, name) {
+  const slug = typeof elOrSlug === 'string' ? elOrSlug : elOrSlug.dataset.slug;
+  name = (typeof elOrSlug === 'string' ? name : elOrSlug.dataset.name) || 'tämä tapahtuma';
   confirm('Poista tapahtuma', `Poistetaanko "${name}"? Tätä ei voi peruuttaa.`, async () => {
     try {
       const fresh = await ghGet('data/tapahtumat.json');
       const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
-      const slug = eventsData[idx]?.slug;
       const fi = all.findIndex(e => e.slug === slug);
       if (fi >= 0) all.splice(fi, 1);
       const ok = await saveJSON('data/tapahtumat.json', all, `Admin: poista tapahtuma: ${name}`);
