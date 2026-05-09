@@ -42,7 +42,8 @@
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
       "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "espoon-9-pallon-tasoitussarja-2",
@@ -64,7 +65,8 @@
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
       "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-n-kesakisat-2026-part-i",
@@ -132,7 +134,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
     "detail": {
       "description": "Ilmoittautuneet:1. Pauli Wigelius2. Jarno Ahola3.4.5.6."
-    }
+    },
+    "featured": true
   },
   {
     "slug": "klubin-karasarja-2026",
@@ -175,7 +178,8 @@
     "detail": {
       "deadline": "in 26.11. klo 16:45 mennessä",
       "description": "EBK:n  (ja klubin) Pyramidimestaruus 2026 pelataan yhden päivän turnauksena torstaina 26.11.2026, kunhan kilpailuun saadaan vähintään 6 osallistujaa. Osallistumismaksu 30€ ja 100% palkintoihin ja osallistumisoikeus niin kerhon kuin klubin jäsenillä.Ilmoittautumiset (torstaihin 26.11. klo 16:45 mennessä, pelit arvotaan klo 17:00 ja aloitetaan sen jälkeen)."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-kaisamestaruus-2026",
@@ -196,7 +200,8 @@
     "detail": {
       "deadline": "in 4.12.  klo 16:00 mennessä",
       "description": "Espoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 4.12.2026 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa)"
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-poolmestaruus-2026",
@@ -216,7 +221,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
     "detail": {
       "description": "EBK:n poolmestaruus pelataan yhden päivän kilpailuna lauantaina 5.12.2026. Kilpailu aloitetaan klo 11:00. Ilmoittautumiset pe iltaan klo 21:00 mennessä."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-kinkkukisat-ja-pikkujoulut",
@@ -236,7 +242,8 @@
     "img": null,
     "detail": {
       "description": "Kinkkukilpailut klo 13:001. Jarno Ahola2.3.4.5.6.7.8.9.10."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-n-saantomaarainen-vuosikokous-3",
@@ -256,7 +263,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/fWL75Q2E2o5vT9pITPuC0dKDoc/ebk%20sportti.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "tahtis-40v-open",
@@ -277,7 +285,8 @@
     "detail": {
       "deadline": "La.7.3. klo 11:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-n-karamestaruus-2026",
@@ -297,7 +306,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/vQ6v8q7GrqnxNCDqjOnY0dKDlA/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "snooker-talvisarja-2026",
@@ -318,7 +328,8 @@
     "detail": {
       "deadline": "ke.21.1. klo 18:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-kinkkukilpailut-pikkujoulut-202",
@@ -338,7 +349,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/K6rvsABgJdG0cq0r3P7k0beoT8@1200=xWflWOfmxg/pikkujoulukuva.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-poolmestaruus-2025",
@@ -358,7 +370,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-kaisamestaruus-2025",
@@ -379,7 +392,8 @@
     "detail": {
       "deadline": "in 5.12.  klo 16:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "finnish-masters-the-dynamic-pyramid",
@@ -399,7 +413,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/srvmVpGtc0ewb2ctfsvG0czlww@1200=bw461aP5q2/2024-11-16%2017.48.28.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-pyramidimestaruus-2025",
@@ -420,7 +435,8 @@
     "detail": {
       "deadline": "in 13.11. klo 16:45 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "klubin-karasarja-2025",
@@ -440,7 +456,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "snookermestaruus-2025",
@@ -460,7 +477,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "espoon-kesakaisa-part-ii",
@@ -481,7 +499,8 @@
     "detail": {
       "deadline": "Pe.8.8. klo 12:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "espoon-kesa-kaisa-2025-part-i",
@@ -502,7 +521,8 @@
     "detail": {
       "deadline": "To.12.6. klo 21:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "espoon-8-pallon-tasoitussarja",
@@ -523,7 +543,8 @@
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "espoon-9-pallon-tasoitussarja",
@@ -544,7 +565,8 @@
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-n-saantomaarainen-vuosikokous-2-4",
@@ -564,7 +586,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/tVDYdU0R9Yds6NvMPtBL0bSZJR/ebk%20sportti.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-karamestaruus-2025",
@@ -584,7 +607,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/r1IBvpxeA0CQGKljjnip0bSZEz/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "snooker-talvisarja-2025",
@@ -605,7 +629,8 @@
     "detail": {
       "deadline": "ke.22.1. klo 18:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-kinkkukilpailut-ja-pikkujoulut-2",
@@ -625,7 +650,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/xXSBchYxauHB4WtNJpxP0_Yi4x@1200=MekZ7LgFWC/20231216_140308.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-poolmestaruus-2024",
@@ -645,6 +671,7 @@
     "img": "https://bin.yhdistysavain.fi/1604389/OqqQ0PMFBp9vVECYK9s40_Yi-_/PoolKuvaUutinen400.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+    },
+    "featured": false
   }
 ]
