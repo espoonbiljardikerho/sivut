@@ -486,7 +486,7 @@
         </div>
         <div class="field">
           <label>Päivämäärä *</label>
-          <input type="text" id="nf-date" placeholder="6.5.2026">
+          <input type="date" id="nf-date" title="Päivämäärä asetetaan automaattisesti tähän päivään uudelle artikkelille">
         </div>
         <div class="field">
           <label>Laji</label>
@@ -741,6 +741,39 @@ const REPO_NAME   = 'sivut';
 const ADMIN_PASS  = 'ebk2024admin'; // Change this!
 const BRANCH      = 'main';
 
+// ── UTF-8 safe base64 helpers (replaces deprecated escape/unescape) ───────────
+function b64Encode(str) {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+}
+function b64Decode(b64) {
+  return new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n/g,'')), c => c.charCodeAt(0)));
+}
+function parseBase64Json(content) {
+  return JSON.parse(b64Decode(content));
+}
+
+// ── Image compression pipeline ────────────────────────────────────────────────
+async function processImageForUpload(file) {
+  const MAX_SIZE = 8 * 1024 * 1024;
+  const ALLOWED  = ['image/jpeg','image/png','image/webp'];
+  if (file.size > MAX_SIZE) throw new Error('Tiedosto on liian suuri (max 8 MB)');
+  if (!ALLOWED.includes(file.type)) throw new Error('Vain JPG, PNG tai WebP sallittu');
+  if (file.size < 300 * 1024 && file.type === 'image/jpeg') return file;
+  const bmp = await createImageBitmap(file);
+  const MAX = 1600;
+  const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+  const w = Math.round(bmp.width * scale);
+  const h = Math.round(bmp.height * scale);
+  const canvas = new OffscreenCanvas(w, h);
+  canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+  bmp.close();
+  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.82 });
+  const origKB = Math.round(file.size / 1024);
+  const newKB  = Math.round(blob.size / 1024);
+  console.log(`Image compressed: ${origKB} KB → ${newKB} KB`);
+  return new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+}
+
 // ── State ───────────────────────────────────────────────────────────────────
 let ghToken    = '';
 let newsData   = [];
@@ -803,7 +836,7 @@ async function ghGet(path) {
 }
 
 async function ghPut(path, content, message, sha) {
-  const body = { message, content: btoa(unescape(encodeURIComponent(content))), branch: BRANCH };
+  const body = { message, content: b64Encode(content), branch: BRANCH };
   if (sha) body.sha = sha;
   const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
     method: 'PUT',
@@ -826,6 +859,16 @@ async function saveJSON(path, data, msg) {
 }
 
 async function uploadImage(file, folder, filename) {
+  // Compress/resize before upload
+  try {
+    file = await processImageForUpload(file);
+    // Update filename extension if converted to jpg
+    if (file.type === 'image/jpeg' && !filename.endsWith('.jpg')) {
+      filename = filename.replace(/\.[^.]+$/, '.jpg');
+    }
+  } catch(e) {
+    throw new Error('Kuvanprosessointi epäonnistui: ' + e.message);
+  }
   const reader = new FileReader();
   return new Promise((resolve, reject) => {
     reader.onload = async () => {
@@ -875,7 +918,7 @@ async function loadAllData() {
     // Load registration badge count silently
     try {
       const rawReg = await ghGet('data/registrations.json');
-      const regs = JSON.parse(decodeURIComponent(escape(atob(rawReg.content.replace(/\n/g,'')))));
+      const regs = parseBase64Json(rawReg.content);
       const pending = regs.filter(r => r.status === 'pending').length;
       const badge = document.getElementById('reg-badge');
       if (badge && pending > 0) { badge.textContent = pending; badge.style.display = ''; }
@@ -961,29 +1004,46 @@ function openNewsModal(idx) {
   document.getElementById('news-modal-title').textContent = a ? 'Muokkaa uutista' : 'Uusi uutinen';
   document.getElementById('nf-title').value   = a?.title   || '';
   document.getElementById('nf-slug').value    = a?.slug    || '';
-  document.getElementById('nf-date').value    = a?.date    || '';
+  // Auto-fill today for new articles
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('nf-date').value    = a?.date    || today;
   document.getElementById('nf-tag').value     = a?.tag     || 'Uutinen';
   document.getElementById('nf-excerpt').value = a?.excerpt || '';
   document.getElementById('nf-body').innerHTML = a?.body   || '';
-  document.getElementById('nf-img-path').textContent = a?.img ? '✓ ' + (a.img.split('/').pop() || 'kuva') : '';
+  document.getElementById('nf-img-path').textContent = a?.img ? '\u2713 ' + (a.img.split('/').pop() || 'kuva') : '';
   document.getElementById('nf-img-preview').style.display = a?.img ? 'block' : 'none';
   if (a?.img) document.getElementById('nf-img-preview').src = a.img;
+  // Slug lock: locked when editing, auto-generated for new
+  document.getElementById('nf-slug').dataset.locked = a ? 'true' : 'false';
   pendingImg = null;
   document.getElementById('news-modal').classList.add('open');
 }
 
+// Lock slug after manual edit
+document.addEventListener('DOMContentLoaded', () => {
+  const slugEl = document.getElementById('nf-slug');
+  if (slugEl) slugEl.addEventListener('input', () => { slugEl.dataset.locked = 'true'; });
+});
+
 function autoSlug() {
+  const slugEl = document.getElementById('nf-slug');
+  if (slugEl.dataset.locked === 'true') return; // one-way lock
   const title = document.getElementById('nf-title').value;
   const slug  = title.toLowerCase()
     .replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a')
-    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  document.getElementById('nf-slug').value = slug;
+    .replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  slugEl.value = slug;
 }
 
 async function saveNews() {
   const title   = document.getElementById('nf-title').value.trim();
   const slug    = document.getElementById('nf-slug').value.trim();
-  const date    = document.getElementById('nf-date').value.trim();
+  const dateRaw = document.getElementById('nf-date').value.trim(); // YYYY-MM-DD
+  // Format for display: "5.5.2026"
+  const date    = dateRaw ? (() => {
+    const [y,m,d] = dateRaw.split('-');
+    return `${parseInt(d)}.${parseInt(m)}.${y}`;
+  })() : '';
   const tag     = document.getElementById('nf-tag').value;
   const excerpt = document.getElementById('nf-excerpt').value.trim();
   const body    = document.getElementById('nf-body').innerHTML;
@@ -998,7 +1058,7 @@ async function saveNews() {
   // Reload fresh from GitHub before saving to avoid SHA mismatch
   try {
     const freshNews = await ghGet('data/uutiset.json');
-    newsData = JSON.parse(decodeURIComponent(escape(atob(freshNews.content.replace(/\n/g,'')))));
+    newsData = parseBase64Json(freshNews.content);
   } catch(e) { /* use cached data */ }
   if (pendingImg) {
     try {
@@ -1152,7 +1212,7 @@ async function saveEvent() {
   if (btn_save) { btn_save.textContent = 'Tallennetaan…'; btn_save.disabled = true; }
   try {
     const fresh = await ghGet('data/tapahtumat.json');
-    const allEvents = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+    const allEvents = parseBase64Json(fresh.content);
     if (editingIdx !== null) {
       // Find the event in full array by slug and update it
       const slug = eventsData[editingIdx]?.slug;
@@ -1479,7 +1539,7 @@ async function removeParticipant(pIdx) {
   // Save immediately
   try {
     const fresh = await ghGet('data/tapahtumat.json');
-    const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+    const all = parseBase64Json(fresh.content);
     const fi = all.findIndex(e => e.slug === evt.slug);
     if (fi >= 0) all[fi].participants = evt.participants;
     await saveJSON('data/tapahtumat.json', all, `Admin: poista osallistuja: ${evt.name}`);
@@ -1514,7 +1574,7 @@ async function loadRegistrations() {
   el.innerHTML = '<div class="text-muted" style="padding:20px">Ladataan…</div>';
   try {
     const raw = await ghGet('data/registrations.json');
-    registrationsData = JSON.parse(decodeURIComponent(escape(atob(raw.content.replace(/\n/g,'')))));
+    registrationsData = parseBase64Json(raw.content);
   } catch(e) {
     // File may not exist yet
     registrationsData = [];
@@ -1576,8 +1636,8 @@ async function approveReg(id) {
       ghGet('data/registrations.json'),
       ghGet('data/tapahtumat.json')
     ]);
-    const allReg = JSON.parse(decodeURIComponent(escape(atob(rawReg.content.replace(/\n/g,'')))));
-    const allEvt = JSON.parse(decodeURIComponent(escape(atob(rawEvt.content.replace(/\n/g,'')))));
+    const allReg = parseBase64Json(rawReg.content);
+    const allEvt = parseBase64Json(rawEvt.content);
 
     // 2. Update registration status
     const ri = allReg.findIndex(r => r.id === id);
@@ -1614,7 +1674,7 @@ async function rejectReg(id) {
   if (!reg) return;
   try {
     const rawReg = await ghGet('data/registrations.json');
-    const allReg = JSON.parse(decodeURIComponent(escape(atob(rawReg.content.replace(/\n/g,'')))));
+    const allReg = parseBase64Json(rawReg.content);
     const ri = allReg.findIndex(r => r.id === id);
     if (ri >= 0) allReg[ri].status = 'rejected';
     await saveJSON('data/registrations.json', allReg, `Admin: hylkää ilmoittautuminen: ${reg.name}`);
@@ -1639,7 +1699,7 @@ async function toggleFeatured(idx, checked) {
   _featuredSaveQueue = _featuredSaveQueue.then(async () => {
     try {
       const fresh = await ghGet('data/tapahtumat.json');
-      const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+      const all = parseBase64Json(fresh.content);
       // Apply all current featured states from eventsData in one write
       eventsData.forEach(e => {
         const fi = all.findIndex(a => a.slug === e.slug);
@@ -1661,7 +1721,7 @@ function deleteNews(elOrSlug, title) {
   confirm('Poista uutinen', `Poistetaanko "${title}"? Tätä ei voi peruuttaa.`, async () => {
     try {
       const fresh = await ghGet('data/uutiset.json');
-      const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+      const all = parseBase64Json(fresh.content);
       const fi = all.findIndex(a => a.slug === slug);
       if (fi >= 0) all.splice(fi, 1);
       const ok = await saveJSON('data/uutiset.json', all, `Admin: poista uutinen: ${title}`);
@@ -1684,7 +1744,7 @@ function deleteEvent(elOrSlug, name) {
   confirm('Poista tapahtuma', `Poistetaanko "${name}"? Tätä ei voi peruuttaa.`, async () => {
     try {
       const fresh = await ghGet('data/tapahtumat.json');
-      const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+      const all = parseBase64Json(fresh.content);
       const fi = all.findIndex(e => e.slug === slug);
       if (fi >= 0) all.splice(fi, 1);
       const ok = await saveJSON('data/tapahtumat.json', all, `Admin: poista tapahtuma: ${name}`);

@@ -184,6 +184,8 @@ section { padding: var(--spy) var(--px); }
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   gap:clamp(10px,1.8vw,18px);
+  max-width:1280px;
+  margin:0 auto;
 }
 
 /* Featured first card spans full width */
@@ -216,13 +218,19 @@ section { padding: var(--spy) var(--px); }
 .news-img-wrap {
   position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; flex-shrink:0;
 }
+/* Tag chip overlaid on top-left of image */
+.news-img-tag {
+  position:absolute; top:9px; left:9px; z-index:2;
+  font-size:9px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+  padding:3px 8px; border-radius:3px; pointer-events:none;
+}
 .news-img-wrap img {
   position:absolute; inset:0;
   width:100%; height:100%; object-fit:cover; object-position:center top; display:block;
-  filter:brightness(0.72) saturate(0.6);
+  filter:brightness(0.92) saturate(0.85);
   transition: transform 0.4s ease, filter 0.3s;
 }
-.news-card:hover .news-img-wrap img { transform:scale(1.03); filter:brightness(0.82) saturate(0.7); }
+.news-card:hover .news-img-wrap img { transform:scale(1.03); filter:brightness(1.0) saturate(0.95); }
 /* Fades: strong bottom, subtle sides */
 .news-img-wrap::after {
   content:''; position:absolute; inset:0; pointer-events:none; z-index:1;
@@ -851,8 +859,8 @@ html { font-size: 112%; }
 
 
   const FALLBACK = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="700" height="400"><rect width="700" height="400" fill="%230D1F0F"/></svg>';
-  const PER_PAGE = 9;
-  const TOTAL_PAGES = 83; // 825 articles, 10 per page
+  const PER_PAGE = 10;
+  // TOTAL_PAGES is now computed dynamically per filter — see loadPage()
 
   let currentPage = 1;
   let activeTag   = 'all';
@@ -901,17 +909,17 @@ html { font-size: 112%; }
     const articleUrl = hasBody ? 'uutinen.html?slug=' + encodeURIComponent(slug) : null;
     const safeTitle   = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const safeExcerpt = (excerpt || '').slice(0, featured ? 220 : 120).replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const tag_ = `<span class="news-tag">${tag}</span>`;
+    const tagCls = `b-${(tag||'uutinen').toLowerCase().replace(/\s+/g,'')}`;
     const inner = `
         <div class="news-img-wrap">
           <img src="${img}" alt="${safeTitle}" onerror="this.src='${FALLBACK}'" loading="lazy">
+          <span class="news-img-tag ebadge ${tagCls}">${tag}</span>
         </div>
         <div class="news-body">
           ${date ? `<div class="news-date">${date}</div>` : ''}
           <h2 class="news-title">${safeTitle}</h2>
           ${safeExcerpt ? `<p class="news-excerpt">${safeExcerpt}${safeExcerpt.length >= (featured ? 220 : 120) ? '…' : ''}</p>` : ''}
           <div class="news-meta">
-            ${tag_}
             ${articleUrl ? `<span class="news-read-more">Lue artikkeli →</span>` : `<span style="font-size:10px;color:var(--text-muted);opacity:0.6">Arkistoitu uutinen</span>`}
           </div>
         </div>`;
@@ -994,8 +1002,19 @@ html { font-size: 112%; }
         ? jsonArticles
         : jsonArticles.filter(a => a.tag === activeTag);
 
-      const totalPages = Math.ceil(filtered.length / 10);
-      const slice = filtered.slice((page - 1) * 10, page * 10);
+      const totalPages = Math.ceil(filtered.length / PER_PAGE);
+      // Clamp page to valid range when filter reduces total pages
+      const safePage = Math.min(Math.max(1, page), totalPages || 1);
+      if (safePage !== page) { currentPage = safePage; }
+
+      const slice = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+      // Persist state in URL without reload
+      const params = new URLSearchParams(location.search);
+      params.set('p', currentPage);
+      if (activeTag !== 'all') params.set('tag', activeTag);
+      else params.delete('tag');
+      history.replaceState({}, '', '?' + params.toString());
 
       allArticles = slice;
       renderGrid(slice);
@@ -1032,13 +1051,22 @@ html { font-size: 112%; }
   // ── Pagination ───────────────────────────────────────────────────────────────
 
   window.goToPage = function(page) {
-    if (page < 1 || page > TOTAL_PAGES) return;
+    // totalPages is validated inside loadPage via clamping
+    if (page < 1) return;
     loadPage(page);
   };
 
-  // ── Read page param from URL ─────────────────────────────────────────────────
+  // ── Read page + tag params from URL on load ───────────────────────────────────
 
-  const urlPage = parseInt(new URLSearchParams(location.search).get('p')) || 1;
+  const urlParams = new URLSearchParams(location.search);
+  const urlPage = parseInt(urlParams.get('p')) || 1;
+  const urlTag  = urlParams.get('tag') || 'all';
+  if (urlTag !== 'all') {
+    activeTag = urlTag;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.tag === urlTag);
+    });
+  }
   loadPage(urlPage);
 
 })();

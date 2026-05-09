@@ -412,7 +412,11 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   .nav-links { display:none; }
     .hamburger { display:flex; }
   .article-layout { grid-template-columns:1fr; }
-  .article-sidebar { display:none; } /* sidebar becomes less useful on mobile */
+  .article-sidebar {
+    display:flex; flex-direction:row; flex-wrap:wrap; gap:10px;
+    border-top:1px solid var(--border); padding-top:16px; margin-top:8px;
+  }
+  .article-sidebar .sidebar-card { flex:1 1 260px; }
   .news-grid { grid-template-columns:1fr 1fr; }
   .footer-grid { grid-template-columns:1fr 1fr; }
 }
@@ -1125,6 +1129,19 @@ html { font-size: 112%; }
       document.getElementById('article-tag').textContent   = tag;
       document.getElementById('article-tag').className     = 'article-tag tag-' + tag.toLowerCase();
       document.title = title + ' — EBK';
+
+      // Inject Open Graph meta for social sharing
+      const setMeta = (prop, val) => {
+        let el = document.querySelector(`meta[property="${prop}"]`);
+        if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+        el.setAttribute('content', val);
+      };
+      setMeta('og:title', title + ' — Espoon Biljardikerho');
+      if (imgSrc && !imgSrc.startsWith('data:')) setMeta('og:image', imgSrc);
+      if (jsonArticle.excerpt) {
+        document.querySelector('meta[name="description"]')?.setAttribute('content', jsonArticle.excerpt);
+        setMeta('og:description', jsonArticle.excerpt);
+      }
 
       const heroImg = document.createElement('img');
       heroImg.src = imgSrc;
