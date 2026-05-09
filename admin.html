@@ -686,7 +686,7 @@
 // ── Config ──────────────────────────────────────────────────────────────────
 const REPO_OWNER  = 'espoonbiljardikerho';
 const REPO_NAME   = 'sivut';
-const ADMIN_PASS  = 'Ebk4923!'; // Change this!
+const ADMIN_PASS  = 'Ebk4923!';
 const GH_TOKEN    = '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';
 const BRANCH      = 'main';
 
@@ -800,14 +800,16 @@ async function uploadImage(file, folder, filename) {
 // ── Load data ────────────────────────────────────────────────────────────────
 async function loadAllData() {
   try {
-    const [nf, ef, mf] = await Promise.all([
-      ghGet('data/uutiset.json'),
-      ghGet('data/tapahtumat.json'),
-      ghGet('data/jasenet.json'),
+    // Use raw URLs for large files (GitHub API has 1MB limit for base64 content)
+    const RAW = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
+    const [nr, er, mr] = await Promise.all([
+      fetch(`${RAW}/data/uutiset.json?v=${Date.now()}`).then(r => r.json()),
+      fetch(`${RAW}/data/tapahtumat.json?v=${Date.now()}`).then(r => r.json()),
+      fetch(`${RAW}/data/jasenet.json?v=${Date.now()}`).then(r => r.json()),
     ]);
-    newsData    = JSON.parse(decodeURIComponent(escape(atob(nf.content.replace(/\n/g,'')))));
-    eventsData  = JSON.parse(decodeURIComponent(escape(atob(ef.content.replace(/\n/g,'')))));
-    membersData = JSON.parse(decodeURIComponent(escape(atob(mf.content.replace(/\n/g,'')))));
+    newsData    = nr;
+    eventsData  = er;
+    membersData = mr;
 
     renderDashboard();
     renderNews();
