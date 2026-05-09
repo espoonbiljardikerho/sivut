@@ -1289,28 +1289,6 @@ html { font-size: 112%; }
     activeSlug = null;
   };
 
-  // ── Filter ────────────────────────────────────────────────────────────────
-
-  function applyFilter(tag) {
-    document.querySelectorAll('.evt-row:not(.evt-skeleton)').forEach(row => {
-      const match = tag === 'all' || row.dataset.tag === tag;
-      row.dataset.hidden = match ? 'false' : 'true';
-    });
-    // If active row is now hidden, close panel
-    if (activeSlug) {
-      const activeRow = document.querySelector(`.evt-row[data-slug="${activeSlug}"]`);
-      if (activeRow?.dataset.hidden === 'true') closePanel();
-    }
-  }
-
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      applyFilter(btn.dataset.tag);
-    });
-  });
-
   // ── Load events ───────────────────────────────────────────────────────────
 
   // ── All events store ─────────────────────────────────────────────────────
@@ -1322,6 +1300,10 @@ html { font-size: 112%; }
   window.setView = function(view, btn) {
     currentView = view;
     evtPage = 1;
+    // Reset tag filter to "all" when switching views
+    document.querySelectorAll('.filter-btn[data-tag]').forEach(b => b.classList.remove('active'));
+    const allBtn = document.querySelector('.filter-btn[data-tag="all"]');
+    if (allBtn) allBtn.classList.add('active');
     document.querySelectorAll('#view-upcoming, #view-past').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
     renderList();
