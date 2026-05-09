@@ -139,19 +139,22 @@
     "name": "Espoon Kesäkaisa 2026 Part II",
     "tag": "Kaisa",
     "dateInfo": {
-      "day": "15",
-      "month": "Elo",
-      "year": "2026",
+      "raw": "15.8.2026",
+      "day": null,
+      "month": null,
+      "year": null,
       "isSeries": false
     },
-    "time": null,
+    "time": "klo 10",
     "fee": "30 €",
     "raw": "Espoon Kesäkaisa 2026 Part II \n  \n\nla 15.8.2026 klo 10–23Espoon Biljardikerhon KlubiLaji: Kaisa Pelipaikka: Espoon Biljardikerhon klubi Pvm: lauantaina 15.8.2026 Alkamisaika: klo. 10:00 Osallistumismaksu: 30€ Osallistumisoikeus: kaikilla, 30 nopeinta pääsee mukaan Palkinnot: 100%…",
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
     "detail": {
       "deadline": "Pe.14.8. klo 12:00 mennessä",
-      "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)Tillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)Klubin puhelin: 04578382201"
+      "venue": "Tillinmäen klubi",
+      "signup": null,
+      "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)\nTillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)\nKlubin puhelin: 04578382201"
     }
   },
   {
