@@ -42,7 +42,8 @@
       "venue": "klubilla",
       "signup": "mikä linkki?",
       "description": "pyris testi"
-    }
+    },
+    "featured": true
   },
   {
     "slug": "espoon-8-pallon-tasoitussarja-2",
