@@ -201,12 +201,12 @@ nav {
   user-select:none; line-height:1;
 }
 .member-monogram-nick {
-  font-size:clamp(18px,2.2vw,28px);
-  opacity:0.85; font-style:italic;
+  font-size:clamp(20px,2.5vw,32px);
+  opacity:1; font-style:italic;
   letter-spacing:0.01em;
   color:var(--gold);
   font-weight:600;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 12px rgba(0,0,0,0.4);
 }
 
 /* type dot on photo corner */
@@ -228,14 +228,7 @@ nav {
   line-height:1.25;
 }
 .member-card-nick {
-  font-family:'Playfair Display',serif;
-  font-style:italic;
-  font-size:clamp(10px,1vw,12px);
-  color:var(--gold);
-  font-weight:600;
-  line-height:1.2;
-  margin-top:1px;
-  opacity:0.9;
+  display: none;
 }
 .member-sports {
   display:flex; flex-wrap:wrap; gap:4px;
@@ -700,12 +693,20 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 /* Profile panel left side (jasenet) */
 [data-theme="light"] .panel-photo-left {
-  background: #1F3A22 !important;
+  background: #F2EDE3 !important;
 }
 [data-theme="light"] .panel-photo-left .panel-name,
 [data-theme="light"] .panel-photo-left .panel-nickname,
 [data-theme="light"] .panel-name-overlay .panel-name,
-[data-theme="light"] .panel-name-overlay .panel-nickname { color: #FAF7F1 !important; }
+[data-theme="light"] .panel-name-overlay .panel-nickname { color: #1F3A22 !important; }
+[data-theme="light"] .panel-photo-right::before {
+  background: linear-gradient(to right,
+    #F2EDE3 0%,
+    rgba(242,237,227,0.7) 12%,
+    rgba(242,237,227,0.2) 35%,
+    transparent 60%
+  ) !important;
+}
 [data-theme="light"] .panel-type-badge { 
   background: rgba(200,168,75,0.2) !important;
   border-color: rgba(200,168,75,0.4) !important;
@@ -777,24 +778,17 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 [data-theme="light"] .members-panel { background: #FAF7F1 !important; }
 
 /* Member card in light mode */
-[data-theme="light"] .member-card { 
-  background: #FFFFFF !important;
-  border-color: rgba(28,26,20,0.08) !important;
+[data-theme="light"] .member-card {
+  background: #F2EDE3 !important;
+  border-color: rgba(28,26,20,0.1) !important;
 }
-[data-theme="light"] .member-card:hover { box-shadow: 0 4px 16px rgba(60,45,15,0.10) !important; }
-[data-theme="light"] .member-card-name { color: var(--text-primary) !important; }
-
-
-/* ── ISSUE 2: Jasenet member cards - dark green monogram bg so gold initials are visible ── */
+[data-theme="light"] .member-card:hover { box-shadow: 0 4px 16px rgba(60,45,15,0.10) !important; transform:translateY(-3px); }
+[data-theme="light"] .member-card-body { background: #F2EDE3 !important; }
+[data-theme="light"] .member-name { color: #1F3A22 !important; }
 [data-theme="light"] .member-monogram {
   background: radial-gradient(ellipse at 50% 40%, #2D5A32 0%, #1F3A22 100%) !important;
 }
-[data-theme="light"] .member-monogram-text { color: #C8A84B !important; opacity: 0.8 !important; }
-[data-theme="light"] .member-card-name { color: var(--text-primary) !important; }
-[data-theme="light"] .member-card {
-  background: #F5F2EA !important;
-  border-color: rgba(28,26,20,0.1) !important;
-}
+[data-theme="light"] .member-monogram-text { color: #C8A84B !important; opacity: 1 !important; }
 
 /* ── ISSUE 5: Placeholder/fallback image in profile panel ── */
 [data-theme="light"] .panel-monogram {
