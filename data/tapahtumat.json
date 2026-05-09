@@ -20,7 +20,8 @@
       "venue": null,
       "signup": null,
       "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)Tillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)Klubin puhelin: 04578382201"
-    }
+    },
+    "featured": false
   },
   {
     "slug": "pyris-testi",
