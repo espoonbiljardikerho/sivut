@@ -955,7 +955,7 @@ html { font-size: 112%; }
     const buttons = [];
 
     // Prev
-    buttons.push(`<button class="page-btn nav-btn${currentPage === 1 ? ' disabled' : ''}" onclick="goToPage(${currentPage - 1})">← Uudemmat</button>`);
+    buttons.push(`<button class="page-btn nav-btn${currentPage === 1 ? ' disabled' : ''}" ${currentPage === 1 ? 'disabled' : `onclick="goToPage(${currentPage - 1})"`}>← Uudemmat</button>`);
 
     // Page numbers — show window around current
     const range = [];
@@ -971,7 +971,7 @@ html { font-size: 112%; }
     }
 
     // Next
-    buttons.push(`<button class="page-btn nav-btn${currentPage === total ? ' disabled' : ''}" onclick="goToPage(${currentPage + 1})">Vanhemmat →</button>`);
+    buttons.push(`<button class="page-btn nav-btn${currentPage === total ? ' disabled' : ''}" ${currentPage === total ? 'disabled' : `onclick="goToPage(${currentPage + 1})"`}>Vanhemmat →</button>`);
 
     el.innerHTML = buttons.join('');
   }

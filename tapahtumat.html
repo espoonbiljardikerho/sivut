@@ -1259,7 +1259,7 @@ html { font-size: 112%; }
   window.selectEvent = async function(el) {
     const slug = el.dataset.slug;
     const idx  = parseInt(el.dataset.idx);
-    const evt  = eventsData[idx];
+    const evt  = allParsed[idx];
     if (!evt) return;
     window._activeEvt = evt;
 
@@ -1846,8 +1846,8 @@ html { font-size: 112%; }
 
       <form id="rm-form" class="jm-form">
         <input type="hidden" id="rm-event-slug" name="eventSlug">
-        <!-- honeypot -->
-        <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+        <!-- honeypot — FormSubmit checks _honey field -->
+        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
 
         <div class="jm-field">
           <label class="jm-field-label" for="rm-name">Nimi *</label>
@@ -1967,7 +1967,6 @@ html { font-size: 112%; }
         formData.append('_subject',   'Ilmoittautuminen: ' + document.getElementById('rm-event-name').textContent);
         formData.append('_template',  'table');
         formData.append('_captcha',   'false');
-        formData.append('website',    document.querySelector('[name="website"]').value); // honeypot
 
         const res = await fetch('https://formsubmit.co/ebk.repo@gmail.com', {
           method: 'POST',

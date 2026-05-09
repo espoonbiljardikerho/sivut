@@ -752,6 +752,8 @@ function parseBase64Json(content) {
   return JSON.parse(b64Decode(content));
 }
 
+const MONTHS_FI = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
+
 // ── Image compression pipeline ────────────────────────────────────────────────
 async function processImageForUpload(file) {
   const MAX_SIZE = 8 * 1024 * 1024;
@@ -764,10 +766,21 @@ async function processImageForUpload(file) {
   const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
   const w = Math.round(bmp.width * scale);
   const h = Math.round(bmp.height * scale);
-  const canvas = new OffscreenCanvas(w, h);
-  canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
-  bmp.close();
-  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.82 });
+  // Resize on canvas — use OffscreenCanvas if available, fall back to regular canvas
+  let blob;
+  if (typeof OffscreenCanvas !== 'undefined') {
+    const canvas = new OffscreenCanvas(w, h);
+    canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+    bmp.close();
+    blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.82 });
+  } else {
+    // Safari fallback
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+    bmp.close();
+    blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.82));
+  }
   const origKB = Math.round(file.size / 1024);
   const newKB  = Math.round(blob.size / 1024);
   console.log(`Image compressed: ${origKB} KB → ${newKB} KB`);
@@ -1004,9 +1017,15 @@ function openNewsModal(idx) {
   document.getElementById('news-modal-title').textContent = a ? 'Muokkaa uutista' : 'Uusi uutinen';
   document.getElementById('nf-title').value   = a?.title   || '';
   document.getElementById('nf-slug').value    = a?.slug    || '';
-  // Auto-fill today for new articles
+  // Auto-fill today for new articles; convert existing Finnish date to YYYY-MM-DD for input
   const today = new Date().toISOString().slice(0, 10);
-  document.getElementById('nf-date').value    = a?.date    || today;
+  let existingDate = today;
+  if (a?.date) {
+    const dm = a.date.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (dm) existingDate = `${dm[3]}-${dm[2].padStart(2,'0')}-${dm[1].padStart(2,'0')}`;
+    else existingDate = today; // unknown format → default to today
+  }
+  document.getElementById('nf-date').value = a ? existingDate : today;
   document.getElementById('nf-tag').value     = a?.tag     || 'Uutinen';
   document.getElementById('nf-excerpt').value = a?.excerpt || '';
   document.getElementById('nf-body').innerHTML = a?.body   || '';
@@ -1066,7 +1085,8 @@ async function saveNews() {
     } catch(e) { toast('Kuvan lataus epäonnistui: ' + e.message, 'error'); btn.textContent = 'Tallenna'; btn.disabled = false; return; }
   }
 
-  const item = { slug: slug || autoSlugFrom(title), href: `/uutiset/${slug}/`, title, date, excerpt, img: imgUrl || null, tag, body };
+  const finalSlug = slug || autoSlugFrom(title);
+  const item = { slug: finalSlug, href: `/uutiset/${finalSlug}/`, title, date, excerpt, img: imgUrl || null, tag, body };
 
   if (editingIdx !== null) {
     newsData[editingIdx] = { ...newsData[editingIdx], ...item };
@@ -1151,7 +1171,6 @@ function openEventModal(idx) {
   document.getElementById('event-modal').classList.add('open');
 }
 
-const MONTHS_FI = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
 
 async function saveEvent() {
   const name = document.getElementById('ef-name').value.trim();
@@ -1190,7 +1209,7 @@ async function saveEvent() {
     dateInfo,
     time:    document.getElementById('ef-time').value.trim() || null,
     fee:     document.getElementById('ef-fee').value.trim()  || null,
-    isPast:  editingIdx !== null ? eventsData[editingIdx].isPast : false,
+    isPast:  document.getElementById('ef-ispast').value === 'true',
     img:     imgUrl,
     capacity: capVal ? parseInt(capVal) : null,
     schedule: schedule.length ? schedule : [],
@@ -1208,7 +1227,7 @@ async function saveEvent() {
   else eventsData.unshift(item);
 
   // Always reload fresh from GitHub before saving to avoid 409 conflict
-  btn_save = document.querySelector('#event-modal .btn-primary');
+  const btn_save = document.querySelector('#event-modal .btn-primary');
   if (btn_save) { btn_save.textContent = 'Tallennetaan…'; btn_save.disabled = true; }
   try {
     const fresh = await ghGet('data/tapahtumat.json');
