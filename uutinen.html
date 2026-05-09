@@ -1110,7 +1110,7 @@ html { font-size: 112%; }
     const slug = articleSlug || (articleUrl || '').replace(/.*\/uutiset\//, '').replace(/\/$/, '');
     const jsonArticle = articles.find(a => a.slug === slug);
 
-    if (jsonArticle && (articleSlug || jsonArticle.body)) {
+    if (jsonArticle && articleSlug) {
       // Render directly from JSON — no Yhdistysavain fetch needed
       document.getElementById('hero-skeleton').style.display = 'none';
       document.getElementById('hero-content').style.opacity = '1';
@@ -1145,7 +1145,7 @@ html { font-size: 112%; }
       };
       document.getElementById('hero-img-wrap').prepend(heroImg);
 
-      document.getElementById('article-content').innerHTML = jsonArticle.body;
+      document.getElementById('article-content').innerHTML = jsonArticle.body || '<p style="color:var(--text-muted);font-style:italic">Artikkelin sisältöä ei ole vielä lisätty.</p>';
       return; // done — no need to fetch from Yhdistysavain
     }
   } catch(e) {
@@ -1153,7 +1153,7 @@ html { font-size: 112%; }
   }
 
   if (!articleUrl) {
-    showError('Artikkelia ei löydy.', true);
+    showError(articleSlug ? `Artikkelia "${articleSlug}" ei löydy. Sivu saattaa olla välimuistissa — kokeile hetken kuluttua uudelleen.` : 'Artikkelia ei löydy.', true);
     return;
   }
 

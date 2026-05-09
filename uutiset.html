@@ -897,12 +897,8 @@ html { font-size: 112%; }
     // Admin-created articles (body field present) → internal reader
     // Old Yhdistysavain articles (no body) → no longer link out, show excerpt only
     const hasBody = !!body;
-    const externalUrl = href && href !== '/'
-      ? (href.startsWith('http') ? href : 'https://espoonbiljardikerho.yhdistysavain.fi' + href)
-      : null;
-    const articleUrl = hasBody
-      ? 'uutinen.html?slug=' + encodeURIComponent(slug)
-      : externalUrl;
+    // Only admin-created articles (with body field) are openable
+    const articleUrl = hasBody ? 'uutinen.html?slug=' + encodeURIComponent(slug) : null;
     const safeTitle   = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const safeExcerpt = (excerpt || '').slice(0, featured ? 220 : 120).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const tag_ = `<span class="news-tag">${tag}</span>`;
@@ -920,8 +916,8 @@ html { font-size: 112%; }
           </div>
         </div>`;
     return articleUrl
-      ? `<a href="${articleUrl}" ${!hasBody ? 'target="_blank" rel="noopener"' : ''} class="news-card" data-tag="${tag}">${inner}</a>`
-      : `<div class="news-card" style="cursor:default;opacity:0.75" data-tag="${tag}">${inner}</div>`;
+      ? `<a href="${articleUrl}" class="news-card" data-tag="${tag}">${inner}</a>`
+      : `<div class="news-card" style="cursor:default;opacity:0.8" data-tag="${tag}">${inner}</div>`;
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
