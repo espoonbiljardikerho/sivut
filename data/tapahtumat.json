@@ -43,7 +43,7 @@
       "signup": "mikä linkki?",
       "description": "pyris testi"
     },
-    "featured": true
+    "featured": false
   },
   {
     "slug": "espoon-8-pallon-tasoitussarja-2",
