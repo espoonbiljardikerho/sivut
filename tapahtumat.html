@@ -1156,7 +1156,7 @@ html { font-size: 112%; }
           <span class="summary-detail-icon">📅</span>
           <div>
             <span class="summary-detail-label">Päivämäärä</span>
-            <span class="summary-detail-value"><strong>${detail.date || (dateInfo?.isSeries ? dateInfo.startLabel : dateInfo?.day+'. '+MONTHS_LONG[MONTHS.indexOf(dateInfo?.month)])}</strong></span>
+            <span class="summary-detail-value"><strong>${detail.date || (dateInfo?.isSeries ? dateInfo.startLabel : (dateInfo?.day != null ? dateInfo.day+'. '+(MONTHS_LONG[MONTHS.indexOf(dateInfo?.month)] || dateInfo?.month || '') : ''))}</strong></span>
           </div>
         </div>` : ''}
         ${detail.time || time ? `

@@ -227,6 +227,16 @@ nav {
   font-weight:600; color:var(--text-primary);
   line-height:1.25;
 }
+.member-card-nick {
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-size:clamp(10px,1vw,12px);
+  color:var(--gold);
+  font-weight:600;
+  line-height:1.2;
+  margin-top:1px;
+  opacity:0.9;
+}
 .member-sports {
   display:flex; flex-wrap:wrap; gap:4px;
 }
@@ -1175,6 +1185,7 @@ html { font-size: 112%; }
         </div>
         <div class="member-card-body">
           <div class="member-name">${cleanName}</div>
+          ${nickname ? `<div class="member-card-nick">${nickname}</div>` : ''}
         </div>
       </div>`;
   }
@@ -1209,6 +1220,17 @@ html { font-size: 112%; }
       if (el && el.textContent !== m.nickname) {
         el.textContent = m.nickname;
         el.classList.add('member-monogram-nick');
+      }
+      // Also update card body nickname if not already rendered
+      const card = document.querySelector(`.member-card[data-slug="${m.slug}"]`);
+      if (card && !card.querySelector('.member-card-nick')) {
+        const body = card.querySelector('.member-card-body');
+        if (body) {
+          const nickEl = document.createElement('div');
+          nickEl.className = 'member-card-nick';
+          nickEl.textContent = m.nickname;
+          body.appendChild(nickEl);
+        }
       }
     });
     return; // no live fetch needed
