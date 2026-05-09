@@ -1624,6 +1624,8 @@ async function rejectReg(id) {
 }
 
 // ── Featured events toggle ────────────────────────────────────────────────────
+let _featuredSaveQueue = Promise.resolve();
+
 async function toggleFeatured(idx, checked) {
   eventsData[idx].featured = checked;
   const featured = eventsData.filter(e => e.featured);
@@ -1633,19 +1635,23 @@ async function toggleFeatured(idx, checked) {
     renderEvents(eventsData[idx]?.isPast ? 'past' : 'upcoming');
     return;
   }
-  // Save immediately
-  try {
-    const fresh = await ghGet('data/tapahtumat.json');
-    const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
-    const slug = eventsData[idx]?.slug;
-    const fi = all.findIndex(e => e.slug === slug);
-    if (fi >= 0) all[fi].featured = checked;
-    await saveJSON('data/tapahtumat.json', all, `Admin: ${checked?'lisää':'poista'} etusivu: ${eventsData[idx]?.name}`);
-    eventsData = all;
-    toast((checked ? '★ Lisätty etusivulle' : 'Poistettu etusivulta'), 'success');
-  } catch(e) {
-    toast('Virhe: ' + e.message, 'error');
-  }
+  // Queue saves so rapid ticks don't cause 409 conflicts
+  _featuredSaveQueue = _featuredSaveQueue.then(async () => {
+    try {
+      const fresh = await ghGet('data/tapahtumat.json');
+      const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+      // Apply all current featured states from eventsData in one write
+      eventsData.forEach(e => {
+        const fi = all.findIndex(a => a.slug === e.slug);
+        if (fi >= 0) all[fi].featured = e.featured || false;
+      });
+      await saveJSON('data/tapahtumat.json', all, `Admin: etusivu päivitetty`);
+      eventsData = all;
+      toast((checked ? '★ Lisätty etusivulle' : 'Poistettu etusivulta'), 'success');
+    } catch(e) {
+      toast('Virhe: ' + e.message, 'error');
+    }
+  });
 }
 
 // ── Delete news ───────────────────────────────────────────────────────────────
