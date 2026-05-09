@@ -318,10 +318,7 @@
     <div class="login-sub">Espoon Biljardikerho · Hallintapaneeli</div>
     <label>Salasana</label>
     <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
-    <label style="margin-top:8px">GitHub Token</label>
-    <input type="password" id="login-token" placeholder="ghp_..." />
-    <p class="login-hint">Token tallennetaan selaimeen — syötä vain kerran.</p>
-    <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Kirjaudu sisään</button>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px" onclick="doLogin()">Kirjaudu sisään</button>
     <p id="login-error" style="color:var(--danger);font-size:12px;margin-top:10px;display:none"></p>
   </div>
 </div>
@@ -689,7 +686,8 @@
 // ── Config ──────────────────────────────────────────────────────────────────
 const REPO_OWNER  = 'espoonbiljardikerho';
 const REPO_NAME   = 'sivut';
-const ADMIN_PASS  = 'ebk2024admin'; // Change this!
+const ADMIN_PASS  = 'Ebk4923!'; // Change this!
+const GH_TOKEN    = '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';
 const BRANCH      = 'main';
 
 // ── State ───────────────────────────────────────────────────────────────────
@@ -703,19 +701,17 @@ let pendingImg = null; // { file, folder, filename }
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 function doLogin() {
-  const pass  = document.getElementById('login-pass').value;
-  const token = document.getElementById('login-token').value.trim();
-  const err   = document.getElementById('login-error');
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
 
   if (pass !== ADMIN_PASS) {
     err.textContent = 'Väärä salasana.'; err.style.display = 'block'; return;
   }
-  if (!token) {
-    err.textContent = 'Syötä GitHub token.'; err.style.display = 'block'; return;
+  if (GH_TOKEN === 'PASTE_YOUR_TOKEN_HERE') {
+    err.textContent = 'GitHub token ei ole asetettu tiedostossa.'; err.style.display = 'block'; return;
   }
 
-  ghToken = token;
-  localStorage.setItem('ebk_token', token);
+  ghToken = GH_TOKEN;
   localStorage.setItem('ebk_authed', '1');
   err.style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
@@ -725,19 +721,15 @@ function doLogin() {
 }
 
 function doLogout() {
-  localStorage.removeItem('ebk_token');
   localStorage.removeItem('ebk_authed');
   location.reload();
 }
 
 // Auto-login if token in storage
 window.addEventListener('DOMContentLoaded', () => {
-  const savedToken  = localStorage.getItem('ebk_token');
   const savedAuthed = localStorage.getItem('ebk_authed');
-  if (savedToken) document.getElementById('login-token').value = savedToken;
-  // Auto-login if previously authenticated
-  if (savedToken && savedAuthed) {
-    ghToken = savedToken;
+  if (savedAuthed && GH_TOKEN !== 'PASTE_YOUR_TOKEN_HERE') {
+    ghToken = GH_TOKEN;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     document.getElementById('sidebar-user-name').textContent = 'Admin · ';
@@ -877,8 +869,9 @@ function renderNews(filtered) {
       <td><strong>${a.title || '—'}</strong><div class="text-muted text-sm">${(a.excerpt||'').slice(0,60)}${(a.excerpt||'').length > 60 ? '…' : ''}</div></td>
       <td><span class="badge badge-${(a.tag||'uutinen').toLowerCase()}">${a.tag||'Uutinen'}</span></td>
       <td class="text-muted">${a.date||'—'}</td>
-      <td style="text-align:right">
+      <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="openNewsModal(${realIdx})">Muokkaa</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteNews(${realIdx})">Poista</button>
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="4" class="empty-state">Ei uutisia</td></tr>';
@@ -981,8 +974,9 @@ function renderEvents(view) {
       }</td>
       <td class="text-muted">${dateStr}</td>
       <td class="text-muted">${fee}</td>
-      <td style="text-align:right">
+      <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
         <button class="btn btn-secondary btn-sm" onclick="openEventModal(${realIdx})">Muokkaa</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEvent(${realIdx})">Poista</button>
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="5" class="empty-state">Ei tapahtumia</td></tr>';
@@ -1380,6 +1374,38 @@ async function toggleFeatured(idx, checked) {
   } catch(e) {
     toast('Virhe: ' + e.message, 'error');
   }
+}
+
+// ── Delete news ───────────────────────────────────────────────────────────────
+function deleteNews(idx) {
+  const title = newsData[idx]?.title || 'tämä uutinen';
+  confirm('Poista uutinen', `Poistetaanko "${title}"? Tätä ei voi peruuttaa.`, async () => {
+    newsData.splice(idx, 1);
+    const ok = await saveJSON('data/uutiset.json', newsData, `Admin: poista uutinen: ${title}`);
+    if (ok) { renderNews(); renderDashboard(); toast('Uutinen poistettu', 'success'); }
+  });
+}
+
+// ── Delete event ──────────────────────────────────────────────────────────────
+function deleteEvent(idx) {
+  const name = eventsData[idx]?.name || 'tämä tapahtuma';
+  confirm('Poista tapahtuma', `Poistetaanko "${name}"? Tätä ei voi peruuttaa.`, async () => {
+    try {
+      const fresh = await ghGet('data/tapahtumat.json');
+      const all = JSON.parse(decodeURIComponent(escape(atob(fresh.content.replace(/\n/g,'')))));
+      const slug = eventsData[idx]?.slug;
+      const fi = all.findIndex(e => e.slug === slug);
+      if (fi >= 0) all.splice(fi, 1);
+      const ok = await saveJSON('data/tapahtumat.json', all, `Admin: poista tapahtuma: ${name}`);
+      if (ok) {
+        eventsData = all;
+        renderEvents('upcoming');
+        toast('Tapahtuma poistettu', 'success');
+      }
+    } catch(e) {
+      toast('Virhe: ' + e.message, 'error');
+    }
+  });
 }
 </script>
 
