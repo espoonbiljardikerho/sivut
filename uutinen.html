@@ -1105,7 +1105,7 @@ html { font-size: 112%; }
 
   // ── Check JSON first for admin-created articles ───────────────────────────────
   try {
-    const jsonResp = await fetch('data/uutiset.json');
+    const jsonResp = await fetch('data/uutiset.json?v=' + Date.now());
     const articles = await jsonResp.json();
     const slug = articleSlug || (articleUrl || '').replace(/.*\/uutiset\//, '').replace(/\/$/, '');
     const jsonArticle = articles.find(a => a.slug === slug);
