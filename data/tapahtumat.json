@@ -23,30 +23,6 @@
     }
   },
   {
-    "slug": "sadawdwad",
-    "href": "/tapahtumat/sadawdwad/",
-    "name": "sadawdwad",
-    "tag": "Pyramidi",
-    "dateInfo": {
-      "raw": "13.6.2026",
-      "day": null,
-      "month": null,
-      "year": null,
-      "isSeries": false
-    },
-    "time": "19:00",
-    "fee": "5 €",
-    "isPast": false,
-    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/events/image.jpg",
-    "detail": {
-      "deadline": "huomenna",
-      "venue": "ebk",
-      "signup": null,
-      "description": "pyris kuvaus"
-    },
-    "featured": false
-  },
-  {
     "slug": "pyris-testi",
     "href": "/tapahtumat/pyris-testi/",
     "name": "pyris testi",
