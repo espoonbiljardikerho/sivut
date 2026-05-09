@@ -220,7 +220,8 @@
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Pelataan 9.9. - 31.10. + viimeistään marraskuussa cuppipelit"
-    }
+    },
+    "featured": false
   },
   {
     "slug": "ebk-pyramidimestaruus-2026",
