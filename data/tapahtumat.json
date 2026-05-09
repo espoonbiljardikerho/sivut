@@ -108,7 +108,8 @@
     "detail": {
       "deadline": "To.11.6. klo 21:00 mennessä",
       "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)Tillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)Klubin puhelin: 04578382201"
-    }
+    },
+    "featured": true
   },
   {
     "slug": "espoon-kesakaisa-2026-part-ii",
