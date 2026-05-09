@@ -1795,8 +1795,6 @@ html { font-size: 112%; }
 
 <script>
 (function() {
-  const WORKER_URL = 'https://delicate-sky-be99.ebk-repo.workers.dev';
-
   window.openRegModal = function(evt) {
     evt = evt || window._activeEvt;
     if (!evt) return;
@@ -1849,16 +1847,20 @@ html { font-size: 112%; }
       errEl.style.display = 'none';
 
       try {
-        const payload = {
-          eventSlug: document.getElementById('rm-event-slug').value,
-          name:      document.getElementById('rm-name').value.trim(),
-          email:     document.getElementById('rm-email').value.trim(),
-          website:   document.querySelector('[name="website"]').value, // honeypot
-        };
-        const res = await fetch(WORKER_URL + '/register', {
+        const formData = new FormData();
+        formData.append('name',       document.getElementById('rm-name').value.trim());
+        formData.append('email',      document.getElementById('rm-email').value.trim());
+        formData.append('tapahtuma',  document.getElementById('rm-event-name').textContent);
+        formData.append('slug',       document.getElementById('rm-event-slug').value);
+        formData.append('pvm',        document.getElementById('rm-event-date').textContent);
+        formData.append('_subject',   'Ilmoittautuminen: ' + document.getElementById('rm-event-name').textContent);
+        formData.append('_template',  'table');
+        formData.append('_captcha',   'false');
+        formData.append('website',    document.querySelector('[name="website"]').value); // honeypot
+
+        const res = await fetch('https://formsubmit.co/ebk.repo@gmail.com', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: formData
         });
         if (!res.ok) throw new Error('fail');
         this.style.display = 'none';
