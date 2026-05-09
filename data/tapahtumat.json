@@ -67,7 +67,7 @@
       "signup": null,
       "description": "pyris kuvaus"
     },
-    "featured": true
+    "featured": false
   },
   {
     "slug": "pyris-testi",
