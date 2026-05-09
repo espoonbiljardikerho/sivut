@@ -1245,7 +1245,7 @@ html { font-size: 112%; }
     const slice = tagged.slice((evtPage - 1) * EVT_PAGE_SIZE, evtPage * EVT_PAGE_SIZE);
 
     const list = document.getElementById('event-list');
-    eventsData = slice;
+    // eventsData stays as full allParsed — indices must refer to allParsed
     list.innerHTML = slice.map((e) => renderRow(e, allParsed.indexOf(e))).join('');
 
     const countEl = document.getElementById('event-count');
@@ -1270,7 +1270,8 @@ html { font-size: 112%; }
     }
 
     if (window.innerWidth > 900 && slice.length) {
-      list.querySelector('.evt-row')?.click();
+      const firstRow = list.querySelector('.evt-row');
+      if (firstRow) firstRow.click();
     }
   }
 
@@ -1283,7 +1284,7 @@ html { font-size: 112%; }
   async function load() {
     try {
       try {
-        const resp = await fetch('data/tapahtumat.json');
+        const resp = await fetch('data/tapahtumat.json?v=' + Date.now());
         const data = await resp.json();
         allParsed = data.map(e => ({
           slug:         e.slug,
@@ -1757,8 +1758,8 @@ html { font-size: 112%; }
 
       <div id="rm-success" class="jm-success" style="display:none;">
         <div class="jm-success-icon">🏆</div>
-        <h3>Ilmoittautuminen lähetetty!</h3>
-        <p>Kiitos ilmoittautumisesta. Saat kuittauksen sähköpostiisi pian.</p>
+        <h3>Ilmoittautuminen vastaanotettu</h3>
+        <p>Kiitos ilmoittautumisestasi! Otamme sinuun yhteyttä tarvittaessa.</p>
         <button class="jm-submit" onclick="closeRegModal()" style="margin-top:20px;">Sulje</button>
       </div>
 
