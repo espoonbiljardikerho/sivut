@@ -1140,6 +1140,8 @@ html { font-size: 112%; }
       const tagWrap = document.getElementById('article-tag-wrap');
       if (tagWrap) tagWrap.innerHTML = `<span class="ebadge b-${tag.toLowerCase().replace(/\s+/g,'')}">${tag}</span>`;
       document.title = title + ' — EBK';
+      const bc = document.getElementById('breadcrumb-title');
+      if (bc) bc.textContent = title.length > 40 ? title.slice(0,40) + '…' : title;
 
       // Inject Open Graph meta for social sharing
       const setMeta = (prop, val) => {
@@ -1173,7 +1175,10 @@ html { font-size: 112%; }
       };
       document.getElementById('hero-img-wrap').prepend(heroImg);
 
-      document.getElementById('article-content').innerHTML = jsonArticle.body || '<p style="color:var(--text-muted);font-style:italic">Artikkelin sisältöä ei ole vielä lisätty.</p>';
+      document.getElementById('body-skeleton').style.display = 'none';
+      const articleContentEl = document.getElementById('article-content');
+      articleContentEl.innerHTML = jsonArticle.body || '<p style="color:var(--text-muted);font-style:italic">Artikkelin sisältöä ei ole vielä lisätty.</p>';
+      articleContentEl.style.display = 'block';
       loadSidebar(tag);
       return; // done — no need to fetch from Yhdistysavain
     }
