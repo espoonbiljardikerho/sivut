@@ -1217,10 +1217,17 @@ html { font-size: 112%; }
     // Update any cards that got initials but have nicknames in JSON
     Object.values(memberData).forEach(m => {
       if (!m.nickname) return;
-      const el = document.getElementById('mono-' + m.slug);
-      if (el && el.textContent !== m.nickname) {
-        el.textContent = m.nickname;
-        el.classList.add('member-monogram-nick');
+      const container = document.getElementById('mono-' + m.slug);
+      if (!container) return;
+      // Update the inner text div — never overwrite the container (destroys the styled div)
+      let textEl = container.querySelector('.member-monogram-text');
+      if (textEl) {
+        if (textEl.textContent !== m.nickname) {
+          textEl.textContent = m.nickname;
+          textEl.classList.add('member-monogram-nick');
+        }
+      } else {
+        container.innerHTML = `<div class="member-monogram-text member-monogram-nick">${m.nickname}</div>`;
       }
       // Also update card body nickname if not already rendered
       const card = document.querySelector(`.member-card[data-slug="${m.slug}"]`);
