@@ -12,7 +12,6 @@
       "startLabel": "3.6–26.8.2026"
     },
     "isPast": false,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
@@ -32,7 +31,6 @@
       "startLabel": "3.6–26.8.2026"
     },
     "isPast": false,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/6Yx4n9ZZo0E4iiiTBw0i0bulAE/PoolKuvaUutinen400.jpg",
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
@@ -51,7 +49,6 @@
       "isSeries": false
     },
     "isPast": false,
-    "featured": true,
     "img": "https://bin.yhdistysavain.fi/1604389/yEYp6MuJU1PpXVzqu8I50dKDrQ/KaisaKuvaUutinen.jpg",
     "fee": "30 €",
     "detail": {
@@ -71,7 +68,6 @@
       "isSeries": false
     },
     "isPast": false,
-    "featured": true,
     "time": "10:00",
     "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
     "fee": "30 €",
@@ -94,7 +90,6 @@
       "startLabel": "26.8–30.11.2026"
     },
     "isPast": false,
-    "featured": true,
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
     "detail": {
       "description": "Ilmoittautuneet:1. Pauli Wigelius2. Jarno Ahola3.4.5.6."
@@ -113,7 +108,6 @@
       "startLabel": "9.9–31.10.2026"
     },
     "isPast": false,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Pelataan 9.9. - 31.10. + viimeistään marraskuussa cuppipelit"
@@ -131,7 +125,6 @@
       "isSeries": false
     },
     "isPast": false,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/AE7woRDUMqsgKqnoNK3y0beoX8/pyres1.jpg",
     "fee": "30 €",
     "detail": {
@@ -151,7 +144,6 @@
       "isSeries": false
     },
     "isPast": false,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Z5DmKMsuotZFGganlCWO0beoJJ/KaisaKuvaUutinen.jpg",
     "detail": {
       "deadline": "in 4.12.  klo 16:00 mennessä",
@@ -170,7 +162,6 @@
       "isSeries": false
     },
     "isPast": false,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
     "detail": {
       "description": "EBK:n poolmestaruus pelataan yhden päivän kilpailuna lauantaina 5.12.2026. Kilpailu aloitetaan klo 11:00. Ilmoittautumiset pe iltaan klo 21:00 mennessä."
@@ -188,7 +179,6 @@
       "isSeries": false
     },
     "isPast": false,
-    "featured": false,
     "detail": {
       "description": "Kinkkukilpailut klo 13:001. Jarno Ahola2.3.4.5.6.7.8.9.10."
     }
@@ -205,7 +195,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/fWL75Q2E2o5vT9pITPuC0dKDoc/ebk%20sportti.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -223,7 +212,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/RVigWpcoBlE9mXXEGyPv0dd7ba@1200=axdwU4YW7o/T%C3%A4htis40v.jpg",
     "detail": {
       "deadline": "La.7.3. klo 11:00 mennessä",
@@ -242,7 +230,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/vQ6v8q7GrqnxNCDqjOnY0dKDlA/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -260,7 +247,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/oQ6nvrxKTwZdHwHlt6zG0dKDfZ/SnookerKuvaUutinen.jpg",
     "detail": {
       "deadline": "ke.21.1. klo 18:00 mennessä",
@@ -279,7 +265,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/K6rvsABgJdG0cq0r3P7k0beoT8@1200=xWflWOfmxg/pikkujoulukuva.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -297,7 +282,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -315,7 +299,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Z5DmKMsuotZFGganlCWO0beoJJ/KaisaKuvaUutinen.jpg",
     "detail": {
       "deadline": "in 5.12.  klo 16:00 mennessä",
@@ -334,7 +317,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/srvmVpGtc0ewb2ctfsvG0czlww@1200=bw461aP5q2/2024-11-16%2017.48.28.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -352,7 +334,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/AE7woRDUMqsgKqnoNK3y0beoX8/pyres1.jpg",
     "fee": "30 €",
     "detail": {
@@ -372,7 +353,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -390,7 +370,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -408,7 +387,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
     "fee": "30 €",
     "detail": {
@@ -428,7 +406,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/pGVIVYuLULnJPPoLZ0TD0beo1P/KaisaKuvaUutinen.jpg",
     "fee": "30 €",
     "detail": {
@@ -448,7 +425,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
@@ -467,7 +443,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/6Yx4n9ZZo0E4iiiTBw0i0bulAE/PoolKuvaUutinen400.jpg",
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
@@ -486,7 +461,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/tVDYdU0R9Yds6NvMPtBL0bSZJR/ebk%20sportti.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -504,7 +478,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/r1IBvpxeA0CQGKljjnip0bSZEz/KaraKuvaUutinen.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -522,7 +495,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/wp99IskBBNHWzJzjLGub0bSZB9/SnookerKuvaUutinen.jpg",
     "detail": {
       "deadline": "ke.22.1. klo 18:00 mennessä",
@@ -541,7 +513,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/xXSBchYxauHB4WtNJpxP0_Yi4x@1200=MekZ7LgFWC/20231216_140308.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -559,7 +530,6 @@
       "isSeries": false
     },
     "isPast": true,
-    "featured": false,
     "img": "https://bin.yhdistysavain.fi/1604389/OqqQ0PMFBp9vVECYK9s40_Yi-_/PoolKuvaUutinen400.jpg",
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
