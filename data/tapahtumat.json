@@ -1,5 +1,44 @@
 [
   {
+    "slug": "testi-pool",
+    "href": "/tapahtumat/testi-pool/",
+    "name": "testi pool",
+    "tag": "Pool",
+    "dateInfo": {
+      "raw": "15.6.2026",
+      "day": null,
+      "month": null,
+      "year": null,
+      "isSeries": false
+    },
+    "time": "klo 10:00",
+    "fee": "50€",
+    "isPast": false,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/lauri-kankkunen-sm-pronssia.jpg",
+    "capacity": 10,
+    "schedule": [
+      {
+        "time": "10:00",
+        "label": "arvotaa"
+      },
+      {
+        "time": "11:00",
+        "label": "pelataan"
+      }
+    ],
+    "organizer": {
+      "name": "Jaska Jokunen",
+      "email": "jaska@jokunen.fi"
+    },
+    "participants": [],
+    "detail": {
+      "deadline": "viimeistään huomenna",
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "avoin",
+      "description": "testi tapahtuma"
+    }
+  },
+  {
     "slug": "espoon-8-pallon-tasoitussarja-2",
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja-2/",
     "name": "Espoon 8-pallon tasoitussarja",
