@@ -764,7 +764,7 @@
 // ── Config ──────────────────────────────────────────────────────────────────
 const REPO_OWNER  = 'espoonbiljardikerho';
 const REPO_NAME   = 'sivut';
-const ADMIN_PASS  = 'Ebk4923!';
+const ADMIN_PASS  = 'ebk2024admin'; // Change this!
 const BRANCH      = 'main';
 
 // ── UTF-8 safe base64 helpers (replaces deprecated escape/unescape) ───────────
@@ -786,30 +786,28 @@ async function processImageForUpload(file) {
   const ALLOWED  = ['image/jpeg','image/png','image/webp'];
   if (file.size > MAX_SIZE) throw new Error('Tiedosto on liian suuri (max 8 MB)');
   if (!ALLOWED.includes(file.type)) throw new Error('Vain JPG, PNG tai WebP sallittu');
-  if (file.size < 300 * 1024 && file.type === 'image/jpeg') return file;
+  // Always process — never skip, even small JPEGs may be oversized dimensions
   const bmp = await createImageBitmap(file);
-  const MAX = 1600;
+  const MAX = 900; // news images display max ~800px wide — 900px is plenty
   const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
   const w = Math.round(bmp.width * scale);
   const h = Math.round(bmp.height * scale);
-  // Resize on canvas — use OffscreenCanvas if available, fall back to regular canvas
   let blob;
   if (typeof OffscreenCanvas !== 'undefined') {
     const canvas = new OffscreenCanvas(w, h);
     canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
     bmp.close();
-    blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.82 });
+    blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.75 });
   } else {
-    // Safari fallback
     const canvas = document.createElement('canvas');
     canvas.width = w; canvas.height = h;
     canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
     bmp.close();
-    blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.82));
+    blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.75));
   }
   const origKB = Math.round(file.size / 1024);
   const newKB  = Math.round(blob.size / 1024);
-  console.log(`Image compressed: ${origKB} KB → ${newKB} KB`);
+  console.log(`Image compressed: ${origKB} KB → ${newKB} KB (${w}×${h}px)`);
   return new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
 }
 
@@ -856,6 +854,47 @@ window.addEventListener('DOMContentLoaded', () => {
   const savedToken  = localStorage.getItem('ebk_token');
   const savedAuthed = localStorage.getItem('ebk_authed');
   if (savedToken) document.getElementById('login-token').value = savedToken;
+
+  // ── Handle image paste in article body RTE ───────────────────────────────
+  // Uploads pasted images to images/news/ in repo, inserts URL tag — never embeds base64
+  ['nf-body', 'ef-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('paste', async function(e) {
+      const items = Array.from(e.clipboardData?.items || []);
+      const imageItem = items.find(i => i.type.startsWith('image/'));
+      if (!imageItem) return; // no image — let browser handle text paste normally
+
+      e.preventDefault();
+
+      // Get slug for filename
+      const isNews = id === 'nf-body';
+      const slugEl = document.getElementById(isNews ? 'nf-slug' : 'ef-name');
+      const baseSlug = isNews
+        ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
+        : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
+      const filename = `${baseSlug}-${Date.now()}.jpg`;
+      const folder   = isNews ? 'news' : 'events';
+
+      // Show uploading placeholder
+      const placeholder = `<span id="img-uploading-${Date.now()}" style="color:var(--text-muted);font-style:italic">⏳ Ladataan kuvaa…</span>`;
+      document.execCommand('insertHTML', false, placeholder);
+
+      try {
+        const file = imageItem.getAsFile();
+        const url  = await uploadImage(file, folder, filename);
+        const RAW  = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
+        // Replace placeholder with actual image
+        el.querySelectorAll('[id^="img-uploading-"]').forEach(p => {
+          p.outerHTML = `<img src="${RAW}" alt="" style="max-width:100%;border-radius:6px;margin:6px 0;">`;
+        });
+        toast('Kuva lisätty ✓', 'success');
+      } catch(err) {
+        el.querySelectorAll('[id^="img-uploading-"]').forEach(p => p.remove());
+        toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
+      }
+    });
+  });
   if (savedToken && savedAuthed) {
     ghToken = savedToken;
     document.getElementById('login-screen').style.display = 'none';
@@ -1107,7 +1146,9 @@ async function saveNews() {
   })() : '';
   const tag     = document.getElementById('nf-tag').value;
   const excerpt = document.getElementById('nf-excerpt').value.trim();
-  const body    = document.getElementById('nf-body').innerHTML;
+  // Safety net: strip any base64 images that bypassed the paste handler
+  const rawBody = document.getElementById('nf-body').innerHTML;
+  const body = rawBody.replace(/<img[^>]+src=["']data:[^"']*["'][^>]*>/gi, '');
 
   if (!title) { toast('Otsikko on pakollinen', 'error'); return; }
 
