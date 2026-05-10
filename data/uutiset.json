@@ -3,9 +3,9 @@
     "slug": "testi",
     "href": "/uutiset/testi/",
     "title": "testi",
-    "date": "9.5.2026",
+    "date": "11.5.2026",
     "excerpt": "lyhyt kuvays",
-    "img": null,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/karavalmennusta-tarjolla-toukokuuss.jpg",
     "tag": "Uutinen",
     "body": "pitkä kkuvays"
   },
