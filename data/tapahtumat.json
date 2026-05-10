@@ -304,8 +304,12 @@
     "participants": [],
     "detail": {
       "deadline": "in 26.11. klo 16:45 mennessä",
-      "description": "EBK:n  (ja klubin) Pyramidimestaruus 2026 pelataan yhden päivän turnauksena torstaina 26.11.2026, kunhan kilpailuun saadaan vähintään 6 osallistujaa. Osallistumismaksu 30€ ja 100% palkintoihin ja osallistumisoikeus niin kerhon kuin klubin jäsenillä.Ilmoittautumiset (torstaihin 26.11. klo 16:45 mennessä, pelit arvotaan klo 17:00 ja aloitetaan sen jälkeen)."
-    }
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "EBK:n &nbsp;(ja klubin) Pyramidimestaruus 2026 pelataan yhden päivän turnauksena torstaina 26.11.2026, kunhan kilpailuun saadaan vähintään 6 osallistujaa.&nbsp;<br><br>Osallistumismaksu 30€ ja 100% palkintoihin ja osallistumisoikeus niin kerhon kuin klubin jäsenillä.<br><br>Ilmoittautumiset (torstaihin 26.11. klo 16:45 mennessä, pelit arvotaan klo 17:00 ja aloitetaan sen jälkeen)."
+    },
+    "schedule": [],
+    "organizer": null
   },
   {
     "slug": "ebk-kaisamestaruus-2026",
