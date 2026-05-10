@@ -277,9 +277,10 @@
   {
     "slug": "kahima-jaakko",
     "name": "Jaakko Kahima",
+    "nickname": "Jaska",
     "type": "tays",
-    "photo": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/members/kahima-jaakko.jpg",
-    "nickname": null,
+    "joined": "2013",
+    "started": "2011",
     "sports": [
       "Kaisa",
       "Pool",
@@ -287,10 +288,9 @@
       "Kara",
       "Pyramidi"
     ],
-    "joined": null,
-    "started": "2011",
     "motto": null,
     "bio": "Jaakko Kahima liittyi EBK:n klubiin melkein heti klubin synnyinvaiheen alkutaipaleella. Hän jäi toiminnasta pois vuonna 2013, mutta palasi 2020 uudella motivaatiolla.",
+    "photo": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/members/kahima-jaakko.jpg",
     "achievements": [
       "Muutaman kerran mennyt aloitusysi. Snookersarjasta hopeaa 2024"
     ],
