@@ -281,8 +281,13 @@
     "capacity": null,
     "participants": [],
     "detail": {
-      "description": "Pelataan 9.9. - 31.10. + viimeistään marraskuussa cuppipelit"
-    }
+      "deadline": null,
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "Pelataan 9.9 - 31.10 + viimeistään marraskuussa cuppipelit"
+    },
+    "schedule": [],
+    "organizer": null
   },
   {
     "slug": "ebk-pyramidimestaruus-2026",
