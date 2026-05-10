@@ -1021,6 +1021,59 @@ html { font-size: 120%; }
     return res.text();
   }
 
+  // ── News data helpers (hot + archive) ────────────────────────────────────
+  // Hot file = data/uutiset.json (current+previous year), Archive = data/uutiset-archive.json (older).
+  // Archive may not exist (first-time installs) — 404 is silently ignored.
+  let _hotCache = null;
+  let _archiveCache = null;
+
+  async function fetchNewsHot() {
+    if (_hotCache) return _hotCache;
+    try {
+      const r = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
+      if (!r.ok) throw new Error('Hot HTTP ' + r.status);
+      _hotCache = await r.json();
+      return _hotCache;
+    } catch(e) {
+      console.warn('Hot news fetch failed:', e);
+      return [];
+    }
+  }
+
+  async function fetchNewsArchive() {
+    if (_archiveCache !== null) return _archiveCache;
+    try {
+      const r = await fetch(RAW_BASE + '/data/uutiset-archive.json?v=' + Date.now());
+      if (!r.ok) {
+        // 404 = no archive yet, that's fine
+        _archiveCache = [];
+        return _archiveCache;
+      }
+      _archiveCache = await r.json();
+      return _archiveCache;
+    } catch(e) {
+      console.warn('Archive news fetch failed:', e);
+      _archiveCache = [];
+      return _archiveCache;
+    }
+  }
+
+  // Find an article by slug — tries hot first, then archive
+  async function findArticleBySlug(slug) {
+    const hot = await fetchNewsHot();
+    let found = hot.find(a => a.slug === slug);
+    if (found) return found;
+    const arc = await fetchNewsArchive();
+    return arc.find(a => a.slug === slug) || null;
+  }
+
+  // Get all articles (hot + archive) — for related/sidebar that need to pick from anywhere
+  async function fetchAllNews() {
+    const [hot, arc] = await Promise.all([fetchNewsHot(), fetchNewsArchive()]);
+    return [...hot, ...arc];
+  }
+
+
 
 
   function cleanContent(el) {
@@ -1096,17 +1149,19 @@ html { font-size: 120%; }
     return;
   }
 
-  // ── Check JSON first for admin-created articles ───────────────────────────────
+  // ── Find article by slug — tries hot first, then archive ────────────────────
   let jsonArticle = null;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 4000)); // wait 4s then retry
-      const jsonResp = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
-      const articles = await jsonResp.json();
+      if (attempt > 0) {
+        // Bust the cache and retry — admin may have just published
+        _hotCache = null; _archiveCache = null;
+        await new Promise(r => setTimeout(r, 4000));
+      }
       const slug = articleSlug || (articleUrl || '').replace(/.*\/uutiset\//, '').replace(/\/$/, '');
-      jsonArticle = articles.find(a => a.slug === slug);
-      if (jsonArticle) break; // found it
-      console.warn(`Attempt ${attempt+1}: slug "${slug}" not in JSON (${articles.length} articles)`);
+      jsonArticle = await findArticleBySlug(slug);
+      if (jsonArticle) break;
+      console.warn(`Attempt ${attempt+1}: slug "${slug}" not in hot or archive`);
     } catch(e) {
       console.warn(`Attempt ${attempt+1}: JSON fetch failed:`, e);
     }
@@ -1289,8 +1344,8 @@ html { font-size: 120%; }
 
   async function loadRelated(currentTag) {
     try {
-      const resp = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
-      const all  = await resp.json();
+      // Use all news (hot + archive) so related can pull from anywhere
+      const all = await fetchAllNews();
 
       // Filter out current article; prefer same tag, fill with others
       const currentSlug = new URLSearchParams(location.search).get('slug') || '';
@@ -1333,8 +1388,8 @@ html { font-size: 120%; }
     const el = document.getElementById('sidebar-news');
     if (!el) return;
     try {
-      const resp = await fetch(RAW_BASE + '/data/uutiset.json?v=' + Date.now());
-      const all  = await resp.json();
+      // Sidebar shows MOST RECENT — hot only is correct (archive is by definition older)
+      const all = await fetchNewsHot();
 
       // Only show admin-created articles (have body) — they're the only ones that open
       const currentSlug = new URLSearchParams(location.search).get('slug') || '';

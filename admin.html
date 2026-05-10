@@ -287,6 +287,72 @@
   .modal-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; line-height: 1; }
   .modal-close:hover { color: var(--text); }
 
+  /* ── Error banner (persistent, dismissible) ────────────────────── */
+  #error-banner {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--danger-bg);
+    border-bottom: 1px solid var(--danger);
+    padding: 12px 18px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  #error-banner.visible { display: block; }
+  #error-banner .eb-row { display: flex; align-items: flex-start; gap: 12px; }
+  #error-banner .eb-icon { color: var(--danger); font-size: 16px; flex-shrink: 0; line-height: 1.4; }
+  #error-banner .eb-content { flex: 1; min-width: 0; }
+  #error-banner .eb-title { font-weight: 600; color: var(--danger); margin-bottom: 2px; }
+  #error-banner .eb-msg { color: var(--text); line-height: 1.5; }
+  #error-banner .eb-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  #error-banner .eb-btn {
+    background: transparent; border: 1px solid var(--border2);
+    color: var(--text2); padding: 4px 10px; border-radius: 4px;
+    font-size: 12px; cursor: pointer; font-family: var(--font);
+  }
+  #error-banner .eb-btn:hover { color: var(--text); border-color: var(--text3); }
+  #error-banner .eb-details {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 11px;
+    color: var(--text2);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  #error-banner .eb-details.visible { display: block; }
+
+  /* ── Top progress bar (replaces / supplements sidebar lock) ────── */
+  #top-progress-bar {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(200,168,75,0.12);
+    border-bottom: 1px solid rgba(200,168,75,0.30);
+    padding: 8px 18px;
+    font-size: 12px;
+    color: var(--gold);
+    font-family: var(--font);
+    align-items: center;
+    gap: 10px;
+  }
+  #top-progress-bar.visible { display: flex; }
+  #top-progress-bar .save-spinner {
+    width: 12px; height: 12px;
+    border: 2px solid rgba(200,168,75,0.3);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
   /* ── Toast ─────────────────────────────────────────────────────── */
   #toast {
     position: fixed; bottom: 24px; right: 24px;
@@ -347,6 +413,29 @@
 </style>
 </head>
 <body>
+
+<!-- ── Top progress bar (visible during saves) ──────────────────── -->
+<div id="top-progress-bar">
+  <div class="save-spinner"></div>
+  <span id="top-progress-msg">Tallennetaan…</span>
+</div>
+
+<!-- ── Persistent error banner ──────────────────────────────────── -->
+<div id="error-banner" role="alert" aria-live="assertive">
+  <div class="eb-row">
+    <div class="eb-icon">⚠</div>
+    <div class="eb-content">
+      <div class="eb-title" id="error-banner-title">Virhe</div>
+      <div class="eb-msg" id="error-banner-msg"></div>
+      <div class="eb-details" id="error-banner-details"></div>
+    </div>
+    <div class="eb-actions">
+      <button class="eb-btn" id="error-banner-toggle" onclick="toggleErrorDetails()">Näytä lisätiedot</button>
+      <button class="eb-btn" onclick="copyErrorDetails()">Kopioi</button>
+      <button class="eb-btn" onclick="dismissError()">Sulje</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── Login ─────────────────────────────────────────────────────── -->
 <div id="login-screen">
@@ -488,6 +577,34 @@
             </div>
             <div class="divider"></div>
             <button class="btn btn-secondary" onclick="checkSyncStatus()">Tarkista tila</button>
+          </div>
+        </div>
+
+        <!-- ── Ylläpito (maintenance) — separate panel, low-key ─────── -->
+        <div class="panel" style="max-width:560px;margin-top:24px;border-color:var(--border)">
+          <div class="panel-header">
+            <div class="panel-title" style="color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:0.08em">Ylläpito</div>
+          </div>
+          <div class="panel-body">
+            <p style="color:var(--text3);font-size:12px;margin-bottom:14px;line-height:1.6">
+              Harvoin tarvittavat toiminnot. Lue kuvaus huolellisesti ennen käyttöä.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <div>
+                  <div style="font-size:13px;color:var(--text2)">Arkistoi vanhat uutiset</div>
+                  <div class="text-muted" id="archive-info">—</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openArchiveModal()">Arkistoi…</button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <div>
+                  <div style="font-size:13px;color:var(--text2)">Palauta arkistosta</div>
+                  <div class="text-muted" id="unarchive-info">—</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openUnarchiveModal()">Palauta…</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -760,12 +877,198 @@
 <!-- ── Toast ──────────────────────────────────────────────────────── -->
 <div id="toast"></div>
 
+<!-- ── Archive confirmation modal ───────────────────────────────────── -->
+<div class="modal-bg" id="archive-modal">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="archive-modal-title">Arkistoi vanhat uutiset</div>
+      <button class="modal-close" onclick="closeModal('archive-modal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="archive-modal-body" style="font-size:13px;line-height:1.6;color:var(--text2)">
+        <p>Lasketaan…</p>
+      </div>
+      <div style="margin-top:18px;padding:12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2)">
+        <label style="display:block;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px">
+          Vahvista kirjoittamalla <strong style="color:var(--gold)" id="archive-confirm-word">ARKISTOI</strong>
+        </label>
+        <input type="text" id="archive-confirm-input" autocomplete="off" autocapitalize="off"
+               oninput="updateArchiveConfirm()"
+               style="width:100%;padding:8px 12px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:13px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('archive-modal')">Peruuta</button>
+      <button class="btn btn-primary" id="archive-confirm-btn" disabled onclick="executeArchive()">Vahvista</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const REPO_OWNER  = 'espoonbiljardikerho';
 const REPO_NAME   = 'sivut';
 const ADMIN_PASS  = 'ebk2024admin'; // Change this!
-const BRANCH      = 'main';
+const BRANCH      = 'main'; // Set to 'admin-staging' (or similar) for testing against a separate branch
+
+// ── Path constants — all data file paths in one place ──────────────────────
+const PATH_NEWS_HOT     = 'data/uutiset.json';
+const PATH_NEWS_ARCHIVE = 'data/uutiset-archive.json';
+const PATH_EVENTS       = 'data/tapahtumat.json';
+const PATH_MEMBERS      = 'data/jasenet.json';
+
+// Archive cutoff: keep articles from this year onwards in hot file.
+// "Strict" interpretation = current year and previous year only.
+function getHotYearCutoff() {
+  return new Date().getFullYear() - 1; // today=2026 -> keep 2025+ in hot
+}
+
+// ── Error message mapping ──────────────────────────────────────────────────
+// Maps low-level errors to user-friendly Finnish messages with actionable guidance.
+// Returns { title, msg, technical } — title/msg shown by default, technical in expander.
+function mapError(err, context) {
+  const ctx = context ? ` (${context})` : '';
+  const technical = err?.stack || err?.message || String(err);
+
+  // Network / fetch failure
+  if (err?.name === 'TypeError' && /fetch|network|failed/i.test(err.message || '')) {
+    return {
+      title: 'Verkkoyhteysongelma' + ctx,
+      msg: 'Yhteys GitHubiin ei toimi. Tarkista internet-yhteytesi ja yritä uudelleen.',
+      technical
+    };
+  }
+
+  // JSON parse error — typically means GitHub returned HTML (404/500 page)
+  // or a remote file is corrupt
+  if (err?.name === 'SyntaxError' && /JSON|token|unexpected/i.test(err.message || '')) {
+    return {
+      title: 'Tiedosto on vioittunut' + ctx,
+      msg: 'Tiedoston sisältöä ei voitu lukea. Tämä voi tarkoittaa että tiedosto repositoriossa on vioittunut, tai GitHub palautti virhesivun. ÄLÄ TALLENNA mitään ennen kuin tiedosto on tarkistettu.',
+      technical
+    };
+  }
+
+  // GitHub API status codes — extracted from message string (ghPut throws e.message)
+  const status = err?.status ?? extractStatus(err?.message);
+
+  if (status === 401) {
+    return {
+      title: 'Token vanhentunut tai virheellinen',
+      msg: 'GitHub-token ei kelpaa. Kirjaudu ulos ja sisään uudella tokenilla.',
+      technical
+    };
+  }
+  if (status === 403) {
+    // Could be permissions OR rate limit
+    if (/rate limit|secondary rate/i.test(err?.message || '')) {
+      return {
+        title: 'GitHub-rajoitus saavutettu',
+        msg: 'Liian monta pyyntöä lyhyessä ajassa. Odota noin minuutti ja yritä uudelleen.',
+        technical
+      };
+    }
+    return {
+      title: 'Oikeudet puuttuvat',
+      msg: 'Tokenilla ei ole oikeutta muokata tätä repositoriota. Tarkista että token on luotu oikealla scope-asetuksella (repo).',
+      technical
+    };
+  }
+  if (status === 404) {
+    return {
+      title: 'Tiedostoa ei löydy' + ctx,
+      msg: 'Tiedosto ei ole repositoriossa. Tämä voi olla normaali tilanne (esim. arkistotiedostoa ei vielä ole) tai virhe.',
+      technical
+    };
+  }
+  if (status === 409) {
+    return {
+      title: 'Yhtäaikainen muokkaus' + ctx,
+      msg: 'Joku muu (tai toinen välilehti) muokkasi tiedostoa samaan aikaan. Lataa sivu uudelleen ja yritä uudelleen — varmista että et hukkaa muutoksiasi.',
+      technical
+    };
+  }
+  if (status === 422) {
+    // Common case: file too large for Contents API (~1 MB base64)
+    if (/too large|size/i.test(err?.message || '')) {
+      return {
+        title: 'Tiedosto on liian suuri' + ctx,
+        msg: 'GitHub Contents API hyväksyy enintään ~1 MB tiedostoja. Suorita arkistointi (Synkronointi → Ylläpito) tai ota yhteys ylläpitoon.',
+        technical
+      };
+    }
+    return {
+      title: 'Pyyntö hylättiin' + ctx,
+      msg: 'GitHub hylkäsi pyynnön. Tarkista että data on oikeassa muodossa.',
+      technical
+    };
+  }
+  if (status === 429) {
+    return {
+      title: 'Liian monta pyyntöä',
+      msg: 'GitHub rajoittaa pyyntöjä. Odota minuutti ja yritä uudelleen.',
+      technical
+    };
+  }
+  if (status >= 500) {
+    return {
+      title: 'GitHub-palvelinvirhe',
+      msg: 'GitHubilla on häiriö. Yritä hetken kuluttua uudelleen.',
+      technical
+    };
+  }
+
+  // Generic fallback
+  return {
+    title: 'Tuntematon virhe' + ctx,
+    msg: err?.message || 'Tapahtui odottamaton virhe.',
+    technical
+  };
+}
+
+function extractStatus(msg) {
+  if (!msg) return null;
+  const m = String(msg).match(/\b(401|403|404|409|422|429|5\d\d)\b/);
+  return m ? parseInt(m[1]) : null;
+}
+
+// ── Persistent error banner ────────────────────────────────────────────────
+let _lastErrorTechnical = '';
+function showError(err, context) {
+  const mapped = (err && typeof err === 'object' && err.title)
+    ? err  // already mapped
+    : mapError(err, context);
+  document.getElementById('error-banner-title').textContent = mapped.title || 'Virhe';
+  document.getElementById('error-banner-msg').textContent   = mapped.msg   || '';
+  document.getElementById('error-banner-details').textContent = mapped.technical || '';
+  _lastErrorTechnical = mapped.technical || '';
+  document.getElementById('error-banner-details').classList.remove('visible');
+  document.getElementById('error-banner-toggle').textContent = 'Näytä lisätiedot';
+  document.getElementById('error-banner').classList.add('visible');
+  // Also log to console so devs can debug
+  console.error('[admin error]', mapped.title, '—', mapped.msg, mapped.technical);
+}
+
+function dismissError() {
+  document.getElementById('error-banner').classList.remove('visible');
+}
+
+function toggleErrorDetails() {
+  const el = document.getElementById('error-banner-details');
+  const btn = document.getElementById('error-banner-toggle');
+  el.classList.toggle('visible');
+  btn.textContent = el.classList.contains('visible') ? 'Piilota lisätiedot' : 'Näytä lisätiedot';
+}
+
+function copyErrorDetails() {
+  const text = `${document.getElementById('error-banner-title').textContent}\n${document.getElementById('error-banner-msg').textContent}\n\n${_lastErrorTechnical}`;
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => toast('Kopioitu leikepöydälle', 'success'),
+      () => toast('Kopiointi epäonnistui', 'error')
+    );
+  }
+}
 
 // ── UTF-8 safe base64 helpers (replaces deprecated escape/unescape) ───────────
 function b64Encode(str) {
@@ -905,23 +1208,52 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── GitHub API ──────────────────────────────────────────────────────────────
+// Custom error class so we can attach HTTP status for the mapper.
+class GhError extends Error {
+  constructor(message, status, body) {
+    super(message);
+    this.name = 'GhError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
 async function ghGet(path) {
-  const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
-    headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github.v3+json' }
-  });
-  if (!r.ok) throw new Error(`GitHub GET ${path}: ${r.status}`);
+  let r;
+  try {
+    r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`, {
+      headers: { Authorization: `token ${ghToken}`, Accept: 'application/vnd.github.v3+json' }
+    });
+  } catch(e) {
+    // Network failure
+    throw new GhError(`Network error fetching ${path}: ${e.message}`, 0);
+  }
+  if (!r.ok) {
+    let body = '';
+    try { body = await r.text(); } catch(_) {}
+    throw new GhError(`GitHub GET ${path}: ${r.status} ${body.slice(0, 200)}`, r.status, body);
+  }
   return r.json();
 }
 
 async function ghPut(path, content, message, sha) {
   const body = { message, content: b64Encode(content), branch: BRANCH };
   if (sha) body.sha = sha;
-  const r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${ghToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) { const e = await r.json(); throw new Error(e.message || r.status); }
+  let r;
+  try {
+    r = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${ghToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  } catch(e) {
+    throw new GhError(`Network error PUT ${path}: ${e.message}`, 0);
+  }
+  if (!r.ok) {
+    let errBody = {};
+    try { errBody = await r.json(); } catch(_) {}
+    throw new GhError(errBody.message || `${r.status}`, r.status, errBody);
+  }
   return r.json();
 }
 
@@ -931,10 +1263,17 @@ let _saveLockCount = 0; // support nested/parallel saves (e.g. approveReg saves 
 function adminLock(msg) {
   _saveLockCount++;
   if (_saveLockCount === 1) {
+    // Both old sidebar bar and new top bar
     document.getElementById('save-lock-msg').textContent = msg || 'Tallennetaan…';
     document.getElementById('save-lock-bar').classList.add('visible');
+    document.getElementById('top-progress-msg').textContent = msg || 'Tallennetaan…';
+    document.getElementById('top-progress-bar').classList.add('visible');
     document.getElementById('sidebar').classList.add('locked');
     document.body.classList.add('save-locked');
+  } else if (msg) {
+    // Update message even on nested locks
+    document.getElementById('save-lock-msg').textContent = msg;
+    document.getElementById('top-progress-msg').textContent = msg;
   }
 }
 
@@ -942,19 +1281,55 @@ function adminUnlock() {
   _saveLockCount = Math.max(0, _saveLockCount - 1);
   if (_saveLockCount === 0) {
     document.getElementById('save-lock-bar').classList.remove('visible');
+    document.getElementById('top-progress-bar').classList.remove('visible');
     document.getElementById('sidebar').classList.remove('locked');
     document.body.classList.remove('save-locked');
   }
 }
 
+function adminProgress(msg) {
+  // Update progress message during a long-running locked operation
+  if (_saveLockCount > 0) {
+    document.getElementById('save-lock-msg').textContent = msg;
+    document.getElementById('top-progress-msg').textContent = msg;
+  }
+}
+
+/**
+ * Save JSON to GitHub with automatic 409 conflict retry.
+ *
+ * @param {string} path - file path in repo
+ * @param {*} data - data to serialize
+ * @param {string} msg - commit message
+ * @param {string|null} knownSha - SHA from a prior fetch (avoid re-fetch)
+ * @returns {boolean} true on success, false on failure (error already shown via banner)
+ */
 async function saveJSON(path, data, msg, knownSha) {
   adminLock();
   try {
-    const sha = knownSha ?? (await ghGet(path).catch(() => null))?.sha;
-    await ghPut(path, JSON.stringify(data, null, 2), msg, sha);
+    const sha = knownSha ?? (await ghGet(path).catch(e => {
+      // 404 is OK — file doesn't exist yet (creating new). Other errors propagate.
+      if (e instanceof GhError && e.status === 404) return null;
+      throw e;
+    }))?.sha;
+    try {
+      await ghPut(path, JSON.stringify(data, null, 2), msg, sha);
+    } catch(e) {
+      // On 409 conflict, retry ONCE with fresh SHA. We only do this safely for
+      // path-level conflicts; the caller is responsible for ensuring `data` is
+      // built from a fresh read (which the save flows now do).
+      if (e instanceof GhError && e.status === 409 && knownSha) {
+        adminProgress('Yhteensovitetaan ja yritetään uudelleen…');
+        const fresh = await ghGet(path);
+        await ghPut(path, JSON.stringify(data, null, 2), msg + ' (retry)', fresh.sha);
+      } else {
+        throw e;
+      }
+    }
     return true;
   } catch(e) {
-    toast('Virhe: ' + e.message, 'error'); return false;
+    showError(e, path);
+    return false;
   } finally {
     adminUnlock();
   }
@@ -998,29 +1373,87 @@ async function uploadImage(file, folder, filename) {
   });
 }
 
+// ── Safe JSON fetch helper ─────────────────────────────────────────────────
+// Wraps fetch + .json() with HTTP error checks so a 404 returning HTML
+// doesn't produce a confusing "Unexpected token <" error.
+async function fetchJSON(url) {
+  let r;
+  try {
+    r = await fetch(url);
+  } catch(e) {
+    throw new GhError(`Network error fetching ${url}: ${e.message}`, 0);
+  }
+  if (!r.ok) {
+    throw new GhError(`HTTP ${r.status} fetching ${url}`, r.status);
+  }
+  const text = await r.text();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    throw new GhError(`Invalid JSON from ${url}: ${e.message}`, null, text.slice(0, 200));
+  }
+}
+
 // ── Load data ────────────────────────────────────────────────────────────────
 async function loadAllData() {
-  try {
-    // Use raw URLs for large files (GitHub API has 1MB limit for base64 content)
-    const RAW = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
-    const [nr, er, mr] = await Promise.all([
-      fetch(`${RAW}/data/uutiset.json?v=${Date.now()}`).then(r => r.json()),
-      fetch(`${RAW}/data/tapahtumat.json?v=${Date.now()}`).then(r => r.json()),
-      fetch(`${RAW}/data/jasenet.json?v=${Date.now()}`).then(r => r.json()),
-    ]);
-    newsData    = nr;
-    eventsData  = er;
-    membersData = mr;
+  // Use raw URLs for large files (GitHub API has 1MB limit for base64 content).
+  // Use allSettled so partial failures don't leave the user with empty arrays
+  // and no idea which file failed.
+  const RAW = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
+  const ts = Date.now();
+  const sources = [
+    { key: 'news',    url: `${RAW}/${PATH_NEWS_HOT}?v=${ts}`,     label: 'uutiset.json' },
+    { key: 'archive', url: `${RAW}/${PATH_NEWS_ARCHIVE}?v=${ts}`, label: 'uutiset-archive.json', optional: true },
+    { key: 'events',  url: `${RAW}/${PATH_EVENTS}?v=${ts}`,       label: 'tapahtumat.json' },
+    { key: 'members', url: `${RAW}/${PATH_MEMBERS}?v=${ts}`,      label: 'jasenet.json' },
+  ];
 
-    renderDashboard();
-    renderNews();
-    renderEvents('upcoming');
-    renderMembers();
-    updateSyncCounts();
+  const results = await Promise.allSettled(sources.map(s => fetchJSON(s.url)));
+  const failures = [];
+  let hotNews = [], archiveNews = [];
+  results.forEach((r, i) => {
+    const { key, label, optional } = sources[i];
+    if (r.status === 'fulfilled') {
+      const v = Array.isArray(r.value) ? r.value : [];
+      if (key === 'news')    hotNews     = v;
+      if (key === 'archive') archiveNews = v;
+      if (key === 'events')  eventsData  = v;
+      if (key === 'members') membersData = v;
+    } else if (!optional) {
+      failures.push({ label, error: r.reason });
+    }
+    // 404 on archive is expected before first archive run — silent
+  });
 
+  // For admin view, combine hot + archive into newsData so admin can see/edit/delete all.
+  // newsData[i].__archived flag tells the row renderer where the article lives.
+  newsData = [
+    ...hotNews.map(a => ({ ...a, __archived: false })),
+    ...archiveNews.map(a => ({ ...a, __archived: true }))
+  ];
+
+  // Cache hot/archive split for archive UI (size info, etc.)
+  window._hotNewsCount = hotNews.length;
+  window._archiveNewsCount = archiveNews.length;
+
+  renderDashboard();
+  renderNews();
+  renderEvents('upcoming');
+  renderMembers();
+  updateSyncCounts();
+  updateArchiveInfo();
+
+  if (failures.length === 0) {
     toast('Tiedot ladattu onnistuneesti', 'success');
-  } catch(e) {
-    toast('Tietojen lataus epäonnistui: ' + e.message, 'error');
+  } else if (failures.length === sources.filter(s => !s.optional).length) {
+    showError(failures[0].error, 'kaikki tiedostot');
+  } else {
+    const f = failures.map(x => x.label).join(', ');
+    showError({
+      title: `Osa tiedostoista ei latautunut: ${f}`,
+      msg: 'Muut tiedot näkyvät normaalisti, mutta nämä tiedostot puuttuvat. Tarkista verkkoyhteys ja lataa sivu uudelleen.',
+      technical: failures.map(x => `${x.label}: ${x.error?.message || x.error}`).join('\n')
+    });
   }
 }
 
@@ -1050,7 +1483,8 @@ function renderDashboard() {
   document.getElementById('kpi-events').textContent  = eventsData.filter(e => !e.isPast).length;
   document.getElementById('kpi-members').textContent = membersData.length;
 
-  const recent = newsData.slice(0, 8);
+  // Only show non-archived in the "recent" panel (archived are old by definition)
+  const recent = newsData.filter(a => !a.__archived).slice(0, 8);
   document.getElementById('dashboard-news').innerHTML = recent.length ? `
     <table class="data-table">
       ${recent.map(a => `
@@ -1069,8 +1503,11 @@ function renderNews(filtered) {
   const tbody = document.getElementById('news-tbody');
   tbody.innerHTML = items.length ? items.map((a, i) => {
     const realIdx = filtered ? newsData.indexOf(a) : i;
+    const archivedBadge = a.__archived
+      ? ' <span class="badge" style="background:rgba(150,150,150,0.15);color:#aaa;font-size:10px">Arkistoitu</span>'
+      : '';
     return `<tr>
-      <td><strong>${a.title || '—'}</strong><div class="text-muted text-sm">${(a.excerpt||'').slice(0,60)}${(a.excerpt||'').length > 60 ? '…' : ''}</div></td>
+      <td><strong>${a.title || '—'}</strong>${archivedBadge}<div class="text-muted text-sm">${(a.excerpt||'').slice(0,60)}${(a.excerpt||'').length > 60 ? '…' : ''}</div></td>
       <td><span class="badge badge-${(a.tag||'uutinen').toLowerCase()}">${a.tag||'Uutinen'}</span></td>
       <td class="text-muted">${a.date||'—'}</td>
       <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
@@ -1139,8 +1576,17 @@ async function saveNews() {
   const title   = document.getElementById('nf-title').value.trim();
   const slug    = document.getElementById('nf-slug').value.trim();
   const dateRaw = document.getElementById('nf-date').value.trim(); // YYYY-MM-DD
+
+  if (!title) { toast('Otsikko on pakollinen', 'error'); return; }
+
+  // Validate date format if present
+  if (dateRaw && !/^\d{4}-\d{2}-\d{2}$/.test(dateRaw)) {
+    toast('Päivämäärä on virheellisessä muodossa', 'error');
+    return;
+  }
+
   // Format for display: "5.5.2026"
-  const date    = dateRaw ? (() => {
+  const date = dateRaw ? (() => {
     const [y,m,d] = dateRaw.split('-');
     return `${parseInt(d)}.${parseInt(m)}.${y}`;
   })() : '';
@@ -1150,38 +1596,147 @@ async function saveNews() {
   const rawBody = document.getElementById('nf-body').innerHTML;
   const body = rawBody.replace(/<img[^>]+src=["']data:[^"']*["'][^>]*>/gi, '');
 
-  if (!title) { toast('Otsikko on pakollinen', 'error'); return; }
-
   const btn = document.getElementById('news-save-btn');
   btn.textContent = 'Tallennetaan…'; btn.disabled = true;
 
-  let imgUrl = window._pickedImgUrl?.context === 'news' ? window._pickedImgUrl.url : (editingIdx !== null ? newsData[editingIdx]?.img : null);
-  window._pickedImgUrl = null;
-  // Reload fresh from GitHub — capture SHA here so saveJSON doesn't need to fetch again
-  let newsSha = null;
   try {
-    const freshNews = await ghGet('data/uutiset.json');
-    newsSha = freshNews.sha;
-    newsData = parseBase64Json(freshNews.content);
-  } catch(e) { /* use cached data */ }
-  if (pendingImg) {
+    // Existing image (preserved on edit) or newly picked
+    let imgUrl = window._pickedImgUrl?.context === 'news' ? window._pickedImgUrl.url
+               : (editingIdx !== null ? newsData[editingIdx]?.img : null);
+    window._pickedImgUrl = null;
+
+    // ── Reload fresh from GitHub. If this fails, ABORT — saving stale data
+    // could overwrite someone else's work. (Bug #15)
+    let freshArr, freshSha;
     try {
-      imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename);
-    } catch(e) { toast('Kuvan lataus epäonnistui: ' + e.message, 'error'); btn.textContent = 'Tallenna'; btn.disabled = false; return; }
+      const fresh = await ghGet(PATH_NEWS_HOT);
+      freshArr = parseBase64Json(fresh.content);
+      freshSha = fresh.sha;
+      if (!Array.isArray(freshArr)) throw new Error('Hot file is not an array');
+    } catch(e) {
+      btn.textContent = 'Tallenna'; btn.disabled = false;
+      showError(e, PATH_NEWS_HOT);
+      return;
+    }
+
+    // ── Upload pending image AFTER fresh fetch (so a fetch failure doesn't
+    // orphan an upload to the repo).
+    if (pendingImg) {
+      try {
+        imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename);
+      } catch(e) {
+        btn.textContent = 'Tallenna'; btn.disabled = false;
+        showError(e, 'kuvan lataus');
+        return;
+      }
+    }
+
+    // ── Build the item
+    const finalSlug = slug || autoSlugFrom(title) || `uutinen-${Date.now()}`;
+
+    // Determine which array we're editing: hot or archive?
+    // If editing and the article isn't in hot, look in archive.
+    const editingSlug = editingIdx !== null ? newsData[editingIdx]?.slug : null;
+    let targetPath = PATH_NEWS_HOT;
+    let targetArr = freshArr;
+    let targetSha = freshSha;
+
+    if (editingIdx !== null) {
+      // Look in hot first
+      const hotIdx = freshArr.findIndex(a => a.slug === editingSlug);
+      if (hotIdx < 0) {
+        // Not in hot — try archive
+        try {
+          const arc = await ghGet(PATH_NEWS_ARCHIVE);
+          const arcArr = parseBase64Json(arc.content);
+          const arcIdx = arcArr.findIndex(a => a.slug === editingSlug);
+          if (arcIdx >= 0) {
+            targetPath = PATH_NEWS_ARCHIVE;
+            targetArr = arcArr;
+            targetSha = arc.sha;
+          } else {
+            // Not in either — fall back to inserting into hot as a safety net
+            console.warn('Editing article not found in hot or archive; treating as new');
+          }
+        } catch(e) {
+          if (!(e instanceof GhError && e.status === 404)) {
+            btn.textContent = 'Tallenna'; btn.disabled = false;
+            showError(e, PATH_NEWS_ARCHIVE);
+            return;
+          }
+          // 404 archive doesn't exist — that's fine, leave targets as hot
+        }
+      }
+    }
+
+    // Preserve original slug on edit (bug #3 sister fix — we already do this for news,
+    // but make it explicit and also preserve href if present).
+    // Note: __archived is an admin-only flag and must NEVER be persisted.
+    const item = editingIdx !== null
+      ? (() => {
+          const { __archived, ...clean } = newsData[editingIdx];
+          return {
+            ...clean,
+            slug: editingSlug || finalSlug,
+            href: clean.href || `/uutiset/${editingSlug || finalSlug}/`,
+            title, date, excerpt, img: imgUrl || null, tag, body
+          };
+        })()
+      : {
+          slug: finalSlug,
+          href: `/uutiset/${finalSlug}/`,
+          title, date, excerpt, img: imgUrl || null, tag, body
+        };
+
+    // ── Apply to fresh array
+    if (editingIdx !== null) {
+      const idx = targetArr.findIndex(a => a.slug === editingSlug);
+      if (idx >= 0) targetArr[idx] = item;
+      else targetArr.unshift(item);
+    } else {
+      // Slug collision check for new articles
+      if (targetArr.some(a => a.slug === item.slug)) {
+        btn.textContent = 'Tallenna'; btn.disabled = false;
+        showError({
+          title: 'Slug on jo käytössä',
+          msg: `Uutinen slugilla "${item.slug}" on jo olemassa. Muokkaa otsikkoa tai slugia.`,
+          technical: `slug=${item.slug}`
+        });
+        return;
+      }
+      targetArr.unshift(item);
+    }
+
+    // ── Save. Only mutate local state on success. (Bug #1)
+    const ok = await saveJSON(targetPath, targetArr, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} uutinen: ${title}`, targetSha);
+    if (ok) {
+      // Update combined newsData = hot + archive (both with __archived flags).
+      // We only modified one side; for the other, use cached.
+      try {
+        if (targetPath === PATH_NEWS_HOT) {
+          newsData = [
+            ...targetArr.map(a => ({ ...a, __archived: false })),
+            ...newsData.filter(a => a.__archived).map(a => ({ ...a }))
+          ];
+          window._hotNewsCount = targetArr.length;
+        } else {
+          // archive was modified
+          newsData = [
+            ...newsData.filter(a => !a.__archived).map(a => ({ ...a })),
+            ...targetArr.map(a => ({ ...a, __archived: true }))
+          ];
+          window._archiveNewsCount = targetArr.length;
+        }
+      } catch(_) { /* leave newsData as-is */ }
+      closeModal('news-modal');
+      renderNews();
+      renderDashboard();
+      updateArchiveInfo();
+      toast('Uutinen tallennettu ✓', 'success');
+    }
+  } finally {
+    btn.textContent = 'Tallenna'; btn.disabled = false;
   }
-
-  const finalSlug = slug || autoSlugFrom(title);
-  const item = { slug: finalSlug, href: `/uutiset/${finalSlug}/`, title, date, excerpt, img: imgUrl || null, tag, body };
-
-  if (editingIdx !== null) {
-    newsData[editingIdx] = { ...newsData[editingIdx], ...item };
-  } else {
-    newsData.unshift(item);
-  }
-
-  const ok = await saveJSON('data/uutiset.json', newsData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} uutinen: ${title}`, newsSha);
-  btn.textContent = 'Tallenna'; btn.disabled = false;
-  if (ok) { closeModal('news-modal'); renderNews(); renderDashboard(); toast('Uutinen tallennettu ✓', 'success'); }
 }
 
 // ── Events ───────────────────────────────────────────────────────────────────
@@ -1253,86 +1808,127 @@ async function saveEvent() {
   const startDate = document.getElementById('ef-date').value || null;
   const endDate   = document.getElementById('ef-enddate').value || null;
 
-  let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url : (editingIdx !== null ? eventsData[editingIdx]?.img : null);
-  window._pickedImgUrl = null;
-  if (pendingImg) {
-    try { imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
-    catch(e) { toast('Kuvan lataus epäonnistui', 'error'); return; }
+  // Validate date format if present
+  if (startDate && !/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+    toast('Alkupäivämäärä on virheellisessä muodossa', 'error');
+    return;
+  }
+  if (endDate && !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
+    toast('Loppupäivämäärä on virheellisessä muodossa', 'error');
+    return;
   }
 
-  // Parse schedule textarea
-  const scheduleRaw = document.getElementById('ef-schedule').value.trim();
-  const schedule = scheduleRaw ? scheduleRaw.split('\n').filter(l => l.trim()).map(l => {
-    const m = l.trim().match(/^(\d{1,2}:\d{2})\s+(.+)/);
-    return m ? { time: m[1], label: m[2] } : { time: '', label: l.trim() };
-  }) : [];
-
-  const capMax  = parseInt(document.getElementById('ef-capacity').value.trim()) || null;
-  const capUsed = parseInt(document.getElementById('ef-capacity-used').value.trim()) || 0;
-  const orgName  = document.getElementById('ef-org-name').value.trim();
-  const orgEmail = document.getElementById('ef-org-email').value.trim();
-
-  // Build participants array from used count — preserve existing entries, pad/trim as needed
-  let participants = editingIdx !== null ? (eventsData[editingIdx]?.participants || []) : [];
-  if (capUsed > participants.length) {
-    // Pad with placeholder entries
-    while (participants.length < capUsed)
-      participants.push({ name: `Osallistuja ${participants.length + 1}`, registeredAt: null });
-  } else {
-    participants = participants.slice(0, capUsed);
-  }
-
-  const item = {
-    slug:      autoSlugFrom(name),
-    href:      `/tapahtumat/${autoSlugFrom(name)}/`,
-    name,
-    tag:       document.getElementById('ef-tag').value,
-    startDate,
-    endDate,
-    time:      document.getElementById('ef-time').value.trim() || null,
-    fee:       document.getElementById('ef-fee').value.trim()  || null,
-    isPast:    document.getElementById('ef-ispast').value === 'true',
-    img:       imgUrl,
-    capacity:  capMax,
-    schedule:  schedule.length ? schedule : [],
-    organizer: (orgName || orgEmail) ? { name: orgName || null, email: orgEmail || null } : null,
-    participants,
-    detail: {
-      deadline:      document.getElementById('ef-deadline').value.trim() || null,
-      venue:         document.getElementById('ef-venue').value.trim()    || null,
-      participation: document.getElementById('ef-participation').value   || null,
-      description:   document.getElementById('ef-desc').innerHTML.trim() || null,
-    }
-  };
-
-  if (editingIdx !== null) eventsData[editingIdx] = { ...eventsData[editingIdx], ...item };
-  else eventsData.unshift(item);
-
-  // Always reload fresh from GitHub before saving to avoid 409 conflict
   const btn_save = document.querySelector('#event-modal .btn-primary');
   if (btn_save) { btn_save.textContent = 'Tallennetaan…'; btn_save.disabled = true; }
+
   try {
-    const fresh = await ghGet('data/tapahtumat.json');
-    const allEvents = parseBase64Json(fresh.content);
-    const evtSha = fresh.sha;
-    if (editingIdx !== null) {
-      // Find the event in full array by slug and update it
-      const slug = eventsData[editingIdx]?.slug;
-      const fullIdx = allEvents.findIndex(e => e.slug === slug);
-      if (fullIdx >= 0) allEvents[fullIdx] = { ...allEvents[fullIdx], ...item };
-      else allEvents.unshift(item);
-    } else {
-      allEvents.unshift(item);
+    let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url
+               : (editingIdx !== null ? eventsData[editingIdx]?.img : null);
+    window._pickedImgUrl = null;
+
+    // ── Reload fresh BEFORE upload so a fetch failure doesn't orphan the upload
+    let freshArr, freshSha;
+    try {
+      const fresh = await ghGet(PATH_EVENTS);
+      freshArr = parseBase64Json(fresh.content);
+      freshSha = fresh.sha;
+      if (!Array.isArray(freshArr)) throw new Error('Events file is not an array');
+    } catch(e) {
+      showError(e, PATH_EVENTS);
+      return;
     }
-    const ok = await saveJSON('data/tapahtumat.json', allEvents, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`, evtSha);
+
+    if (pendingImg) {
+      try { imgUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
+      catch(e) { showError(e, 'kuvan lataus'); return; }
+    }
+
+    // Parse schedule textarea
+    const scheduleRaw = document.getElementById('ef-schedule').value.trim();
+    const schedule = scheduleRaw ? scheduleRaw.split('\n').filter(l => l.trim()).map(l => {
+      const m = l.trim().match(/^(\d{1,2}:\d{2})\s+(.+)/);
+      return m ? { time: m[1], label: m[2] } : { time: '', label: l.trim() };
+    }) : [];
+
+    const capMax  = parseInt(document.getElementById('ef-capacity').value.trim()) || null;
+    let   capUsed = parseInt(document.getElementById('ef-capacity-used').value.trim()) || 0;
+
+    // Bug #19: clamp capacity-used to capacity max
+    if (capMax != null && capUsed > capMax) {
+      toast(`Käytössä (${capUsed}) ei voi ylittää maksimia (${capMax}) — leikataan automaattisesti`, 'error');
+      capUsed = capMax;
+    }
+
+    const orgName  = document.getElementById('ef-org-name').value.trim();
+    const orgEmail = document.getElementById('ef-org-email').value.trim();
+
+    // Build participants array from used count — preserve existing entries, pad/trim as needed
+    let participants = editingIdx !== null ? (eventsData[editingIdx]?.participants || []) : [];
+    if (capUsed > participants.length) {
+      while (participants.length < capUsed)
+        participants.push({ name: `Osallistuja ${participants.length + 1}`, registeredAt: null });
+    } else {
+      participants = participants.slice(0, capUsed);
+    }
+
+    // ── Bug #3: preserve slug on edit. Only generate new slug for new events.
+    let finalSlug, originalSlug;
+    if (editingIdx !== null) {
+      originalSlug = eventsData[editingIdx]?.slug;
+      finalSlug = originalSlug || autoSlugFrom(name) || `tapahtuma-${Date.now()}`;
+    } else {
+      finalSlug = autoSlugFrom(name) || `tapahtuma-${Date.now()}`;
+    }
+
+    const item = {
+      slug:      finalSlug,
+      href:      `/tapahtumat/${finalSlug}/`,
+      name,
+      tag:       document.getElementById('ef-tag').value,
+      startDate,
+      endDate,
+      time:      document.getElementById('ef-time').value.trim() || null,
+      fee:       document.getElementById('ef-fee').value.trim()  || null,
+      isPast:    document.getElementById('ef-ispast').value === 'true',
+      img:       imgUrl,
+      capacity:  capMax,
+      schedule:  schedule.length ? schedule : [],
+      organizer: (orgName || orgEmail) ? { name: orgName || null, email: orgEmail || null } : null,
+      participants,
+      detail: {
+        deadline:      document.getElementById('ef-deadline').value.trim() || null,
+        venue:         document.getElementById('ef-venue').value.trim()    || null,
+        participation: document.getElementById('ef-participation').value   || null,
+        description:   document.getElementById('ef-desc').innerHTML.trim() || null,
+      }
+    };
+
+    // ── Apply to fresh array
+    if (editingIdx !== null) {
+      const fullIdx = freshArr.findIndex(e => e.slug === originalSlug);
+      if (fullIdx >= 0) freshArr[fullIdx] = { ...freshArr[fullIdx], ...item };
+      else freshArr.unshift(item);
+    } else {
+      // Slug collision check for new events
+      if (freshArr.some(e => e.slug === item.slug)) {
+        showError({
+          title: 'Slug on jo käytössä',
+          msg: `Tapahtuma slugilla "${item.slug}" on jo olemassa. Muuta nimeä.`,
+          technical: `slug=${item.slug}`
+        });
+        return;
+      }
+      freshArr.unshift(item);
+    }
+
+    // ── Save. Mutate local state ONLY on success. (Bug #1)
+    const ok = await saveJSON(PATH_EVENTS, freshArr, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`, freshSha);
     if (ok) {
-      eventsData = allEvents;
+      eventsData = freshArr;
       closeModal('event-modal');
       renderEvents('upcoming');
       toast('Tapahtuma tallennettu ✓', 'success');
     }
-  } catch(e) {
-    toast('Virhe tallennuksessa: ' + e.message, 'error');
   } finally {
     if (btn_save) { btn_save.textContent = 'Tallenna'; btn_save.disabled = false; }
   }
@@ -1395,56 +1991,140 @@ async function saveMember() {
   const name = document.getElementById('mf-name').value.trim();
   if (!name) { toast('Nimi on pakollinen', 'error'); return; }
 
-  let photoUrl = window._pickedImgUrl?.context === 'members' ? window._pickedImgUrl.url : (editingIdx !== null ? membersData[editingIdx]?.photo : null);
-  window._pickedImgUrl = null;
-  if (pendingImg) {
-    try { photoUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
-    catch(e) { toast('Kuvan lataus epäonnistui', 'error'); return; }
+  const btn = document.querySelector('#member-modal .btn-primary');
+  if (btn) { btn.textContent = 'Tallennetaan…'; btn.disabled = true; }
+
+  try {
+    let photoUrl = window._pickedImgUrl?.context === 'members' ? window._pickedImgUrl.url
+                 : (editingIdx !== null ? membersData[editingIdx]?.photo : null);
+    window._pickedImgUrl = null;
+
+    // ── Reload fresh BEFORE upload
+    let freshArr, freshSha;
+    try {
+      const fresh = await ghGet(PATH_MEMBERS);
+      freshArr = parseBase64Json(fresh.content);
+      freshSha = fresh.sha;
+      if (!Array.isArray(freshArr)) throw new Error('Members file is not an array');
+    } catch(e) {
+      showError(e, PATH_MEMBERS);
+      return;
+    }
+
+    if (pendingImg) {
+      try { photoUrl = await uploadImage(pendingImg.file, pendingImg.folder, pendingImg.filename); }
+      catch(e) { showError(e, 'kuvan lataus'); return; }
+    }
+
+    const sportsRaw = document.getElementById('mf-sports').value;
+    const sports    = sportsRaw.split(',').map(s => s.trim()).filter(Boolean);
+
+    // Slug logic: preserve original slug if name unchanged, regenerate otherwise
+    const newSlug = autoSlugFrom(name) || `jasen-${Date.now()}`;
+    const currentSlug = editingIdx !== null ? membersData[editingIdx].slug : null;
+    const currentName = editingIdx !== null ? membersData[editingIdx].name : null;
+    const finalSlug   = currentSlug && currentName === name ? currentSlug : newSlug;
+
+    const item = {
+      slug: finalSlug,
+      name,
+      nickname:  document.getElementById('mf-nickname').value.trim() || null,
+      type:      document.getElementById('mf-type').value,
+      joined:    document.getElementById('mf-joined').value.trim()   || null,
+      started:   document.getElementById('mf-started').value.trim()  || null,
+      sports,
+      motto:     document.getElementById('mf-motto').value.trim()    || null,
+      bio:       document.getElementById('mf-bio').value.trim()      || null,
+      photo:     photoUrl,
+      achievements: editingIdx !== null ? (membersData[editingIdx].achievements || []) : [],
+      records:      editingIdx !== null ? (membersData[editingIdx].records      || []) : [],
+    };
+
+    // ── Apply to fresh array
+    if (editingIdx !== null) {
+      // Find by original slug from cached data — bug #4 sister fix for edit too
+      const idx = freshArr.findIndex(m => m.slug === currentSlug);
+      if (idx >= 0) {
+        // If renaming caused a slug change, also check that new slug doesn't collide
+        if (finalSlug !== currentSlug && freshArr.some(m => m.slug === finalSlug)) {
+          showError({
+            title: 'Nimi on jo käytössä',
+            msg: `Jäsen samalla nimellä on jo olemassa (slug "${finalSlug}"). Lisää lempinimi tai erotin.`,
+            technical: `slug=${finalSlug}, currentSlug=${currentSlug}`
+          });
+          return;
+        }
+        freshArr[idx] = item;
+      } else {
+        // Member missing from fresh fetch — someone deleted it. Don't silently re-add.
+        showError({
+          title: 'Jäsen on poistettu',
+          msg: 'Jäsen, jota muokkaat, on poistettu repositorioista (mahdollisesti toinen admin). Sulje ikkuna ja tarkista tilanne.',
+          technical: `slug=${currentSlug}`
+        });
+        return;
+      }
+    } else {
+      // ── Bug #2: explicit collision detection for new member
+      if (freshArr.some(m => m.slug === item.slug)) {
+        showError({
+          title: 'Nimi on jo käytössä',
+          msg: `Jäsen samalla nimellä on jo olemassa (slug "${item.slug}"). Lisää lempinimi tai erotin nimeen.`,
+          technical: `slug=${item.slug}`
+        });
+        return;
+      }
+      freshArr.push(item);
+    }
+
+    // ── Save. Mutate local state ONLY on success.
+    const ok = await saveJSON(PATH_MEMBERS, freshArr, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} jäsen: ${name}`, freshSha);
+    if (ok) {
+      membersData = freshArr;
+      closeModal('member-modal');
+      renderMembers();
+      toast('Jäsen tallennettu ✓', 'success');
+    }
+  } finally {
+    if (btn) { btn.textContent = 'Tallenna'; btn.disabled = false; }
   }
-
-  const sportsRaw = document.getElementById('mf-sports').value;
-  const sports    = sportsRaw.split(',').map(s => s.trim()).filter(Boolean);
-
-  // Always regenerate slug from current name
-  const newSlug = autoSlugFrom(name);
-  // For existing members, update slug only if name changed (keeps URLs stable for original members)
-  const currentSlug = editingIdx !== null ? membersData[editingIdx].slug : null;
-  const currentName = editingIdx !== null ? membersData[editingIdx].name : null;
-  const finalSlug   = currentSlug && currentName === name ? currentSlug : newSlug;
-  const item = {
-    slug: finalSlug,
-    name,
-    nickname:  document.getElementById('mf-nickname').value.trim() || null,
-    type:      document.getElementById('mf-type').value,
-    joined:    document.getElementById('mf-joined').value.trim()   || null,
-    started:   document.getElementById('mf-started').value.trim()  || null,
-    sports,
-    motto:     document.getElementById('mf-motto').value.trim()    || null,
-    bio:       document.getElementById('mf-bio').value.trim()      || null,
-    photo:     photoUrl,
-    achievements: editingIdx !== null ? membersData[editingIdx].achievements : [],
-    records:      editingIdx !== null ? membersData[editingIdx].records      : [],
-  };
-
-  if (editingIdx !== null) membersData[editingIdx] = item;
-  else membersData.push(item);
-
-  let memSha = null;
-  try { const f = await ghGet('data/jasenet.json'); memSha = f.sha; membersData = parseBase64Json(f.content); if (editingIdx !== null) membersData[editingIdx] = item; else if (!membersData.find(m => m.slug === item.slug)) membersData.push(item); } catch(_) {}
-  const ok = await saveJSON('data/jasenet.json', membersData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} jäsen: ${name}`, memSha);
-  if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen tallennettu ✓', 'success'); }
 }
 
 function deleteMember() {
   if (editingIdx === null) return;
-  confirm('Poista jäsen', `Poistetaanko "${membersData[editingIdx].name}"? Tätä ei voi peruuttaa.`, async () => {
+  // Capture slug NOW from current in-memory data — but we'll find it by slug, not index, in the fresh data (bug #4)
+  const targetSlug = membersData[editingIdx]?.slug;
+  const targetName = membersData[editingIdx]?.name;
+  if (!targetSlug) {
+    showError({ title: 'Slug puuttuu', msg: 'Jäsentä ei voi poistaa ilman slug-tunnistetta.', technical: '' });
+    return;
+  }
+  confirm('Poista jäsen', `Poistetaanko "${targetName}"? Tätä ei voi peruuttaa.`, async () => {
     try {
-      const fresh = await ghGet('data/jasenet.json');
-      membersData = parseBase64Json(fresh.content);
-      membersData.splice(editingIdx, 1);
-      const ok = await saveJSON('data/jasenet.json', membersData, `Admin: poista jäsen`, fresh.sha);
-      if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen poistettu', 'success'); }
-    } catch(e) { toast('Virhe: ' + e.message, 'error'); }
+      const fresh = await ghGet(PATH_MEMBERS);
+      let freshArr = parseBase64Json(fresh.content);
+      if (!Array.isArray(freshArr)) throw new Error('Members file is not an array');
+      // Bug #4: find by slug, not by stale index
+      const idx = freshArr.findIndex(m => m.slug === targetSlug);
+      if (idx < 0) {
+        showError({
+          title: 'Jäsen on jo poistettu',
+          msg: 'Jäsen ei ole repositoriossa. Joku muu on jo poistanut sen.',
+          technical: `slug=${targetSlug}`
+        });
+        return;
+      }
+      freshArr.splice(idx, 1);
+      const ok = await saveJSON(PATH_MEMBERS, freshArr, `Admin: poista jäsen: ${targetName}`, fresh.sha);
+      if (ok) {
+        membersData = freshArr;
+        closeModal('member-modal');
+        renderMembers();
+        toast('Jäsen poistettu', 'success');
+      }
+    } catch(e) {
+      showError(e, PATH_MEMBERS);
+    }
   });
 }
 
@@ -1483,21 +2163,25 @@ function rteLink() {
 
 // ── Sync status ──────────────────────────────────────────────────────────────
 function updateSyncCounts() {
-  document.getElementById('sync-news-count').textContent    = newsData.length    + ' artikkelia';
+  const hot = window._hotNewsCount ?? newsData.filter(a => !a.__archived).length;
+  const arc = window._archiveNewsCount ?? newsData.filter(a => a.__archived).length;
+  const newsLine = arc > 0
+    ? `${hot} aktiivista + ${arc} arkistoitua`
+    : `${hot} artikkelia`;
+  document.getElementById('sync-news-count').textContent    = newsLine;
   document.getElementById('sync-events-count').textContent  = eventsData.length  + ' tapahtumaa';
   document.getElementById('sync-members-count').textContent = membersData.length + ' jäsentä';
 }
 
 async function checkSyncStatus() {
   const files = [
-    { path: 'data/uutiset.json',    statusId: 'sync-news-status' },
-    { path: 'data/tapahtumat.json', statusId: 'sync-events-status' },
-    { path: 'data/jasenet.json',    statusId: 'sync-members-status' },
+    { path: PATH_NEWS_HOT,  statusId: 'sync-news-status' },
+    { path: PATH_EVENTS,    statusId: 'sync-events-status' },
+    { path: PATH_MEMBERS,   statusId: 'sync-members-status' },
   ];
   for (const f of files) {
     try {
-      const info = await ghGet(f.path);
-      const d = new Date(info.last_modified || info.commit?.committer?.date || Date.now());
+      await ghGet(f.path);
       document.getElementById(f.statusId).textContent = '✓ OK';
       document.getElementById(f.statusId).style.color = 'var(--green)';
     } catch(e) {
@@ -1511,7 +2195,9 @@ async function checkSyncStatus() {
 function autoSlugFrom(title) {
   return (title||'').toLowerCase()
     .replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a')
-    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/-+/g,'-')        // bug #17: collapse multiple dashes (matches autoSlug)
+    .replace(/^-|-$/g,'');
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('open'); pendingImg = null; }
@@ -1631,24 +2317,63 @@ function rteLink2() {
 
 
 // ── Delete news ───────────────────────────────────────────────────────────────
+// Searches both hot and archive files, deletes from whichever contains the slug.
 function deleteNews(elOrSlug, title) {
   const slug = typeof elOrSlug === 'string' ? elOrSlug : elOrSlug.dataset.slug;
   title = (typeof elOrSlug === 'string' ? title : elOrSlug.dataset.title) || 'tämä uutinen';
+  if (!slug) {
+    showError({ title: 'Slug puuttuu', msg: 'Uutista ei voi poistaa ilman slug-tunnistetta.', technical: '' });
+    return;
+  }
   confirm('Poista uutinen', `Poistetaanko "${title}"? Tätä ei voi peruuttaa.`, async () => {
     try {
-      const fresh = await ghGet('data/uutiset.json');
-      const all = parseBase64Json(fresh.content);
-      const fi = all.findIndex(a => a.slug === slug);
-      if (fi >= 0) all.splice(fi, 1);
-      const ok = await saveJSON('data/uutiset.json', all, `Admin: poista uutinen: ${title}`, fresh.sha);
-      if (ok) {
-        newsData = all;
-        renderNews();
-        renderDashboard();
-        toast('Uutinen poistettu', 'success');
+      // Try hot first
+      const fresh = await ghGet(PATH_NEWS_HOT);
+      let arr = parseBase64Json(fresh.content);
+      if (!Array.isArray(arr)) throw new Error('Hot file is not an array');
+      let idx = arr.findIndex(a => a.slug === slug);
+      if (idx >= 0) {
+        arr.splice(idx, 1);
+        const ok = await saveJSON(PATH_NEWS_HOT, arr, `Admin: poista uutinen: ${title}`, fresh.sha);
+        if (ok) {
+          newsData = newsData.filter(a => a.slug !== slug);
+          window._hotNewsCount = arr.length;
+          renderNews();
+          renderDashboard();
+          updateArchiveInfo();
+          toast('Uutinen poistettu', 'success');
+        }
+        return;
       }
+      // Not in hot — try archive
+      try {
+        const arc = await ghGet(PATH_NEWS_ARCHIVE);
+        let arcArr = parseBase64Json(arc.content);
+        if (!Array.isArray(arcArr)) throw new Error('Archive file is not an array');
+        const arcIdx = arcArr.findIndex(a => a.slug === slug);
+        if (arcIdx >= 0) {
+          arcArr.splice(arcIdx, 1);
+          const ok = await saveJSON(PATH_NEWS_ARCHIVE, arcArr, `Admin: poista uutinen (arkisto): ${title}`, arc.sha);
+          if (ok) {
+            newsData = newsData.filter(a => a.slug !== slug);
+            window._archiveNewsCount = arcArr.length;
+            renderNews();
+            renderDashboard();
+            updateArchiveInfo();
+            toast('Uutinen poistettu arkistosta', 'success');
+          }
+          return;
+        }
+      } catch(arcErr) {
+        if (!(arcErr instanceof GhError && arcErr.status === 404)) throw arcErr;
+      }
+      showError({
+        title: 'Uutista ei löydy',
+        msg: 'Uutinen on jo poistettu repositoriosta tai sitä ei löydy hot- eikä arkistotiedostosta.',
+        technical: `slug=${slug}`
+      });
     } catch(e) {
-      toast('Virhe: ' + e.message, 'error');
+      showError(e, 'uutisen poisto');
     }
   });
 }
@@ -1657,23 +2382,438 @@ function deleteNews(elOrSlug, title) {
 function deleteEvent(elOrSlug, name) {
   const slug = typeof elOrSlug === 'string' ? elOrSlug : elOrSlug.dataset.slug;
   name = (typeof elOrSlug === 'string' ? name : elOrSlug.dataset.name) || 'tämä tapahtuma';
+  if (!slug) {
+    showError({ title: 'Slug puuttuu', msg: 'Tapahtumaa ei voi poistaa ilman slug-tunnistetta.', technical: '' });
+    return;
+  }
   confirm('Poista tapahtuma', `Poistetaanko "${name}"? Tätä ei voi peruuttaa.`, async () => {
     try {
-      const fresh = await ghGet('data/tapahtumat.json');
-      const all = parseBase64Json(fresh.content);
-      const fi = all.findIndex(e => e.slug === slug);
-      if (fi >= 0) all.splice(fi, 1);
-      const ok = await saveJSON('data/tapahtumat.json', all, `Admin: poista tapahtuma: ${name}`, fresh.sha);
+      const fresh = await ghGet(PATH_EVENTS);
+      let arr = parseBase64Json(fresh.content);
+      if (!Array.isArray(arr)) throw new Error('Events file is not an array');
+      const idx = arr.findIndex(e => e.slug === slug);
+      if (idx < 0) {
+        showError({
+          title: 'Tapahtumaa ei löydy',
+          msg: 'Tapahtuma on jo poistettu repositoriosta.',
+          technical: `slug=${slug}`
+        });
+        return;
+      }
+      arr.splice(idx, 1);
+      const ok = await saveJSON(PATH_EVENTS, arr, `Admin: poista tapahtuma: ${name}`, fresh.sha);
       if (ok) {
-        eventsData = all;
+        eventsData = arr;
         renderEvents('upcoming');
         toast('Tapahtuma poistettu', 'success');
       }
     } catch(e) {
-      toast('Virhe: ' + e.message, 'error');
+      showError(e, 'tapahtuman poisto');
     }
   });
 }
+// ────────────────────────────────────────────────────────────────────────────
+// ── Archive feature: split news into hot / archive ─────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
+//
+// Strategy:
+//  - "Hot" = current year + previous year + undated articles (always stay hot)
+//  - "Archive" = everything older
+//
+// Date parsing: news.date is a Finnish-formatted string "5.5.2026" (D.M.YYYY).
+// We extract the year. If we can't parse it, the article stays in HOT (safe default).
+//
+// Operation flow:
+//   1. Read fresh hot file from GitHub
+//   2. Read fresh archive file (or initialize empty if 404)
+//   3. Partition hot into kept/movedToArchive
+//   4. Compute new archive (existing + moved), deduplicated by slug
+//   5. Write timestamped backup file (uutiset-backup-YYYY-MM-DD.json) to repo
+//   6. Write archive
+//   7. Write trimmed hot
+//   8. Reload all data
+//
+// All writes are sequential. If step 5 fails, we abort. If step 6 fails after backup,
+// we abort and tell the user to delete the backup. If step 7 fails, hot still has
+// everything (archive has duplicates which the un-archive will resolve).
+
+function parseNewsYear(article) {
+  // Accept "D.M.YYYY", "DD.MM.YYYY"
+  const m = (article?.date || '').match(/\b(\d{4})\b/);
+  return m ? parseInt(m[1]) : null;
+}
+
+function partitionNewsByYear(articles, hotCutoffYear) {
+  // hotCutoffYear = the EARLIEST year that stays hot (e.g. 2025 means 2025+2026 stay hot)
+  const hot = [], archive = [];
+  for (const a of articles) {
+    const y = parseNewsYear(a);
+    if (y === null) {
+      // Undated: stay hot (per user's instruction — better than burying recent articles)
+      hot.push(a);
+    } else if (y >= hotCutoffYear) {
+      hot.push(a);
+    } else {
+      archive.push(a);
+    }
+  }
+  return { hot, archive };
+}
+
+// Strip the admin-only __archived flag before persisting
+function stripArchivedFlag(arr) {
+  return arr.map(a => { const { __archived, ...rest } = a; return rest; });
+}
+
+async function getArchiveStats() {
+  // Returns { hotCount, archiveCount, toArchive, hotAfter, hotSizeBefore, hotSizeAfter, archiveSizeAfter }
+  // Tries to use cached data first; falls back to fresh fetch.
+  const hotItems = newsData.filter(a => !a.__archived);
+  const archiveItems = newsData.filter(a => a.__archived);
+
+  const cutoff = getHotYearCutoff(); // e.g. 2025
+  const { hot: keepInHot, archive: toMove } = partitionNewsByYear(stripArchivedFlag(hotItems), cutoff);
+
+  const hotJsonNow   = JSON.stringify(stripArchivedFlag(hotItems), null, 2);
+  const hotJsonAfter = JSON.stringify(keepInHot, null, 2);
+  const archiveAfter = [...stripArchivedFlag(archiveItems), ...toMove];
+  // Dedupe by slug (in case an old article was edited and somehow lives in both)
+  const seen = new Set();
+  const archiveDedup = archiveAfter.filter(a => {
+    if (seen.has(a.slug)) return false;
+    seen.add(a.slug);
+    return true;
+  });
+  const archiveJsonAfter = JSON.stringify(archiveDedup, null, 2);
+
+  return {
+    hotCount: hotItems.length,
+    archiveCount: archiveItems.length,
+    toArchive: toMove.length,
+    hotAfter: keepInHot.length,
+    hotSizeBefore: new Blob([hotJsonNow]).size,
+    hotSizeAfter: new Blob([hotJsonAfter]).size,
+    archiveSizeAfter: new Blob([archiveJsonAfter]).size,
+    cutoff,
+    keepInHot,
+    archiveDedup
+  };
+}
+
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024*1024) return (n / 1024).toFixed(1).replace(/\.0$/, '') + ' KB';
+  return (n / (1024*1024)).toFixed(2) + ' MB';
+}
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// ── Archive maintenance info on the sync page ─────────────────────────────────
+function updateArchiveInfo() {
+  const hot = window._hotNewsCount ?? newsData.filter(a => !a.__archived).length;
+  const arc = window._archiveNewsCount ?? 0;
+  document.getElementById('archive-info').textContent = arc > 0
+    ? `${arc} arkistoitua, ${hot} aktiivista`
+    : `${hot} aktiivista (ei arkistoa vielä)`;
+  document.getElementById('unarchive-info').textContent = arc > 0
+    ? `Palauttaa ${arc} artikkelia takaisin pääpinoon`
+    : 'Ei arkistoituja uutisia';
+}
+
+// ── Archive modal ─────────────────────────────────────────────────────────────
+async function openArchiveModal() {
+  // Populate modal with current stats
+  const body = document.getElementById('archive-modal-body');
+  document.getElementById('archive-modal-title').textContent = 'Arkistoi vanhat uutiset';
+  document.getElementById('archive-confirm-word').textContent = 'ARKISTOI';
+  document.getElementById('archive-confirm-input').value = '';
+  document.getElementById('archive-confirm-btn').disabled = true;
+  document.getElementById('archive-confirm-btn').onclick = executeArchive;
+
+  body.innerHTML = '<p>Lasketaan…</p>';
+  document.getElementById('archive-modal').classList.add('open');
+
+  try {
+    const s = await getArchiveStats();
+    if (s.toArchive === 0) {
+      body.innerHTML = `
+        <p style="color:var(--text)">Ei arkistoitavaa.</p>
+        <p style="margin-top:8px;color:var(--text3)">Kaikki uutiset ovat vuodelta ${s.cutoff} tai uudempia, joten ne pidetään aktiivisina. Aktiivisia: <strong>${s.hotCount}</strong>. Hot-tiedoston koko: <strong>${fmtBytes(s.hotSizeBefore)}</strong>.</p>
+      `;
+      // Disable input — nothing to confirm
+      document.getElementById('archive-confirm-input').disabled = true;
+      return;
+    }
+    body.innerHTML = `
+      <p>Tämä toiminto siirtää <strong>vuotta ${s.cutoff} vanhemmat</strong> uutiset arkistoon (<code>${PATH_NEWS_ARCHIVE}</code>).</p>
+
+      <div style="margin:16px 0;padding:12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2)">
+        <table style="width:100%;font-size:12px;border-collapse:collapse">
+          <tr><td style="padding:4px 0;color:var(--text3)">Siirrettäviä uutisia:</td><td style="text-align:right;color:var(--gold);font-weight:600">${s.toArchive}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Säilyy aktiivisena:</td><td style="text-align:right">${s.hotAfter}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Hot-tiedoston koko ennen:</td><td style="text-align:right">${fmtBytes(s.hotSizeBefore)}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Hot-tiedoston koko jälkeen:</td><td style="text-align:right;color:var(--green)">${fmtBytes(s.hotSizeAfter)}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Arkiston koko jälkeen:</td><td style="text-align:right">${fmtBytes(s.archiveSizeAfter)}</td></tr>
+        </table>
+      </div>
+
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">
+        <div style="margin-bottom:6px"><span style="color:var(--green)">✓</span> Arkistoidut uutiset näkyvät sivustolla normaalisti</div>
+        <div style="margin-bottom:6px"><span style="color:var(--green)">✓</span> Niitä voi yhä muokata ja poistaa admin-työkalulla</div>
+        <div style="margin-bottom:6px"><span style="color:var(--green)">✓</span> Public-sivut latautuvat nopeammin (lataavat vain hot-tiedoston)</div>
+        <div style="margin-bottom:6px"><span style="color:var(--green)">✓</span> Toiminto on peruutettavissa "Palauta arkistosta" -painikkeella</div>
+      </div>
+
+      <div style="margin-top:14px;padding:10px;background:var(--bg);border-left:3px solid var(--gold);border-radius:4px;font-size:12px;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--gold)">Huom:</strong> Toiminto luo myös kertaluontoisen varmuuskopion <code>data/uutiset-backup-${todayISO()}.json</code>. Voit poistaa tiedoston repositoriosta arkistoinnin onnistumisen jälkeen.
+      </div>
+    `;
+  } catch(e) {
+    body.innerHTML = `<p style="color:var(--danger)">Virhe laskennassa: ${e.message}</p>`;
+  }
+}
+
+function updateArchiveConfirm() {
+  const input = document.getElementById('archive-confirm-input');
+  const word  = document.getElementById('archive-confirm-word').textContent;
+  const btn   = document.getElementById('archive-confirm-btn');
+  btn.disabled = input.value.trim() !== word;
+}
+
+async function executeArchive() {
+  closeModal('archive-modal');
+  adminLock('Arkistoidaan…');
+
+  try {
+    // ── Step 1: Re-fetch hot fresh ───────────────────────────────────────
+    adminProgress('Luetaan uutiset…');
+    const freshHot = await ghGet(PATH_NEWS_HOT);
+    const hotArr = parseBase64Json(freshHot.content);
+    if (!Array.isArray(hotArr)) throw new Error('Hot file is not an array');
+
+    // ── Step 2: Re-fetch archive (or empty) ──────────────────────────────
+    let arcArr = [];
+    let arcSha = null;
+    try {
+      const freshArc = await ghGet(PATH_NEWS_ARCHIVE);
+      arcArr = parseBase64Json(freshArc.content);
+      arcSha = freshArc.sha;
+      if (!Array.isArray(arcArr)) throw new Error('Archive file is not an array');
+    } catch(e) {
+      if (!(e instanceof GhError && e.status === 404)) throw e;
+      // 404 = first-time archive, leave arcArr=[] and arcSha=null
+    }
+
+    // ── Step 3: Partition ─────────────────────────────────────────────────
+    adminProgress('Lasketaan jako…');
+    const cutoff = getHotYearCutoff();
+    const { hot: keepInHot, archive: moveToArchive } = partitionNewsByYear(hotArr, cutoff);
+
+    if (moveToArchive.length === 0) {
+      adminUnlock();
+      toast('Ei arkistoitavaa', 'success');
+      return;
+    }
+
+    // ── Step 4: Build new archive (existing + moved), dedupe by slug ─────
+    const combined = [...arcArr, ...moveToArchive];
+    const seen = new Set();
+    const newArchive = combined.filter(a => {
+      if (seen.has(a.slug)) return false;
+      seen.add(a.slug);
+      return true;
+    });
+
+    // ── Step 5: Write backup of pre-archive hot ───────────────────────────
+    adminProgress('Kirjoitetaan varmuuskopio…');
+    const backupPath = `data/uutiset-backup-${todayISO()}.json`;
+    const backupMsg = `Admin: arkistoinnin varmuuskopio (${hotArr.length} uutista)`;
+    // If a backup with the same date already exists, append a counter
+    let finalBackupPath = backupPath;
+    try {
+      await ghGet(backupPath);
+      // Exists — find a new name
+      for (let i = 2; i < 100; i++) {
+        const candidate = `data/uutiset-backup-${todayISO()}-${i}.json`;
+        try { await ghGet(candidate); } catch(e) {
+          if (e instanceof GhError && e.status === 404) { finalBackupPath = candidate; break; }
+          throw e;
+        }
+      }
+    } catch(e) {
+      if (!(e instanceof GhError && e.status === 404)) throw e;
+      // 404 = doesn't exist, perfect, use as-is
+    }
+    // Direct ghPut (no SHA — creating new file)
+    await ghPut(finalBackupPath, JSON.stringify(hotArr, null, 2), backupMsg);
+
+    // ── Step 6: Write archive ─────────────────────────────────────────────
+    adminProgress('Tallennetaan arkisto…');
+    await ghPut(PATH_NEWS_ARCHIVE, JSON.stringify(newArchive, null, 2),
+                `Admin: arkistoi ${moveToArchive.length} uutista`, arcSha);
+
+    // ── Step 7: Write trimmed hot ─────────────────────────────────────────
+    adminProgress('Tallennetaan aktiiviset…');
+    await ghPut(PATH_NEWS_HOT, JSON.stringify(keepInHot, null, 2),
+                `Admin: trimmaa hot-tiedosto (${keepInHot.length} uutista)`, freshHot.sha);
+
+    // ── Step 8: Reload ────────────────────────────────────────────────────
+    adminProgress('Päivitetään näkymä…');
+    await loadAllData();
+
+    toast(`Arkistoitu ${moveToArchive.length} uutista. Varmuuskopio: ${finalBackupPath}`, 'success');
+  } catch(e) {
+    showError(e, 'arkistointi');
+  } finally {
+    adminUnlock();
+  }
+}
+
+// ── Un-archive modal ──────────────────────────────────────────────────────────
+async function openUnarchiveModal() {
+  document.getElementById('archive-modal-title').textContent = 'Palauta arkistosta';
+  document.getElementById('archive-confirm-word').textContent = 'PALAUTA';
+  document.getElementById('archive-confirm-input').value = '';
+  document.getElementById('archive-confirm-input').disabled = false;
+  document.getElementById('archive-confirm-btn').disabled = true;
+  document.getElementById('archive-confirm-btn').onclick = executeUnarchive;
+
+  const body = document.getElementById('archive-modal-body');
+  body.innerHTML = '<p>Lasketaan…</p>';
+  document.getElementById('archive-modal').classList.add('open');
+
+  try {
+    let arcArr = [];
+    try {
+      const f = await ghGet(PATH_NEWS_ARCHIVE);
+      arcArr = parseBase64Json(f.content);
+    } catch(e) {
+      if (!(e instanceof GhError && e.status === 404)) throw e;
+    }
+
+    if (!Array.isArray(arcArr) || arcArr.length === 0) {
+      body.innerHTML = '<p>Arkistossa ei ole mitään palautettavaa.</p>';
+      document.getElementById('archive-confirm-input').disabled = true;
+      return;
+    }
+
+    const hotArr = await ghGet(PATH_NEWS_HOT).then(f => parseBase64Json(f.content));
+    const merged = [...arcArr, ...hotArr];
+    const seen = new Set();
+    const dedup = merged.filter(a => {
+      if (seen.has(a.slug)) return false;
+      seen.add(a.slug);
+      return true;
+    });
+    const mergedJson = JSON.stringify(dedup, null, 2);
+    const mergedSize = new Blob([mergedJson]).size;
+    const willHitLimit = mergedSize > 900_000; // ~900 KB warning threshold
+
+    body.innerHTML = `
+      <p>Tämä toiminto siirtää <strong>kaikki ${arcArr.length} arkistoitua uutista</strong> takaisin aktiiviseen pääpinoon.</p>
+
+      <div style="margin:16px 0;padding:12px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border2)">
+        <table style="width:100%;font-size:12px;border-collapse:collapse">
+          <tr><td style="padding:4px 0;color:var(--text3)">Arkistossa nyt:</td><td style="text-align:right;font-weight:600">${arcArr.length}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Aktiivisena nyt:</td><td style="text-align:right">${hotArr.length}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Aktiivisena jälkeen:</td><td style="text-align:right;color:var(--gold);font-weight:600">${dedup.length}</td></tr>
+          <tr><td style="padding:4px 0;color:var(--text3)">Hot-tiedoston koko jälkeen:</td><td style="text-align:right;${willHitLimit ? 'color:var(--danger);font-weight:600' : ''}">${fmtBytes(mergedSize)}${willHitLimit ? ' ⚠' : ''}</td></tr>
+        </table>
+      </div>
+
+      ${willHitLimit ? `
+      <div style="padding:10px;background:var(--danger-bg);border-left:3px solid var(--danger);border-radius:4px;font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">
+        <strong style="color:var(--danger)">Varoitus:</strong> Yhdistetty tiedosto on lähellä GitHub Contents API:n 1 MB:n rajaa. Palauttaminen voi epäonnistua.
+      </div>` : ''}
+
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">
+        <div style="margin-bottom:6px"><span style="color:var(--text3)">→</span> Arkistotiedosto tyhjennetään (säilyy mutta on tyhjä)</div>
+        <div style="margin-bottom:6px"><span style="color:var(--text3)">→</span> Kaikki uutiset ovat taas hot-tiedostossa</div>
+      </div>
+
+      <div style="margin-top:14px;padding:10px;background:var(--bg);border-left:3px solid var(--gold);border-radius:4px;font-size:12px;color:var(--text2);line-height:1.6">
+        <strong style="color:var(--gold)">Huom:</strong> Toiminto luo varmuuskopion <code>data/uutiset-archive-backup-${todayISO()}.json</code> ennen muutoksia.
+      </div>
+    `;
+  } catch(e) {
+    body.innerHTML = `<p style="color:var(--danger)">Virhe laskennassa: ${e.message}</p>`;
+  }
+}
+
+async function executeUnarchive() {
+  closeModal('archive-modal');
+  adminLock('Palautetaan…');
+
+  try {
+    adminProgress('Luetaan arkisto…');
+    const freshArc = await ghGet(PATH_NEWS_ARCHIVE);
+    const arcArr = parseBase64Json(freshArc.content);
+    if (!Array.isArray(arcArr)) throw new Error('Archive file is not an array');
+    if (arcArr.length === 0) {
+      adminUnlock();
+      toast('Arkisto on jo tyhjä', 'success');
+      return;
+    }
+
+    adminProgress('Luetaan hot-tiedosto…');
+    const freshHot = await ghGet(PATH_NEWS_HOT);
+    const hotArr = parseBase64Json(freshHot.content);
+    if (!Array.isArray(hotArr)) throw new Error('Hot file is not an array');
+
+    // Merge: archive first, then hot — dedupe by slug, hot wins on conflict
+    adminProgress('Yhdistetään…');
+    const seen = new Set();
+    const hotSlugs = new Set(hotArr.map(a => a.slug));
+    const merged = [
+      ...arcArr.filter(a => !hotSlugs.has(a.slug)).filter(a => !seen.has(a.slug) && (seen.add(a.slug), true)),
+      ...hotArr
+    ];
+    // Re-dedupe defensively
+    seen.clear();
+    const finalMerged = merged.filter(a => seen.has(a.slug) ? false : (seen.add(a.slug), true));
+
+    // Backup archive before clearing
+    adminProgress('Kirjoitetaan varmuuskopio…');
+    const backupPath = `data/uutiset-archive-backup-${todayISO()}.json`;
+    let finalBackupPath = backupPath;
+    try {
+      await ghGet(backupPath);
+      for (let i = 2; i < 100; i++) {
+        const candidate = `data/uutiset-archive-backup-${todayISO()}-${i}.json`;
+        try { await ghGet(candidate); } catch(e) {
+          if (e instanceof GhError && e.status === 404) { finalBackupPath = candidate; break; }
+          throw e;
+        }
+      }
+    } catch(e) {
+      if (!(e instanceof GhError && e.status === 404)) throw e;
+    }
+    await ghPut(finalBackupPath, JSON.stringify(arcArr, null, 2),
+                `Admin: arkiston palautuksen varmuuskopio`);
+
+    // Clear archive
+    adminProgress('Tyhjennetään arkisto…');
+    await ghPut(PATH_NEWS_ARCHIVE, JSON.stringify([], null, 2),
+                `Admin: tyhjennä arkisto (palautus)`, freshArc.sha);
+
+    // Write merged hot
+    adminProgress('Tallennetaan aktiiviset…');
+    await ghPut(PATH_NEWS_HOT, JSON.stringify(finalMerged, null, 2),
+                `Admin: palauta arkistosta (${arcArr.length} uutista)`, freshHot.sha);
+
+    adminProgress('Päivitetään näkymä…');
+    await loadAllData();
+
+    toast(`Palautettu ${arcArr.length} uutista. Varmuuskopio: ${finalBackupPath}`, 'success');
+  } catch(e) {
+    showError(e, 'palautus');
+  } finally {
+    adminUnlock();
+  }
+}
+
 </script>
 
 <!-- ── Image Picker Modal ──────────────────────────────────────────────────── -->

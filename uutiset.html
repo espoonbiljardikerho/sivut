@@ -963,16 +963,55 @@ html { font-size: 120%; }
 
   // ── Fetch & load ─────────────────────────────────────────────────────────────
 
-  // ── Load all articles from JSON at startup ───────────────────────────────
-  let jsonArticles = [];
+  // ── Load hot articles from JSON at startup; lazy-load archive on demand ──
+  // Hot file = data/uutiset.json (recent ~2 years), Archive = data/uutiset-archive.json (older)
+  let jsonArticles = [];   // current dataset shown to user (hot only or hot+archive)
+  let archiveLoaded = false;
+  let archiveLoading = null; // promise during in-flight archive fetch
+
+  async function loadArchiveIfNeeded() {
+    if (archiveLoaded) return;
+    if (archiveLoading) return archiveLoading;
+    archiveLoading = (async () => {
+      try {
+        const resp = await fetch('data/uutiset-archive.json?v=' + Date.now());
+        if (!resp.ok) {
+          // 404 is fine — no archive yet
+          if (resp.status === 404) { archiveLoaded = true; return; }
+          throw new Error(`Archive HTTP ${resp.status}`);
+        }
+        const arc = await resp.json();
+        if (Array.isArray(arc) && arc.length) {
+          // Append archive to existing hot articles. Hot is already sorted newest-first;
+          // archive is older, so just append. Dedupe by slug for safety.
+          const seen = new Set(jsonArticles.map(a => a.slug));
+          for (const a of arc) {
+            if (!seen.has(a.slug)) {
+              jsonArticles.push(a);
+              seen.add(a.slug);
+            }
+          }
+        }
+        archiveLoaded = true;
+      } catch(e) {
+        console.warn('Archive load failed:', e);
+        // Mark as loaded anyway so we don't keep retrying — user can still see hot
+        archiveLoaded = true;
+      } finally {
+        archiveLoading = null;
+      }
+    })();
+    return archiveLoading;
+  }
+
   (async () => {
     try {
       const resp = await fetch('data/uutiset.json?v=' + Date.now());
       jsonArticles = await resp.json();
-      console.log(`Loaded ${jsonArticles.length} articles from JSON`);
+      console.log(`Loaded ${jsonArticles.length} articles from hot JSON`);
       loadPage(1);
     } catch(e) {
-      console.warn('uutiset.json failed, falling back to live scrape', e);
+      console.warn('uutiset.json failed', e);
       loadPage(1);
     }
   })();
@@ -983,11 +1022,45 @@ html { font-size: 120%; }
 
     // ── Serve from local JSON if available ──────────────────────────────
     if (jsonArticles.length) {
-      const filtered = activeTag === 'all'
+      // Filter against current dataset (which may include archive if it's been loaded)
+      let filtered = activeTag === 'all'
         ? jsonArticles
         : jsonArticles.filter(a => a.tag === activeTag);
 
-      const totalPages = Math.ceil(filtered.length / PER_PAGE);
+      let totalPages = Math.ceil(filtered.length / PER_PAGE);
+
+      // ── Lazy-load archive when needed ──────────────────────────────────
+      // Trigger 1: requested page is beyond what hot can serve
+      // Trigger 2: filtered tag has very few results (archive may help)
+      const needsArchive =
+        !archiveLoaded && (
+          page > totalPages ||
+          (activeTag !== 'all' && filtered.length < PER_PAGE * 2)
+        );
+
+      if (needsArchive) {
+        // Show a brief "loading more" indicator if archive load takes a moment
+        const loadingTimer = setTimeout(() => {
+          if (grid && !archiveLoaded) {
+            // Only show if still loading — soft hint, doesn't replace existing content
+            const hint = document.createElement('div');
+            hint.id = 'archive-loading-hint';
+            hint.style.cssText = 'grid-column:1/-1;padding:12px;text-align:center;color:var(--text-muted);font-size:13px';
+            hint.textContent = 'Ladataan vanhempia uutisia…';
+            if (!document.getElementById('archive-loading-hint')) grid.appendChild(hint);
+          }
+        }, 200);
+        await loadArchiveIfNeeded();
+        clearTimeout(loadingTimer);
+        document.getElementById('archive-loading-hint')?.remove();
+
+        // Recompute filter/totalPages with newly-loaded archive
+        filtered = activeTag === 'all'
+          ? jsonArticles
+          : jsonArticles.filter(a => a.tag === activeTag);
+        totalPages = Math.ceil(filtered.length / PER_PAGE);
+      }
+
       // Clamp page to valid range when filter reduces total pages
       const safePage = Math.min(Math.max(1, page), totalPages || 1);
       if (safePage !== page) { currentPage = safePage; }
