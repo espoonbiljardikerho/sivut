@@ -259,8 +259,13 @@
     "capacity": null,
     "participants": [],
     "detail": {
-      "description": "Ilmoittautuneet:1. Pauli Wigelius2. Jarno Ahola3.4.5.6."
-    }
+      "deadline": null,
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "Ilmoittautuneet:<br>1. Pauli Wigelius<br>2. Jarno Ahola<br>3.<br>4.<br>5.<br>6."
+    },
+    "schedule": [],
+    "organizer": null
   },
   {
     "slug": "klubin-karasarja-2026",
