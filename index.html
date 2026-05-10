@@ -1553,48 +1553,47 @@ html { font-size: 112%; }
   try {
     const resp   = await fetch('data/tapahtumat.json?v=' + Date.now());
     const events = await resp.json();
-    const MONTHS_SORT = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
-    // Show 5 soonest upcoming events by date
+    const MONTHS_SHORT = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'];
+
+    // Show 5 soonest upcoming events — ISO dates sort correctly as strings
     const upcoming = events
-      .filter(e => !e.isPast)
-      .sort((a, b) => {
-        const da = a.dateInfo, db = b.dateInfo;
-        if (!da) return 1; if (!db) return -1;
-        const ya = parseInt(da.year)||2026, yb = parseInt(db.year)||2026;
-        const ma = MONTHS_SORT.indexOf(da.month), mb = MONTHS_SORT.indexOf(db.month);
-        const ddA = parseInt(da.day)||1, ddB = parseInt(db.day)||1;
-        return ya !== yb ? ya - yb : ma !== mb ? ma - mb : ddA - ddB;
-      })
+      .filter(e => !e.isPast && e.startDate)
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))
       .slice(0, 5);
 
     const TAG_CSS = {Kaisa:'b-kaisa',Pool:'b-pool',Snooker:'b-snooker',Kara:'b-kara',Pyramidi:'b-pyramidi'};
 
-    function makeSlug(name) {
-      return (name||'').toLowerCase()
-        .replace(/ä/g,'a').replace(/ö/g,'o').replace(/å/g,'a')
-        .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    }
-
     function evtHTML(e, isMobile) {
-      const d   = e.dateInfo || {};
-      const tag = e.tag || 'Kaisa';
-      const cls = TAG_CSS[tag] || 'b-kaisa';
-      const slug = e.slug || makeSlug(e.name);
-      const sub  = [d.raw || null, e.time, e.fee].filter(Boolean).join(' · ');
-      const dateLabel = d.isSeries ? (d.startLabel || '') : '';
-      const dayDisplay = d.raw ? d.raw.match(/^(\d{1,2})/)?.[1] || '—' : (d.day || '—');
-      const moDisplay  = d.raw ? '' : (d.month || '');
+      const tag  = e.tag || 'Kaisa';
+      const cls  = TAG_CSS[tag] || 'b-kaisa';
+      const slug = e.slug;
+
+      // Parse startDate for display
+      const [sy, sm, sd] = (e.startDate || '').split('-').map(Number);
+      const isSeries  = !!e.endDate;
+      const dayDisplay = isSeries ? 'Sarja' : (sd || '—');
+      const moDisplay  = isSeries ? '' : (MONTHS_SHORT[sm-1] || '');
+
+      // Sub row: date range or single date · time · fee
+      let dateStr = '';
+      if (isSeries) {
+        const [ey, em, ed] = (e.endDate || '').split('-').map(Number);
+        dateStr = `${sd}.${sm}–${ed}.${em}.${ey}`;
+      } else if (sd) {
+        dateStr = `${sd}.${sm}.${sy}`;
+      }
+      const sub = [dateStr, e.time ? `klo ${e.time}` : null, e.fee].filter(Boolean).join(' · ');
 
       if (isMobile) {
         return `<a href="tapahtumat.html#${slug}" style="display:grid;grid-template-columns:50px 1fr auto;gap:10px;align-items:center;padding:10px 12px;background:var(--surface-card);border-radius:8px;text-decoration:none;border:1px solid var(--border);color:inherit;">
-          <div class="evt-date"><div class="evt-day">${dayDisplay}</div><div class="evt-month">${moDisplay}</div></div>
+          <div class="evt-date"><div class="evt-day" style="${isSeries?'font-size:10px;':''}"> ${dayDisplay}</div><div class="evt-month">${moDisplay}</div></div>
           <div><div class="evt-name">${e.name}</div>${sub?`<div class="evt-sub">${sub}</div>`:''}</div>
           <span class="ebadge ${cls}">${tag}</span>
         </a>`;
       }
       return `<a href="tapahtumat.html#${slug}" class="h-evt">
-        <div class="evt-date"><div class="evt-day">${dayDisplay}</div><div class="evt-month">${moDisplay}</div></div>
-        <div><div class="evt-name">${e.name}</div>${sub||dateLabel?`<div class="evt-sub">${[sub,dateLabel].filter(Boolean).join(' · ')}</div>`:''}</div>
+        <div class="evt-date"><div class="evt-day" style="${isSeries?'font-size:10px;font-family:\'DM Sans\',sans-serif;':''}">${dayDisplay}</div><div class="evt-month">${moDisplay}</div></div>
+        <div><div class="evt-name">${e.name}</div>${sub?`<div class="evt-sub">${sub}</div>`:''}</div>
         <span class="ebadge ${cls}">${tag}</span>
       </a>`;
     }
