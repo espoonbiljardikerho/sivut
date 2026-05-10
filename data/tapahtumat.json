@@ -455,18 +455,22 @@
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja/",
     "name": "Espoon 8-pallon tasoitussarja",
     "tag": "Pool",
-    "startDate": "2025-06-12",
-    "endDate": null,
+    "startDate": "2026-06-03",
+    "endDate": "2026-08-26",
     "time": null,
     "fee": null,
-    "isPast": true,
+    "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
     "capacity": null,
     "participants": [],
     "detail": {
-      "deadline": "Ke.4.6. klo 19:00 mennessä",
-      "description": "Tarkastelet mennyttä tapahtumaa."
-    }
+      "deadline": "Ke.3.6. klo 19:00 mennessä",
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "kutsu",
+      "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
+    },
+    "schedule": [],
+    "organizer": null
   },
   {
     "slug": "espoon-9-pallon-tasoitussarja",
