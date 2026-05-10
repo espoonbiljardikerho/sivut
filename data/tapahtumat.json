@@ -37,13 +37,37 @@
       {
         "name": "Osallistuja 3",
         "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 4",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 5",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 6",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 7",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 8",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 9",
+        "registeredAt": null
       }
     ],
     "detail": {
       "deadline": "12.5",
       "venue": "Espoon Biljardi Klubi",
       "participation": "jasenet",
-      "description": "testi pool event"
+      "description": "testi pool event<br><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div>"
     }
   },
   {
