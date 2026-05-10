@@ -1121,9 +1121,11 @@ html { font-size: 120%; }
       : part === 'kutsu'   ? `<span class="aud-badge aud-kutsu">✉ Kutsu</span>`
       : '';
 
-    // ── Deadline pill (always shown for upcoming; Päättynyt for past) ─────
-    // Series events: show "Ilm. auki" only if they have a deadline
-    const pill = deadlinePill(detail?.deadline, isPast);
+    // ── Deadline pill (hide if full) ─────────────────────────────────────
+    const isFull = capNum > 0 && capUsed >= capNum;
+    const pill = (!isFull && !isPast && !isSeries) ? deadlinePill(detail?.deadline, isPast)
+      : isPast ? deadlinePill(null, true)
+      : '';
 
     // ── Capacity bar ──────────────────────────────────────────────────────
     let capHTML = '';

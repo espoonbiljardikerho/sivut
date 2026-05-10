@@ -1174,7 +1174,6 @@ html { font-size: 120%; }
         </div>
         <div class="member-card-body">
           <div class="member-name">${cleanName}</div>
-          ${nickname ? `<div class="member-card-nick">${nickname}</div>` : ''}
         </div>
       </div>`;
   }
@@ -1216,17 +1215,6 @@ html { font-size: 120%; }
         }
       } else {
         container.innerHTML = `<div class="member-monogram-text member-monogram-nick">${m.nickname}</div>`;
-      }
-      // Also update card body nickname if not already rendered
-      const card = document.querySelector(`.member-card[data-slug="${m.slug}"]`);
-      if (card && !card.querySelector('.member-card-nick')) {
-        const body = card.querySelector('.member-card-body');
-        if (body) {
-          const nickEl = document.createElement('div');
-          nickEl.className = 'member-card-nick';
-          nickEl.textContent = m.nickname;
-          body.appendChild(nickEl);
-        }
       }
     });
     return; // no live fetch needed
