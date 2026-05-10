@@ -570,7 +570,6 @@
     </div>
     <div class="tabs" style="padding:0 20px;border-bottom:1px solid var(--border);margin-bottom:0;">
       <button class="tab-btn active" id="evt-tab-details" onclick="switchEvtTab('details')">Tiedot</button>
-      <button class="tab-btn" id="evt-tab-participants" onclick="switchEvtTab('participants')">Osallistujat</button>
     </div>
     <div class="modal-body">
       <!-- Details tab -->
@@ -589,11 +588,15 @@
           </div>
           <div class="field">
             <label>Alkamisaika</label>
-            <input type="text" id="ef-time" placeholder="klo 18:00">
+            <input type="text" id="ef-time" placeholder="18:00">
           </div>
           <div class="field">
-            <label>Päivämäärä <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:10px">(pv.kk.vvvv tai vapaateksti)</span></label>
-            <input type="text" id="ef-date" placeholder="13.6.2026">
+            <label>Alkaa *</label>
+            <input type="date" id="ef-date">
+          </div>
+          <div class="field">
+            <label>Päättyy <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:10px">jätä tyhjäksi yksittäiselle tapahtumalle</span></label>
+            <input type="date" id="ef-enddate">
           </div>
           <div class="field">
             <label>Osallistumismaksu</label>
@@ -605,7 +608,7 @@
           </div>
           <div class="field">
             <label>Pelipaikka</label>
-            <input type="text" id="ef-venue" placeholder="Espoon Biljardikerhon klubi">
+            <input type="text" id="ef-venue" placeholder="Espoon Biljardi Klubi" value="Espoon Biljardi Klubi">
           </div>
           <div class="field">
             <label>Kenelle</label>
@@ -623,8 +626,12 @@
             </select>
           </div>
           <div class="field">
-            <label>Paikkamäärä</label>
-            <input type="number" id="ef-capacity" placeholder="16" min="1">
+            <label>Paikkamäärä <span style="color:var(--text3);font-weight:400;text-transform:none;font-size:10px">käytetty/max</span></label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="number" id="ef-capacity-used" placeholder="0" min="0" style="width:70px;">
+              <span style="color:var(--text-muted)">/</span>
+              <input type="number" id="ef-capacity" placeholder="max" min="1" style="width:70px;">
+            </div>
           </div>
           <div class="field">
             <label>Järjestäjä — nimi</label>
@@ -662,17 +669,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <!-- Participants tab -->
-      <div id="evt-panel-participants" style="display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <div class="text-muted" style="font-size:12px">Hyväksytyt osallistujat</div>
-          <button class="btn btn-secondary btn-sm" onclick="addParticipantManual()">+ Lisää</button>
-        </div>
-        <table class="data-table" id="participants-table">
-          <thead><tr><th>#</th><th>Nimi</th><th>Lisätty</th><th style="width:60px"></th></tr></thead>
-          <tbody id="participants-tbody"></tbody>
-        </table>
       </div>
     </div>
     <div class="modal-footer">
@@ -1153,9 +1149,9 @@ function renderEvents(view) {
   const tbody = document.getElementById('events-tbody');
   tbody.innerHTML = items.length ? items.map(e => {
     const realIdx = eventsData.indexOf(e);
-    const dateStr = !e.dateInfo ? '—'
-      : e.dateInfo.raw ? e.dateInfo.raw
-      : [e.dateInfo.day, e.dateInfo.month, e.dateInfo.year].filter(Boolean).join(' ') || '—';
+    const dateStr = e.startDate
+      ? (e.endDate ? `${e.startDate} – ${e.endDate}` : e.startDate)
+      : '—';
     const fee     = e.fee || e.detail?.fee || '—';
     return `<tr>
       <td><strong>${e.name||'—'}</strong></td>
@@ -1191,22 +1187,18 @@ function openEventModal(idx) {
   document.getElementById('ef-time').value     = e?.time || '';
   document.getElementById('ef-fee').value      = e?.fee  || e?.detail?.fee || '';
   document.getElementById('ef-deadline').value = e?.detail?.deadline || '';
-  document.getElementById('ef-venue').value    = e?.detail?.venue    || '';
+  document.getElementById('ef-venue').value    = e?.detail?.venue || 'Espoon Biljardi Klubi';
   document.getElementById('ef-participation').value = e?.detail?.participation || 'jasenet';
-  document.getElementById('ef-ispast').value = String(e?.isPast || false);
-  document.getElementById('ef-capacity').value  = e?.capacity != null ? e.capacity : '';
+  document.getElementById('ef-ispast').value   = String(e?.isPast || false);
+  document.getElementById('ef-capacity').value = e?.capacity != null ? e.capacity : '';
+  document.getElementById('ef-capacity-used').value = e ? (e.participants || []).length : 0;
   document.getElementById('ef-org-name').value  = e?.organizer?.name  || '';
   document.getElementById('ef-org-email').value = e?.organizer?.email || '';
   document.getElementById('ef-schedule').value  = (e?.schedule || []).map(s => s.time + ' ' + s.label).join('\n');
   document.getElementById('ef-desc').innerHTML  = e?.detail?.description || '';
-  // Date
-  if (e?.dateInfo) {
-    const d = e.dateInfo;
-    document.getElementById('ef-date').value = d.raw || d.startLabel || `${d.day}.${MONTHS_FI.indexOf(d.month)+1}.${d.year}`;
-  } else {
-    document.getElementById('ef-date').value = '';
-  }
-  renderParticipantsTable(e?.participants || []);
+  // Dates — use ISO date fields directly
+  document.getElementById('ef-date').value    = e?.startDate || '';
+  document.getElementById('ef-enddate').value = e?.endDate   || '';
   switchEvtTab('details');
   pendingImg = null;
   document.getElementById('event-modal').classList.add('open');
@@ -1217,9 +1209,8 @@ async function saveEvent() {
   const name = document.getElementById('ef-name').value.trim();
   if (!name) { toast('Nimi on pakollinen', 'error'); return; }
 
-  const dateRaw = document.getElementById('ef-date').value.trim();
-  // Store date as raw text — no parsing, display as-is
-  const dateInfo = dateRaw ? { raw: dateRaw, day: null, month: null, year: null, isSeries: false } : null;
+  const startDate = document.getElementById('ef-date').value || null;
+  const endDate   = document.getElementById('ef-enddate').value || null;
 
   let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url : (editingIdx !== null ? eventsData[editingIdx]?.img : null);
   window._pickedImgUrl = null;
@@ -1235,27 +1226,36 @@ async function saveEvent() {
     return m ? { time: m[1], label: m[2] } : { time: '', label: l.trim() };
   }) : [];
 
-  const capVal = document.getElementById('ef-capacity').value.trim();
-  const orgName = document.getElementById('ef-org-name').value.trim();
+  const capMax  = parseInt(document.getElementById('ef-capacity').value.trim()) || null;
+  const capUsed = parseInt(document.getElementById('ef-capacity-used').value.trim()) || 0;
+  const orgName  = document.getElementById('ef-org-name').value.trim();
   const orgEmail = document.getElementById('ef-org-email').value.trim();
 
-  // Preserve existing participants when editing
-  const existingParticipants = editingIdx !== null ? (eventsData[editingIdx]?.participants || []) : [];
+  // Build participants array from used count — preserve existing entries, pad/trim as needed
+  let participants = editingIdx !== null ? (eventsData[editingIdx]?.participants || []) : [];
+  if (capUsed > participants.length) {
+    // Pad with placeholder entries
+    while (participants.length < capUsed)
+      participants.push({ name: `Osallistuja ${participants.length + 1}`, registeredAt: null });
+  } else {
+    participants = participants.slice(0, capUsed);
+  }
 
   const item = {
-    slug:    autoSlugFrom(name),
-    href:    `/tapahtumat/${autoSlugFrom(name)}/`,
+    slug:      autoSlugFrom(name),
+    href:      `/tapahtumat/${autoSlugFrom(name)}/`,
     name,
-    tag:     document.getElementById('ef-tag').value,
-    dateInfo,
-    time:    document.getElementById('ef-time').value.trim() || null,
-    fee:     document.getElementById('ef-fee').value.trim()  || null,
-    isPast:  document.getElementById('ef-ispast').value === 'true',
-    img:     imgUrl,
-    capacity: capVal ? parseInt(capVal) : null,
-    schedule: schedule.length ? schedule : [],
+    tag:       document.getElementById('ef-tag').value,
+    startDate,
+    endDate,
+    time:      document.getElementById('ef-time').value.trim() || null,
+    fee:       document.getElementById('ef-fee').value.trim()  || null,
+    isPast:    document.getElementById('ef-ispast').value === 'true',
+    img:       imgUrl,
+    capacity:  capMax,
+    schedule:  schedule.length ? schedule : [],
     organizer: (orgName || orgEmail) ? { name: orgName || null, email: orgEmail || null } : null,
-    participants: existingParticipants,
+    participants,
     detail: {
       deadline:      document.getElementById('ef-deadline').value.trim() || null,
       venue:         document.getElementById('ef-venue').value.trim()    || null,
@@ -1575,54 +1575,13 @@ function selectPickerImage(url, filename) {
 
 // ── Event modal tab switching ─────────────────────────────────────────────────
 function switchEvtTab(tab) {
-  document.getElementById('evt-panel-details').style.display      = tab === 'details'      ? '' : 'none';
-  document.getElementById('evt-panel-participants').style.display = tab === 'participants' ? '' : 'none';
-  document.getElementById('evt-tab-details').classList.toggle('active',      tab === 'details');
-  document.getElementById('evt-tab-participants').classList.toggle('active', tab === 'participants');
+  document.getElementById('evt-panel-details').style.display = '';
+  document.getElementById('evt-tab-details').classList.add('active');
 }
 
 // ── Participants table (inside event modal) ───────────────────────────────────
-function renderParticipantsTable(participants) {
-  const tbody = document.getElementById('participants-tbody');
-  if (!participants.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text3);text-align:center;padding:16px">Ei osallistujia</td></tr>';
-    return;
-  }
-  tbody.innerHTML = participants.map((p, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${p.name}</td>
-      <td style="color:var(--text3);font-size:11px">${p.registeredAt ? new Date(p.registeredAt).toLocaleDateString('fi-FI') : '—'}</td>
-      <td><button class="btn btn-secondary btn-sm" style="color:#e87c7c" onclick="removeParticipant(${i})">✕</button></td>
-    </tr>`).join('');
 }
 
-async function removeParticipant(pIdx) {
-  if (editingIdx === null) return;
-  const evt = eventsData[editingIdx];
-  if (!evt.participants) return;
-  evt.participants.splice(pIdx, 1);
-  renderParticipantsTable(evt.participants);
-  // Save immediately
-  try {
-    const fresh = await ghGet('data/tapahtumat.json');
-    const all = parseBase64Json(fresh.content);
-    const fi = all.findIndex(e => e.slug === evt.slug);
-    if (fi >= 0) all[fi].participants = evt.participants;
-    await saveJSON('data/tapahtumat.json', all, `Admin: poista osallistuja: ${evt.name}`, fresh.sha);
-    eventsData = all;
-    toast('Osallistuja poistettu', 'success');
-  } catch(e) { toast('Virhe: ' + e.message, 'error'); }
-}
-
-function addParticipantManual() {
-  if (editingIdx === null) return;
-  const name = prompt('Osallistujan nimi:');
-  if (!name?.trim()) return;
-  const evt = eventsData[editingIdx];
-  if (!evt.participants) evt.participants = [];
-  evt.participants.push({ name: name.trim(), registeredAt: new Date().toISOString() });
-  renderParticipantsTable(evt.participants);
 }
 
 // ── Event RTE (separate from news RTE) ───────────────────────────────────────

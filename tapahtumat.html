@@ -1373,23 +1373,41 @@ html { font-size: 112%; }
       try {
         const resp = await fetch('data/tapahtumat.json?v=' + Date.now());
         const data = await resp.json();
-        allParsed = data.map(e => ({
-          slug:         e.slug,
-          href:         e.href,
-          name:         e.name,
-          tag:          e.tag,
-          dateInfo:     e.dateInfo,
-          time:         e.time,
-          fee:          e.fee,
-          isPast:       e.isPast || false,
-          img:          e.img || null,
-          detail:       e.detail || {},
-          capacity:     e.capacity || null,
-          schedule:     e.schedule || [],
-          organizer:    e.organizer || null,
-          participants: e.participants || [],
-          raw:          e.raw || '',
-        }));
+        allParsed = data.map(e => {
+          // ── Build dateInfo from new startDate / endDate fields ──────────
+          const MONTHS = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'];
+          const MONTHS_LONG = ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu','Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
+          let dateInfo = null;
+          if (e.startDate) {
+            const [sy, sm, sd] = e.startDate.split('-').map(Number);
+            const isSeries = !!e.endDate;
+            if (isSeries) {
+              const [ey, em, ed] = e.endDate.split('-').map(Number);
+              const startMo = MONTHS[sm-1] || '';
+              const endMo   = MONTHS[em-1] || '';
+              const startLabel = `${sd}.${sm}–${ed}.${em}.${ey}`;
+              dateInfo = { day: String(sd), month: startMo, year: String(sy), isSeries: true, startLabel, endMonth: endMo, endYear: String(ey) };
+            } else {
+              dateInfo = { day: String(sd), month: MONTHS[sm-1]||'', year: String(sy), isSeries: false };
+            }
+          }
+          return {
+            slug:         e.slug,
+            href:         e.href,
+            name:         e.name,
+            tag:          e.tag,
+            dateInfo,
+            startDate:    e.startDate || null,
+            endDate:      e.endDate   || null,
+            time:         e.time,
+            fee:          e.fee,
+            isPast:       e.isPast || false,
+            img:          e.img || null,
+            detail:       e.detail || {},
+            capacity:     e.capacity || null,
+            participants: e.participants || [],
+          };
+        });
       } catch(jsonErr) {
         console.warn('tapahtumat.json load failed', jsonErr);
         allParsed = [];
