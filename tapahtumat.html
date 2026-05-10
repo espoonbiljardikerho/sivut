@@ -204,8 +204,8 @@ section { padding: var(--spy) var(--px); }
 /* ── Audience badge pill ──────────────────────────────────────────────────── */
 .aud-badge {
   display:inline-flex; align-items:center; gap:3px;
-  font-size:9px; font-weight:600; letter-spacing:0.05em;
-  padding:2px 7px; border-radius:10px; flex-shrink:0; white-space:nowrap;
+  font-size:11px; font-weight:600; letter-spacing:0.04em;
+  padding:3px 8px; border-radius:10px; flex-shrink:0; white-space:nowrap;
 }
 .aud-jasenet { background:rgba(200,168,75,0.15); color:var(--gold); border:1px solid rgba(200,168,75,0.3); }
 .aud-avoin   { background:rgba(111,191,140,0.15); color:#6FBF8C;   border:1px solid rgba(111,191,140,0.3); }
@@ -214,7 +214,7 @@ section { padding: var(--spy) var(--px); }
 /* ── Deadline urgency pill ────────────────────────────────────────────────── */
 .deadline-pill {
   display:inline-flex; align-items:center; gap:3px;
-  font-size:9px; font-weight:600; padding:2px 7px;
+  font-size:11px; font-weight:600; padding:3px 8px;
   border-radius:10px; flex-shrink:0; white-space:nowrap;
 }
 .deadline-soon  { background:rgba(217,168,92,0.18); color:#d9a85c; border:1px solid rgba(217,168,92,0.35); }
@@ -222,7 +222,7 @@ section { padding: var(--spy) var(--px); }
 .deadline-open  { background:rgba(150,150,150,0.1);  color:var(--text-muted); border:1px solid var(--border); }
 /* ── Capacity bar ─────────────────────────────────────────────────────────── */
 .cap-wrap { display:flex; align-items:center; gap:5px; flex-shrink:0; }
-.cap-label { font-size:9.5px; color:var(--text-muted); white-space:nowrap; }
+.cap-label { font-size:11px; color:var(--text-muted); white-space:nowrap; }
 .cap-bar   { width:36px; height:3px; border-radius:2px; background:rgba(200,168,75,0.15); overflow:hidden; }
 .cap-fill  { height:100%; border-radius:2px; background:var(--gold); transition:width 0.3s; }
 .cap-fill.warm { background:#d9a85c; }
@@ -1994,5 +1994,11 @@ function toggleTheme() {
 (function() {
   const saved = localStorage.getItem('ebk-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
+  // Update all theme toggle buttons to match saved theme
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+      btn.textContent = saved === 'light' ? '🌙' : '☀';
+    });
+  });
 })();
 </script>

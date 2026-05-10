@@ -1793,6 +1793,12 @@ function toggleTheme() {
 (function() {
   const saved = localStorage.getItem('ebk-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
+  // Update all theme toggle buttons to match saved theme
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+      btn.textContent = saved === 'light' ? '🌙' : '☀';
+    });
+  });
 })();
 
 // ── Reading progress bar ──────────────────────────────────────────────────────
