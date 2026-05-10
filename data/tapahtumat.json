@@ -1,5 +1,52 @@
 [
   {
+    "slug": "testi",
+    "href": "/tapahtumat/testi/",
+    "name": "testi",
+    "tag": "Pool",
+    "startDate": "2026-05-13",
+    "endDate": null,
+    "time": "10:00",
+    "fee": "5€",
+    "isPast": false,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/casper-matikainen-pelaa-upeasti.jpg",
+    "capacity": 10,
+    "schedule": [
+      {
+        "time": "10:00",
+        "label": "aloitus"
+      },
+      {
+        "time": "10:30",
+        "label": "lounas"
+      }
+    ],
+    "organizer": {
+      "name": "Jaska",
+      "email": "jaska@jaska.com"
+    },
+    "participants": [
+      {
+        "name": "Osallistuja 1",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 2",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 3",
+        "registeredAt": null
+      }
+    ],
+    "detail": {
+      "deadline": "12.5",
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "testi pool event"
+    }
+  },
+  {
     "slug": "espoon-8-pallon-tasoitussarja-2",
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja-2/",
     "name": "Espoon 8-pallon tasoitussarja",
