@@ -1228,7 +1228,7 @@ html { font-size: 112%; }
           <span class="summary-detail-icon">💶</span>
           <div>
             <span class="summary-detail-label">Osallistumismaksu</span>
-            <span class="summary-detail-value"><strong>${evtFee}</strong> · 100% palkintoihin</span>
+            <span class="summary-detail-value"><strong>${evtFee}</strong></span>
           </div>
         </div>` : ''}
         ${detail?.deadline ? `
@@ -1253,11 +1253,6 @@ html { font-size: 112%; }
       <div class="summary-schedule">
         <div class="summary-schedule-title">Aikataulu</div>
         ${schedule.map(s => `<div class="summary-schedule-row"><span class="summary-schedule-time">${s.time}</span><span>${s.label}</span></div>`).join('')}
-      </div>` : ''}
-      ${approvedCount > 0 ? `
-      <div class="summary-participants">
-        <div class="summary-schedule-title">Ilmoittautuneet (${approvedCount}${capNum ? '/'+capNum : ''})</div>
-        <div class="summary-participants-list">${(participants||[]).map((p,i) => `<span class="summary-participant">${i+1}. ${p.name}</span>`).join('')}</div>
       </div>` : ''}
       ${!isPast ? `
       <button class="btn-primary summary-cta" id="reg-cta-btn" onclick="openRegModal(window._activeEvt)" ${isFull ? 'disabled style="opacity:0.5;cursor:not-allowed"' : ''}>
