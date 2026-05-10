@@ -95,7 +95,7 @@
     "endDate": null,
     "time": "10:00",
     "fee": "5€",
-    "isPast": false,
+    "isPast": true,
     "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/casper-matikainen-pelaa-upeasti.jpg",
     "capacity": 10,
     "schedule": [
