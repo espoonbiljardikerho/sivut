@@ -326,8 +326,12 @@
     "participants": [],
     "detail": {
       "deadline": "in 4.12.  klo 16:00 mennessä",
-      "description": "Espoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 4.12.2026 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa)"
-    }
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "Espoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 4.12.2026 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa)&nbsp;"
+    },
+    "schedule": [],
+    "organizer": null
   },
   {
     "slug": "ebk-poolmestaruus-2026",
