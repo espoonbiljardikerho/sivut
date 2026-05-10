@@ -435,7 +435,7 @@
         <div class="panel">
           <table class="data-table" id="events-table">
             <thead><tr>
-              <th title="Näytä etusivulla" style="width:30px">★</th><th>Nimi</th><th>Laji</th><th>Kenelle</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
+              <th>Nimi</th><th>Laji</th><th>Kenelle</th><th>Päivämäärä</th><th>Maksu</th><th style="width:100px"></th>
             </tr></thead>
             <tbody id="events-tbody"></tbody>
           </table>
@@ -1157,14 +1157,7 @@ function renderEvents(view) {
       : e.dateInfo.raw ? e.dateInfo.raw
       : [e.dateInfo.day, e.dateInfo.month, e.dateInfo.year].filter(Boolean).join(' ') || '—';
     const fee     = e.fee || e.detail?.fee || '—';
-    const featured = e.featured || false;
     return `<tr>
-      <td>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer" title="Näytä etusivulla">
-          <input type="checkbox" ${featured?'checked':''} onchange="toggleFeatured(${realIdx},this.checked)"
-            style="width:14px;height:14px;accent-color:var(--gold)">
-        </label>
-      </td>
       <td><strong>${e.name||'—'}</strong></td>
       <td><span class="badge badge-${(e.tag||'').toLowerCase()}">${e.tag||'—'}</span></td>
       <td class="text-muted text-sm">${
@@ -1179,7 +1172,7 @@ function renderEvents(view) {
         <button class="btn btn-danger btn-sm" onclick="deleteEvent(this)" data-slug="${e.slug||''}" data-name="${(e.name||'').replace(/"/g,'&quot;')}">Poista</button>
       </td>
     </tr>`;
-  }).join('') : '<tr><td colspan="5" class="empty-state">Ei tapahtumia</td></tr>';
+  }).join('') : '<tr><td colspan="6" class="empty-state">Ei tapahtumia</td></tr>';
 }
 
 function filterEvents(view, btn) {
@@ -1641,36 +1634,6 @@ function rteLink2() {
 }
 
 
-// ── Featured events toggle ────────────────────────────────────────────────────
-let _featuredSaveQueue = Promise.resolve();
-
-async function toggleFeatured(idx, checked) {
-  eventsData[idx].featured = checked;
-  const featured = eventsData.filter(e => e.featured);
-  if (featured.length > 5) {
-    toast('Maksimissaan 5 tapahtumaa etusivulla', 'error');
-    eventsData[idx].featured = false;
-    renderEvents(eventsData[idx]?.isPast ? 'past' : 'upcoming');
-    return;
-  }
-  // Queue saves so rapid ticks don't cause 409 conflicts
-  _featuredSaveQueue = _featuredSaveQueue.then(async () => {
-    try {
-      const fresh = await ghGet('data/tapahtumat.json');
-      const all = parseBase64Json(fresh.content);
-      // Apply all current featured states from eventsData in one write
-      eventsData.forEach(e => {
-        const fi = all.findIndex(a => a.slug === e.slug);
-        if (fi >= 0) all[fi].featured = e.featured || false;
-      });
-      await saveJSON('data/tapahtumat.json', all, `Admin: etusivu päivitetty`, fresh.sha);
-      eventsData = all;
-      toast((checked ? '★ Lisätty etusivulle' : 'Poistettu etusivulta'), 'success');
-    } catch(e) {
-      toast('Virhe: ' + e.message, 'error');
-    }
-  });
-}
 
 // ── Delete news ───────────────────────────────────────────────────────────────
 function deleteNews(elOrSlug, title) {

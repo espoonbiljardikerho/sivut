@@ -1554,9 +1554,8 @@ html { font-size: 112%; }
     const resp   = await fetch('data/tapahtumat.json?v=' + Date.now());
     const events = await resp.json();
     const MONTHS_SORT = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
-    // Use featured events if any are marked, otherwise show 5 soonest upcoming
-    const featured = events.filter(e => e.featured && !e.isPast);
-    const upcoming = (featured.length > 0 ? featured : events
+    // Show 5 soonest upcoming events by date
+    const upcoming = events
       .filter(e => !e.isPast)
       .sort((a, b) => {
         const da = a.dateInfo, db = b.dateInfo;
@@ -1565,7 +1564,8 @@ html { font-size: 112%; }
         const ma = MONTHS_SORT.indexOf(da.month), mb = MONTHS_SORT.indexOf(db.month);
         const ddA = parseInt(da.day)||1, ddB = parseInt(db.day)||1;
         return ya !== yb ? ya - yb : ma !== mb ? ma - mb : ddA - ddB;
-      })).slice(0, 5);
+      })
+      .slice(0, 5);
 
     const TAG_CSS = {Kaisa:'b-kaisa',Pool:'b-pool',Snooker:'b-snooker',Kara:'b-kara',Pyramidi:'b-pyramidi'};
 
