@@ -216,9 +216,6 @@ section { padding: var(--spy) var(--px); }
 }
 .news-card:hover { border-color:var(--border-strong); transform:translateY(-2px); }
 /* Archived cards: no hover effect, clearly non-interactive */
-.news-card-archived { cursor:default; opacity:0.65; }
-.news-card-archived:hover { border-color:var(--border) !important; transform:none !important; box-shadow:none !important; }
-.news-card-archived:hover .news-img-wrap img { transform:none !important; filter:brightness(0.92) saturate(0.85) !important; }
 .news-img-wrap {
   position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; flex-shrink:0;
 }
@@ -908,9 +905,9 @@ html { font-size: 112%; }
     const { slug, href, title, date, excerpt, img, tag, body } = article;
     // Admin-created articles (body field present) → internal reader
     // Old Yhdistysavain articles (no body) → no longer link out, show excerpt only
-    const hasBody = !!body;
-    // Only admin-created articles (with body field) are openable
-    const articleUrl = hasBody ? 'uutinen.html?slug=' + encodeURIComponent(slug) : null;
+    // All articles are openable via slug — uutinen.html tries JSON body first,
+    // then falls back to Yhdistysavain scrape for old articles without body
+    const articleUrl = 'uutinen.html?slug=' + encodeURIComponent(slug);
     const safeTitle   = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const safeExcerpt = (excerpt || '').slice(0, featured ? 220 : 120).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const tagCls = `b-${(tag||'uutinen').toLowerCase().replace(/\s+/g,'')}`;
@@ -924,12 +921,10 @@ html { font-size: 112%; }
           <h2 class="news-title">${safeTitle}</h2>
           ${safeExcerpt ? `<p class="news-excerpt">${safeExcerpt}${safeExcerpt.length >= (featured ? 220 : 120) ? '…' : ''}</p>` : ''}
           <div class="news-meta">
-            ${articleUrl ? `<span class="news-read-more">Lue artikkeli →</span>` : `<span style="font-size:10px;color:var(--text-muted);opacity:0.6">Arkistoitu uutinen</span>`}
+            <span class="news-read-more">Lue artikkeli →</span>
           </div>
         </div>`;
-    return articleUrl
-      ? `<a href="${articleUrl}" class="news-card" data-tag="${tag}">${inner}</a>`
-      : `<div class="news-card news-card-archived" data-tag="${tag}">${inner}</div>`;
+    return `<a href="${articleUrl}" class="news-card" data-tag="${tag}">${inner}</a>`;
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────

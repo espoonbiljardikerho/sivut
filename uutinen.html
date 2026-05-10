@@ -1125,7 +1125,7 @@ html { font-size: 112%; }
     }
   }
 
-  if (jsonArticle && articleSlug) {
+  if (jsonArticle && articleSlug && jsonArticle.body) {
       // Render directly from JSON — no Yhdistysavain fetch needed
       document.getElementById('hero-skeleton').style.display = 'none';
       document.getElementById('hero-content').style.opacity = '1';
@@ -1183,13 +1183,33 @@ html { font-size: 112%; }
       return; // done — no need to fetch from Yhdistysavain
     }
 
-  if (!articleUrl) {
+  // If we found the article in JSON but it has no body, use its href for Yhdistysavain fetch
+  let resolvedArticleUrl = articleUrl;
+  if (jsonArticle && !jsonArticle.body && jsonArticle.href) {
+    resolvedArticleUrl = jsonArticle.href; // e.g. /uutiset/poolviikkis-6-5-2026/
+  }
+
+  if (!resolvedArticleUrl) {
     showError(articleSlug ? `Artikkelia "${articleSlug}" ei löydy. Sivu saattaa olla välimuistissa — kokeile hetken kuluttua uudelleen.` : 'Artikkelia ei löydy.', true);
-    loadSidebar('Uutinen'); // still populate sidebar even on error
+    loadSidebar('Uutinen');
     return;
   }
 
-  const fullUrl = articleUrl.startsWith('http') ? articleUrl : BASE + articleUrl;
+  const fullUrl = resolvedArticleUrl.startsWith('http') ? resolvedArticleUrl : BASE + resolvedArticleUrl;
+
+  // ── Pre-fill header from JSON metadata (while Yhdistysavain content loads) ───
+  if (jsonArticle) {
+    document.getElementById('article-title').textContent = jsonArticle.title || '';
+    document.getElementById('article-date').textContent  = jsonArticle.date  || '';
+    const tagWrap = document.getElementById('article-tag-wrap');
+    const tag0 = jsonArticle.tag || 'Uutinen';
+    if (tagWrap) tagWrap.innerHTML = `<span class="ebadge b-${tag0.toLowerCase().replace(/\s+/g,'')}">${tag0}</span>`;
+    document.title = (jsonArticle.title || 'Artikkeli') + ' — EBK';
+    const bc = document.getElementById('breadcrumb-title');
+    if (bc) bc.textContent = (jsonArticle.title||'').length > 40 ? jsonArticle.title.slice(0,40)+'…' : (jsonArticle.title||'');
+    document.getElementById('hero-skeleton').style.display = 'none';
+    document.getElementById('hero-content').style.opacity = '1';
+  }
 
   // ── Load article from Yhdistysavain ───────────────────────────────────────────
 
