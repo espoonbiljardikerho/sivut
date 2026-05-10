@@ -1975,5 +1975,21 @@
     "bio": "Ying liittyi EBK:n jäseneksi marraskuussa 2021 ja osallistui heti naisten Kaisan SM-kilpailuihin. Pääasialliset lajit on kaisa ja pool.",
     "achievements": [],
     "records": []
+  },
+  {
+    "slug": "jaakko-kahima",
+    "name": "Jaakko Kahima",
+    "nickname": null,
+    "type": "klubi",
+    "joined": null,
+    "started": null,
+    "sports": [
+      "Kaisa"
+    ],
+    "motto": null,
+    "bio": null,
+    "photo": null,
+    "achievements": [],
+    "records": []
   }
 ]
