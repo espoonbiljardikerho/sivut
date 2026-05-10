@@ -86,7 +86,7 @@ section { padding: var(--spy) var(--px); }
 .btn-primary:hover { background:var(--gold-light); transform:translateY(-1px); }
 .btn-secondary { display:inline-flex; align-items:center; gap:7px; padding:clamp(8px,1.2vw,11px) clamp(12px,1.8vw,20px); background:transparent; color:var(--text-primary); font-family:'DM Sans',sans-serif; font-size:clamp(11.5px,1.1vw,13.5px); font-weight:400; border:1px solid var(--border-strong); border-radius:6px; text-decoration:none; transition:border-color 0.2s, color 0.2s; cursor:pointer; }
 .btn-secondary:hover { border-color:var(--gold); color:var(--gold); }
-.ebadge { padding:3px 8px; border-radius:20px; font-size:9.5px; font-weight:500; letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
+.ebadge { padding:3px 8px; border-radius:20px; font-size:11px; font-weight:500; letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
 .b-kaisa   { background:rgba(200,168,75,0.12); color:var(--gold);  border:1px solid rgba(200,168,75,0.25); }
 .b-pool    { background:rgba(29,158,117,0.12); color:#4ECBA0; border:1px solid rgba(29,158,117,0.25); }
 .b-snooker { background:rgba(106,90,205,0.12); color:#9D8FE8; border:1px solid rgba(106,90,205,0.25); }
@@ -135,7 +135,7 @@ section { padding: var(--spy) var(--px); }
   background: rgba(13,31,15,0.92);
 }
 .filter-label { font-size:10.5px; color:var(--text-muted); letter-spacing:0.06em; text-transform:uppercase; margin-right:2px; flex-shrink:0; }
-.filter-btn { padding:5px 13px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:11px; cursor:pointer; transition:all 0.18s; letter-spacing:0.03em; }
+.filter-btn { padding:5px 13px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; transition:all 0.18s; letter-spacing:0.03em; }
 .filter-btn:hover { border-color:var(--border-strong); color:var(--text-primary); }
 .filter-btn.active { background:rgba(200,168,75,0.1); border-color:var(--border-strong); color:var(--gold); }
 
@@ -181,12 +181,12 @@ section { padding: var(--spy) var(--px); }
   border-radius: 6px;
   flex-shrink: 0;
 }
-.evt-day   { font-family:'Playfair Display',serif; font-size:clamp(16px,1.8vw,20px); font-weight:700; color:var(--gold); line-height:1; }
-.evt-month { font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:2px; }
+.evt-day   { font-family:'Playfair Display',serif; font-size:clamp(18px,1.8vw,22px); font-weight:700; color:var(--gold); line-height:1; }
+.evt-month { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.07em; margin-top:2px; }
 
 .evt-info { min-width:0; }
-.evt-name { font-size:clamp(12px,1.2vw,14px); font-weight:500; color:var(--text-primary); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.evt-sub  { font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.evt-name { font-size:clamp(14px,1.3vw,16px); font-weight:500; color:var(--text-primary); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.evt-sub  { font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .evt-sub-dot { width:2px; height:2px; background:var(--text-muted); border-radius:50%; opacity:0.5; flex-shrink:0; }
 
 .evt-badge-wrap { flex-shrink:0; display:flex; flex-direction:column; align-items:flex-end; gap:0; min-width:120px; }
@@ -229,7 +229,7 @@ section { padding: var(--spy) var(--px); }
 .cap-fill.full { background:#d96f6f; }
 
 /* ── Series: show start→end in month block ───────────────────────────────── */
-.evt-series-range { font-size:8px; color:var(--text-muted); letter-spacing:0.04em; margin-top:2px; line-height:1.2; }
+.evt-series-range { font-size:10px; color:var(--text-muted); letter-spacing:0.04em; margin-top:2px; line-height:1.2; }
 
 
 
@@ -1081,7 +1081,7 @@ html { font-size: 120%; }
       const endMo   = parts ? (() => { const mo = parseInt(parts[2].split('.')[1]); return MONTHS[mo-1]||''; })() : '';
       const rangeStr = endMo && endMo !== startMo ? `${startMo} → ${endMo}` : startMo;
       dateBlock = `<div class="evt-date-block" style="border-style:dashed;">
-        <div class="evt-day" style="font-size:10px;font-family:'DM Sans',sans-serif;color:var(--text-muted);letter-spacing:0.01em;">Sarja</div>
+        <div class="evt-day" style="font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text-muted);letter-spacing:0.01em;">Sarja</div>
         <div class="evt-series-range">${rangeStr}</div>
       </div>`;
     } else if (dateInfo.raw) {
