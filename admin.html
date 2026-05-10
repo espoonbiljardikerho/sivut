@@ -1510,9 +1510,11 @@ function renderNews(filtered) {
       <td><strong>${a.title || '—'}</strong>${archivedBadge}<div class="text-muted text-sm">${(a.excerpt||'').slice(0,60)}${(a.excerpt||'').length > 60 ? '…' : ''}</div></td>
       <td><span class="badge badge-${(a.tag||'uutinen').toLowerCase()}">${a.tag||'Uutinen'}</span></td>
       <td class="text-muted">${a.date||'—'}</td>
-      <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
-        <button class="btn btn-secondary btn-sm" onclick="openNewsModal(${realIdx})">Muokkaa</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteNews(this)" data-slug="${a.slug||''}" data-title="${(a.title||'').replace(/"/g,'&quot;')}">Poista</button>
+      <td style="text-align:right">
+        <div style="display:inline-flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-secondary btn-sm" onclick="openNewsModal(${realIdx})">Muokkaa</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteNews(this)" data-slug="${a.slug||''}" data-title="${(a.title||'').replace(/"/g,'&quot;')}">Poista</button>
+        </div>
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="4" class="empty-state">Ei uutisia</td></tr>';
@@ -1759,9 +1761,11 @@ function renderEvents(view) {
       }</td>
       <td class="text-muted">${dateStr}</td>
       <td class="text-muted">${fee}</td>
-      <td style="text-align:right;display:flex;gap:6px;justify-content:flex-end">
-        <button class="btn btn-secondary btn-sm" onclick="openEventModal(${realIdx})">Muokkaa</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteEvent(this)" data-slug="${e.slug||''}" data-name="${(e.name||'').replace(/"/g,'&quot;')}">Poista</button>
+      <td style="text-align:right">
+        <div style="display:inline-flex;gap:6px;justify-content:flex-end">
+          <button class="btn btn-secondary btn-sm" onclick="openEventModal(${realIdx})">Muokkaa</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteEvent(this)" data-slug="${e.slug||''}" data-name="${(e.name||'').replace(/"/g,'&quot;')}">Poista</button>
+        </div>
       </td>
     </tr>`;
   }).join('') : '<tr><td colspan="6" class="empty-state">Ei tapahtumia</td></tr>';
