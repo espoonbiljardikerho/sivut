@@ -1121,16 +1121,17 @@ html { font-size: 120%; }
       : part === 'kutsu'   ? `<span class="aud-badge aud-kutsu">✉ Kutsu</span>`
       : '';
 
+    // ── Capacity bar ──────────────────────────────────────────────────────
+    const capNum  = parseInt(capacity) || 0;
+    const capUsed = (participants || []).length;
+
     // ── Deadline pill (hide if full) ─────────────────────────────────────
     const isFull = capNum > 0 && capUsed >= capNum;
     const pill = (!isFull && !isPast && !isSeries) ? deadlinePill(detail?.deadline, isPast)
       : isPast ? deadlinePill(null, true)
       : '';
 
-    // ── Capacity bar ──────────────────────────────────────────────────────
     let capHTML = '';
-    const capNum  = parseInt(capacity) || 0;
-    const capUsed = (participants || []).length;
     if (capNum > 0) {
       const pct = Math.min(100, Math.round(capUsed/capNum*100));
       const fillCls = pct >= 100 ? 'full' : pct >= 75 ? 'warm' : '';
