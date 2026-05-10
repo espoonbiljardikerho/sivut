@@ -215,6 +215,10 @@ section { padding: var(--spy) var(--px); }
   transition:border-color 0.2s, transform 0.2s;
 }
 .news-card:hover { border-color:var(--border-strong); transform:translateY(-2px); }
+/* Archived cards: no hover effect, clearly non-interactive */
+.news-card-archived { cursor:default; opacity:0.65; }
+.news-card-archived:hover { border-color:var(--border) !important; transform:none !important; box-shadow:none !important; }
+.news-card-archived:hover .news-img-wrap img { transform:none !important; filter:brightness(0.92) saturate(0.85) !important; }
 .news-img-wrap {
   position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; flex-shrink:0;
 }
@@ -925,7 +929,7 @@ html { font-size: 112%; }
         </div>`;
     return articleUrl
       ? `<a href="${articleUrl}" class="news-card" data-tag="${tag}">${inner}</a>`
-      : `<div class="news-card" style="cursor:default;opacity:0.8" data-tag="${tag}">${inner}</div>`;
+      : `<div class="news-card news-card-archived" data-tag="${tag}">${inner}</div>`;
   }
 
   // ── Render ───────────────────────────────────────────────────────────────────
