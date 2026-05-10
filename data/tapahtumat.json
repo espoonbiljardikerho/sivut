@@ -194,8 +194,12 @@
     "participants": [],
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
-      "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
-    }
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\" -vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
+    },
+    "schedule": [],
+    "organizer": null
   },
   {
     "slug": "ebk-n-kesakisat-2026-part-i",
