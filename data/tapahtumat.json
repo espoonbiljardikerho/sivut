@@ -1,57 +1,17 @@
 [
   {
-    "slug": "testi-pool",
-    "href": "/tapahtumat/testi-pool/",
-    "name": "testi pool",
-    "tag": "Pool",
-    "dateInfo": {
-      "raw": "15.6.2026",
-      "day": null,
-      "month": null,
-      "year": null,
-      "isSeries": false
-    },
-    "time": "klo 10:00",
-    "fee": "50€",
-    "isPast": false,
-    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/lauri-kankkunen-sm-pronssia.jpg",
-    "capacity": 10,
-    "schedule": [
-      {
-        "time": "10:00",
-        "label": "arvotaa"
-      },
-      {
-        "time": "11:00",
-        "label": "pelataan"
-      }
-    ],
-    "organizer": {
-      "name": "Jaska Jokunen",
-      "email": "jaska@jokunen.fi"
-    },
-    "participants": [],
-    "detail": {
-      "deadline": "viimeistään huomenna",
-      "venue": "Espoon Biljardi Klubi",
-      "participation": "avoin",
-      "description": "testi tapahtuma"
-    }
-  },
-  {
     "slug": "espoon-8-pallon-tasoitussarja-2",
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja-2/",
     "name": "Espoon 8-pallon tasoitussarja",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "3",
-      "month": "Kes",
-      "year": "2026",
-      "isSeries": true,
-      "startLabel": "3.6–26.8.2026"
-    },
+    "startDate": "2026-06-03",
+    "endDate": "2026-08-26",
+    "time": null,
+    "fee": null,
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
       "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 8-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
@@ -62,15 +22,14 @@
     "href": "/tapahtumat/espoon-9-pallon-tasoitussarja-2/",
     "name": "Espoon 9-pallon tasoitussarja",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "3",
-      "month": "Kes",
-      "year": "2026",
-      "isSeries": true,
-      "startLabel": "3.6–26.8.2026"
-    },
+    "startDate": "2026-06-03",
+    "endDate": "2026-08-26",
+    "time": null,
+    "fee": null,
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/6Yx4n9ZZo0E4iiiTBw0i0bulAE/PoolKuvaUutinen400.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "Ke.3.6. klo 19:00 mennessä",
       "description": "Klubilaisille tarkoitettu tasoituksellinen kesäsarja, jossa osallistuvat pelaajat pelaavat 9-palloa erätasoituksilla \"kaikki kaikkia\"-vastaan joko yhdessä tai useammassa eri lohkossa - riippuen osallistujamääristä."
@@ -81,15 +40,14 @@
     "href": "/tapahtumat/ebk-n-kesakisat-2026-part-i/",
     "name": "EBK:n Kesäkaisa 2026 Part I",
     "tag": "Kaisa",
-    "dateInfo": {
-      "day": "13",
-      "month": "Kes",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-06-13",
+    "endDate": null,
+    "time": null,
+    "fee": "30 €",
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/yEYp6MuJU1PpXVzqu8I50dKDrQ/KaisaKuvaUutinen.jpg",
-    "fee": "30 €",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "To.11.6. klo 21:00 mennessä",
       "description": "Lisätietoja kilpailusta:Joni Ahola (0407563627)Tillinmäentie 1 F, 02330 Espoo (Kiviruukin teollisuusalue)Klubin puhelin: 04578382201"
@@ -100,16 +58,14 @@
     "href": "/tapahtumat/espoon-kesakaisa-2026-part-ii/",
     "name": "Espoon Kesäkaisa 2026 Part II",
     "tag": "Kaisa",
-    "dateInfo": {
-      "day": "15",
-      "month": "Elo",
-      "year": "2026",
-      "isSeries": false
-    },
-    "isPast": false,
+    "startDate": "2026-08-15",
+    "endDate": null,
     "time": "10:00",
-    "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
     "fee": "30 €",
+    "isPast": false,
+    "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "Pe.14.8. klo 12:00 mennessä",
       "venue": "Tillinmäen klubi",
@@ -121,15 +77,14 @@
     "href": "/tapahtumat/snookermestaruus-2026/",
     "name": "Snookermestaruus 2026",
     "tag": "Snooker",
-    "dateInfo": {
-      "day": "26",
-      "month": "Elo",
-      "year": "2026",
-      "isSeries": true,
-      "startLabel": "26.8–30.11.2026"
-    },
+    "startDate": "2026-08-26",
+    "endDate": "2026-11-30",
+    "time": null,
+    "fee": null,
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Ilmoittautuneet:1. Pauli Wigelius2. Jarno Ahola3.4.5.6."
     }
@@ -139,15 +94,14 @@
     "href": "/tapahtumat/klubin-karasarja-2026/",
     "name": "Klubin Karasarja 2026",
     "tag": "Kara",
-    "dateInfo": {
-      "day": "9",
-      "month": "Syy",
-      "year": "2026",
-      "isSeries": true,
-      "startLabel": "9.9–31.10.2026"
-    },
+    "startDate": "2026-09-09",
+    "endDate": "2026-10-31",
+    "time": null,
+    "fee": null,
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Pelataan 9.9. - 31.10. + viimeistään marraskuussa cuppipelit"
     }
@@ -157,15 +111,14 @@
     "href": "/tapahtumat/ebk-pyramidimestaruus-2026/",
     "name": "EBK Pyramidimestaruus 2026",
     "tag": "Pyramidi",
-    "dateInfo": {
-      "day": "26",
-      "month": "Mar",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-11-26",
+    "endDate": null,
+    "time": null,
+    "fee": "30 €",
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/AE7woRDUMqsgKqnoNK3y0beoX8/pyres1.jpg",
-    "fee": "30 €",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "in 26.11. klo 16:45 mennessä",
       "description": "EBK:n  (ja klubin) Pyramidimestaruus 2026 pelataan yhden päivän turnauksena torstaina 26.11.2026, kunhan kilpailuun saadaan vähintään 6 osallistujaa. Osallistumismaksu 30€ ja 100% palkintoihin ja osallistumisoikeus niin kerhon kuin klubin jäsenillä.Ilmoittautumiset (torstaihin 26.11. klo 16:45 mennessä, pelit arvotaan klo 17:00 ja aloitetaan sen jälkeen)."
@@ -176,14 +129,14 @@
     "href": "/tapahtumat/ebk-kaisamestaruus-2026/",
     "name": "EBK Kaisamestaruus 2026",
     "tag": "Kaisa",
-    "dateInfo": {
-      "day": "4",
-      "month": "Jou",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-12-04",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Z5DmKMsuotZFGganlCWO0beoJJ/KaisaKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "in 4.12.  klo 16:00 mennessä",
       "description": "Espoon Biljardikerhon jäsenille tarkoitettu kaisamestaruus ratkotaan klubimme tiloissa perjantaina 4.12.2026 alkaen 16:00 (aloitetaan tarvittaessa vasta 17:00 jos ei liikaa porukkaa)"
@@ -194,14 +147,14 @@
     "href": "/tapahtumat/ebk-poolmestaruus-2026/",
     "name": "EBK Poolmestaruus 2026",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "5",
-      "month": "Jou",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-12-05",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": false,
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "EBK:n poolmestaruus pelataan yhden päivän kilpailuna lauantaina 5.12.2026. Kilpailu aloitetaan klo 11:00. Ilmoittautumiset pe iltaan klo 21:00 mennessä."
     }
@@ -211,13 +164,14 @@
     "href": "/tapahtumat/ebk-kinkkukisat-ja-pikkujoulut/",
     "name": "EBK kinkkukisat ja pikkujoulut",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "12",
-      "month": "Jou",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-12-12",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": false,
+    "img": null,
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Kinkkukilpailut klo 13:001. Jarno Ahola2.3.4.5.6.7.8.9.10."
     }
@@ -227,14 +181,14 @@
     "href": "/tapahtumat/ebk-n-saantomaarainen-vuosikokous-3/",
     "name": "EBK:n sääntömääräinen vuosikokous",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "16",
-      "month": "Maa",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-03-16",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/fWL75Q2E2o5vT9pITPuC0dKDoc/ebk%20sportti.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -244,14 +198,14 @@
     "href": "/tapahtumat/tahtis-40v-open/",
     "name": "Tähtis 40v Open",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "7",
-      "month": "Maa",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-03-07",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/RVigWpcoBlE9mXXEGyPv0dd7ba@1200=axdwU4YW7o/T%C3%A4htis40v.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "La.7.3. klo 11:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -262,14 +216,14 @@
     "href": "/tapahtumat/ebk-n-karamestaruus-2026/",
     "name": "EBK:n Karamestaruus 2026",
     "tag": "Kara",
-    "dateInfo": {
-      "day": "26",
-      "month": "Hel",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-02-26",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/vQ6v8q7GrqnxNCDqjOnY0dKDlA/KaraKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -279,14 +233,14 @@
     "href": "/tapahtumat/snooker-talvisarja-2026/",
     "name": "Snooker talvisarja 2026",
     "tag": "Snooker",
-    "dateInfo": {
-      "day": "31",
-      "month": "Tam",
-      "year": "2026",
-      "isSeries": false
-    },
+    "startDate": "2026-01-31",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/oQ6nvrxKTwZdHwHlt6zG0dKDfZ/SnookerKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "ke.21.1. klo 18:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -297,14 +251,14 @@
     "href": "/tapahtumat/ebk-kinkkukilpailut-pikkujoulut-202/",
     "name": "EBK Kinkkukilpailut & Pikkujoulut 2025",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "13",
-      "month": "Jou",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-12-13",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/K6rvsABgJdG0cq0r3P7k0beoT8@1200=xWflWOfmxg/pikkujoulukuva.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -314,14 +268,14 @@
     "href": "/tapahtumat/ebk-poolmestaruus-2025/",
     "name": "EBK Poolmestaruus 2025",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "6",
-      "month": "Jou",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-12-06",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/Jz3H3CK292abcjWOz61O0beoM7/PoolKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -331,14 +285,14 @@
     "href": "/tapahtumat/ebk-kaisamestaruus-2025/",
     "name": "EBK Kaisamestaruus 2025",
     "tag": "Kaisa",
-    "dateInfo": {
-      "day": "5",
-      "month": "Jou",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-12-05",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/Z5DmKMsuotZFGganlCWO0beoJJ/KaisaKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "in 5.12.  klo 16:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -349,14 +303,14 @@
     "href": "/tapahtumat/finnish-masters-the-dynamic-pyramid/",
     "name": "Finnish Masters The Dynamic Pyramid RG4 Nevskaja Espoo Open",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "15",
-      "month": "Mar",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-11-15",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/srvmVpGtc0ewb2ctfsvG0czlww@1200=bw461aP5q2/2024-11-16%2017.48.28.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -366,15 +320,14 @@
     "href": "/tapahtumat/ebk-pyramidimestaruus-2025/",
     "name": "EBK Pyramidimestaruus 2025",
     "tag": "Pyramidi",
-    "dateInfo": {
-      "day": "13",
-      "month": "Mar",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-11-13",
+    "endDate": null,
+    "time": null,
+    "fee": "30 €",
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/AE7woRDUMqsgKqnoNK3y0beoX8/pyres1.jpg",
-    "fee": "30 €",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "in 13.11. klo 16:45 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -385,14 +338,14 @@
     "href": "/tapahtumat/klubin-karasarja-2025/",
     "name": "Klubin Karasarja 2025",
     "tag": "Kara",
-    "dateInfo": {
-      "day": "5",
-      "month": "Syy",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-09-05",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/KDWzWIueggP122WBIJAk0beoDH/KaraKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -402,14 +355,14 @@
     "href": "/tapahtumat/snookermestaruus-2025/",
     "name": "Snookermestaruus 2025",
     "tag": "Snooker",
-    "dateInfo": {
-      "day": "31",
-      "month": "Elo",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-08-31",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/tg3534pWnJybtiJR0bsb0bUCbI/SnookerKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -419,15 +372,14 @@
     "href": "/tapahtumat/espoon-kesakaisa-part-ii/",
     "name": "Espoon Kesäkaisa 2025 Part II",
     "tag": "Kaisa",
-    "dateInfo": {
-      "day": "9",
-      "month": "Elo",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-08-09",
+    "endDate": null,
+    "time": null,
+    "fee": "30 €",
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/SvvhdwFAji1f66mCn4cC0beo6b/KaisaKuvaUutinen.jpg",
-    "fee": "30 €",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "Pe.8.8. klo 12:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -438,15 +390,14 @@
     "href": "/tapahtumat/espoon-kesa-kaisa-2025-part-i/",
     "name": "Espoon Kesäkaisa 2025 Part I",
     "tag": "Kaisa",
-    "dateInfo": {
-      "day": "14",
-      "month": "Kes",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-06-14",
+    "endDate": null,
+    "time": null,
+    "fee": "30 €",
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/pGVIVYuLULnJPPoLZ0TD0beo1P/KaisaKuvaUutinen.jpg",
-    "fee": "30 €",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "To.12.6. klo 21:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -457,14 +408,14 @@
     "href": "/tapahtumat/espoon-8-pallon-tasoitussarja/",
     "name": "Espoon 8-pallon tasoitussarja",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "12",
-      "month": "Kes",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-06-12",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/iv4N0s4RwzksOTf5VmBY0bulF7@1200=z3r12yeh7L/8-pallopakka.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -475,14 +426,14 @@
     "href": "/tapahtumat/espoon-9-pallon-tasoitussarja/",
     "name": "Espoon 9-pallon tasoitussarja",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "12",
-      "month": "Kes",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-06-12",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/6Yx4n9ZZo0E4iiiTBw0i0bulAE/PoolKuvaUutinen400.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "Ke.4.6. klo 19:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -493,14 +444,14 @@
     "href": "/tapahtumat/ebk-n-saantomaarainen-vuosikokous-2-4/",
     "name": "EBK:n sääntömääräinen vuosikokous 2025",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "17",
-      "month": "Maa",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-03-17",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/tVDYdU0R9Yds6NvMPtBL0bSZJR/ebk%20sportti.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -510,14 +461,14 @@
     "href": "/tapahtumat/ebk-karamestaruus-2025/",
     "name": "EBK Karamestaruus 2025",
     "tag": "Kara",
-    "dateInfo": {
-      "day": "28",
-      "month": "Hel",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-02-28",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/r1IBvpxeA0CQGKljjnip0bSZEz/KaraKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -527,14 +478,14 @@
     "href": "/tapahtumat/snooker-talvisarja-2025/",
     "name": "Snooker talvisarja 2025",
     "tag": "Snooker",
-    "dateInfo": {
-      "day": "24",
-      "month": "Tam",
-      "year": "2025",
-      "isSeries": false
-    },
+    "startDate": "2025-01-24",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/wp99IskBBNHWzJzjLGub0bSZB9/SnookerKuvaUutinen.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "deadline": "ke.22.1. klo 18:00 mennessä",
       "description": "Tarkastelet mennyttä tapahtumaa."
@@ -545,14 +496,14 @@
     "href": "/tapahtumat/ebk-kinkkukilpailut-ja-pikkujoulut-2/",
     "name": "EBK kinkkukilpailut ja pikkujoulut",
     "tag": "Uutinen",
-    "dateInfo": {
-      "day": "14",
-      "month": "Jou",
-      "year": "2024",
-      "isSeries": false
-    },
+    "startDate": "2024-12-14",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/xXSBchYxauHB4WtNJpxP0_Yi4x@1200=MekZ7LgFWC/20231216_140308.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
@@ -562,14 +513,14 @@
     "href": "/tapahtumat/ebk-poolmestaruus-2024/",
     "name": "EBK Poolmestaruus 2024",
     "tag": "Pool",
-    "dateInfo": {
-      "day": "6",
-      "month": "Jou",
-      "year": "2024",
-      "isSeries": false
-    },
+    "startDate": "2024-12-06",
+    "endDate": null,
+    "time": null,
+    "fee": null,
     "isPast": true,
     "img": "https://bin.yhdistysavain.fi/1604389/OqqQ0PMFBp9vVECYK9s40_Yi-_/PoolKuvaUutinen400.jpg",
+    "capacity": null,
+    "participants": [],
     "detail": {
       "description": "Tarkastelet mennyttä tapahtumaa."
     }
