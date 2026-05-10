@@ -912,11 +912,10 @@ function adminUnlock() {
   }
 }
 
-async function saveJSON(path, data, msg) {
-  adminLock(msg ? 'Tallennetaan…' : 'Tallennetaan…');
+async function saveJSON(path, data, msg, knownSha) {
+  adminLock();
   try {
-    const existing = await ghGet(path).catch(() => null);
-    const sha = existing?.sha;
+    const sha = knownSha ?? (await ghGet(path).catch(() => null))?.sha;
     await ghPut(path, JSON.stringify(data, null, 2), msg, sha);
     return true;
   } catch(e) {
@@ -1121,9 +1120,11 @@ async function saveNews() {
 
   let imgUrl = window._pickedImgUrl?.context === 'news' ? window._pickedImgUrl.url : (editingIdx !== null ? newsData[editingIdx]?.img : null);
   window._pickedImgUrl = null;
-  // Reload fresh from GitHub before saving to avoid SHA mismatch
+  // Reload fresh from GitHub — capture SHA here so saveJSON doesn't need to fetch again
+  let newsSha = null;
   try {
     const freshNews = await ghGet('data/uutiset.json');
+    newsSha = freshNews.sha;
     newsData = parseBase64Json(freshNews.content);
   } catch(e) { /* use cached data */ }
   if (pendingImg) {
@@ -1141,7 +1142,7 @@ async function saveNews() {
     newsData.unshift(item);
   }
 
-  const ok = await saveJSON('data/uutiset.json', newsData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} uutinen: ${title}`);
+  const ok = await saveJSON('data/uutiset.json', newsData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} uutinen: ${title}`, newsSha);
   btn.textContent = 'Tallenna'; btn.disabled = false;
   if (ok) { closeModal('news-modal'); renderNews(); renderDashboard(); toast('Uutinen tallennettu ✓', 'success'); }
 }
@@ -1279,6 +1280,7 @@ async function saveEvent() {
   try {
     const fresh = await ghGet('data/tapahtumat.json');
     const allEvents = parseBase64Json(fresh.content);
+    const evtSha = fresh.sha;
     if (editingIdx !== null) {
       // Find the event in full array by slug and update it
       const slug = eventsData[editingIdx]?.slug;
@@ -1288,7 +1290,7 @@ async function saveEvent() {
     } else {
       allEvents.unshift(item);
     }
-    const ok = await saveJSON('data/tapahtumat.json', allEvents, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`);
+    const ok = await saveJSON('data/tapahtumat.json', allEvents, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} tapahtuma: ${name}`, evtSha);
     if (ok) {
       eventsData = allEvents;
       closeModal('event-modal');
@@ -1393,16 +1395,22 @@ async function saveMember() {
   if (editingIdx !== null) membersData[editingIdx] = item;
   else membersData.push(item);
 
-  const ok = await saveJSON('data/jasenet.json', membersData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} jäsen: ${name}`);
+  let memSha = null;
+  try { const f = await ghGet('data/jasenet.json'); memSha = f.sha; membersData = parseBase64Json(f.content); if (editingIdx !== null) membersData[editingIdx] = item; else if (!membersData.find(m => m.slug === item.slug)) membersData.push(item); } catch(_) {}
+  const ok = await saveJSON('data/jasenet.json', membersData, `Admin: ${editingIdx !== null ? 'päivitä' : 'lisää'} jäsen: ${name}`, memSha);
   if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen tallennettu ✓', 'success'); }
 }
 
 function deleteMember() {
   if (editingIdx === null) return;
   confirm('Poista jäsen', `Poistetaanko "${membersData[editingIdx].name}"? Tätä ei voi peruuttaa.`, async () => {
-    membersData.splice(editingIdx, 1);
-    const ok = await saveJSON('data/jasenet.json', membersData, `Admin: poista jäsen`);
-    if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen poistettu', 'success'); }
+    try {
+      const fresh = await ghGet('data/jasenet.json');
+      membersData = parseBase64Json(fresh.content);
+      membersData.splice(editingIdx, 1);
+      const ok = await saveJSON('data/jasenet.json', membersData, `Admin: poista jäsen`, fresh.sha);
+      if (ok) { closeModal('member-modal'); renderMembers(); toast('Jäsen poistettu', 'success'); }
+    } catch(e) { toast('Virhe: ' + e.message, 'error'); }
   });
 }
 
@@ -1608,7 +1616,7 @@ async function removeParticipant(pIdx) {
     const all = parseBase64Json(fresh.content);
     const fi = all.findIndex(e => e.slug === evt.slug);
     if (fi >= 0) all[fi].participants = evt.participants;
-    await saveJSON('data/tapahtumat.json', all, `Admin: poista osallistuja: ${evt.name}`);
+    await saveJSON('data/tapahtumat.json', all, `Admin: poista osallistuja: ${evt.name}`, fresh.sha);
     eventsData = all;
     toast('Osallistuja poistettu', 'success');
   } catch(e) { toast('Virhe: ' + e.message, 'error'); }
@@ -1655,7 +1663,7 @@ async function toggleFeatured(idx, checked) {
         const fi = all.findIndex(a => a.slug === e.slug);
         if (fi >= 0) all[fi].featured = e.featured || false;
       });
-      await saveJSON('data/tapahtumat.json', all, `Admin: etusivu päivitetty`);
+      await saveJSON('data/tapahtumat.json', all, `Admin: etusivu päivitetty`, fresh.sha);
       eventsData = all;
       toast((checked ? '★ Lisätty etusivulle' : 'Poistettu etusivulta'), 'success');
     } catch(e) {
@@ -1674,7 +1682,7 @@ function deleteNews(elOrSlug, title) {
       const all = parseBase64Json(fresh.content);
       const fi = all.findIndex(a => a.slug === slug);
       if (fi >= 0) all.splice(fi, 1);
-      const ok = await saveJSON('data/uutiset.json', all, `Admin: poista uutinen: ${title}`);
+      const ok = await saveJSON('data/uutiset.json', all, `Admin: poista uutinen: ${title}`, fresh.sha);
       if (ok) {
         newsData = all;
         renderNews();
@@ -1697,7 +1705,7 @@ function deleteEvent(elOrSlug, name) {
       const all = parseBase64Json(fresh.content);
       const fi = all.findIndex(e => e.slug === slug);
       if (fi >= 0) all.splice(fi, 1);
-      const ok = await saveJSON('data/tapahtumat.json', all, `Admin: poista tapahtuma: ${name}`);
+      const ok = await saveJSON('data/tapahtumat.json', all, `Admin: poista tapahtuma: ${name}`, fresh.sha);
       if (ok) {
         eventsData = all;
         renderEvents('upcoming');
