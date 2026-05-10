@@ -1,5 +1,92 @@
 [
   {
+    "slug": "testi-tays-sarja",
+    "href": "/tapahtumat/testi-tays-sarja/",
+    "name": "testi_täys_sarja",
+    "tag": "Kaisa",
+    "startDate": "2026-05-11",
+    "endDate": "2026-05-29",
+    "time": "12:00",
+    "fee": "10 €",
+    "isPast": false,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/karavalmennusta-tarjolla-toukokuuss.jpg",
+    "capacity": 12,
+    "schedule": [
+      {
+        "time": "",
+        "label": "arvotaan"
+      },
+      {
+        "time": "",
+        "label": "lauletaan"
+      },
+      {
+        "time": "",
+        "label": "soitellaan"
+      }
+    ],
+    "organizer": {
+      "name": "Matti",
+      "email": "meikalainen@juu.fi"
+    },
+    "participants": [
+      {
+        "name": "Osallistuja 1",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 2",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 3",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 4",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 5",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 6",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 7",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 8",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 9",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 10",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 11",
+        "registeredAt": null
+      },
+      {
+        "name": "Osallistuja 12",
+        "registeredAt": null
+      }
+    ],
+    "detail": {
+      "deadline": "Su 10.05 mennessä",
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "avoin",
+      "description": "testi sarja kaisa"
+    }
+  },
+  {
     "slug": "testi",
     "href": "/tapahtumat/testi/",
     "name": "testi",
