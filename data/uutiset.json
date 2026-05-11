@@ -1,5 +1,15 @@
 [
   {
+    "slug": "testi-uutinen",
+    "href": "/uutiset/testi-uutinen/",
+    "title": "testi uutinen",
+    "date": "11.5.2026",
+    "excerpt": "lyhyt kuvaus",
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/ebk-n-ykkosnyrkit-cappe-ja-jarno-ma.jpg",
+    "tag": "Uutinen",
+    "body": "<div>pitkä kuvaus</div><div>asd</div>"
+  },
+  {
     "slug": "ap-kingi-hurjana",
     "href": "/uutiset/ap-kingi-hurjana/",
     "title": "ap-kingi hurjana",
