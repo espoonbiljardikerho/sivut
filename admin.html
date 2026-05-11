@@ -1228,6 +1228,95 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ── Drag-and-drop image handler ──────────────────────────────────────────
+  // Mirrors the paste handler: if user drops an image FILE into the editor,
+  // upload it via the same pipeline instead of letting Firefox embed it as a
+  // <img src="data:..."> data URL.
+  ['nf-body', 'ef-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    // Need dragover to allow the drop event to fire at all
+    el.addEventListener('dragover', e => {
+      // Only intercept file drags — let internal text drags pass through
+      const dt = e.dataTransfer;
+      if (dt && dt.types && (Array.from(dt.types).includes('Files') || Array.from(dt.types).includes('application/x-moz-file'))) {
+        e.preventDefault();
+      }
+    });
+
+    el.addEventListener('drop', async function(e) {
+      const dt = e.dataTransfer;
+      if (!dt) return;
+      // Check for an image file in the drop
+      const files = Array.from(dt.files || []);
+      const imgFile = files.find(f => f.type.startsWith('image/'));
+      if (!imgFile) return; // not a file drop — let browser do its thing
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      const isNews = id === 'nf-body';
+      const baseSlug = isNews
+        ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
+        : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
+      const filename = `${baseSlug}-${Date.now()}.jpg`;
+      const folder   = isNews ? 'news' : 'events';
+
+      // Try to insert placeholder where the drop landed. If we can't get a
+      // range from the drop point, just append at the end of the editor.
+      const placeholderId = `img-uploading-drop-${Date.now()}`;
+      const placeholder = document.createElement('span');
+      placeholder.id = placeholderId;
+      placeholder.style.cssText = 'color:var(--text-muted);font-style:italic';
+      placeholder.textContent = '⏳ Ladataan kuvaa…';
+      let inserted = false;
+      try {
+        // Firefox: caretPositionFromPoint. Chromium: caretRangeFromPoint.
+        let range = null;
+        if (document.caretPositionFromPoint) {
+          const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
+          if (pos && el.contains(pos.offsetNode)) {
+            range = document.createRange();
+            range.setStart(pos.offsetNode, pos.offset);
+            range.collapse(true);
+          }
+        } else if (document.caretRangeFromPoint) {
+          const r = document.caretRangeFromPoint(e.clientX, e.clientY);
+          if (r && el.contains(r.startContainer)) range = r;
+        }
+        if (range) {
+          range.insertNode(placeholder);
+          inserted = true;
+        }
+      } catch(_) { /* fall through to append */ }
+      if (!inserted) el.appendChild(placeholder);
+
+      try {
+        const url = await uploadImage(imgFile, folder, filename);
+        const RAW = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `<p><img src="${RAW}" alt="" class="img-full"></p><p><br></p>`;
+        const ph = document.getElementById(placeholderId);
+        if (ph) {
+          const parent = ph.parentNode;
+          while (wrapper.firstChild) parent.insertBefore(wrapper.firstChild, ph);
+          parent.removeChild(ph);
+        }
+        const newImg = el.querySelector(`img[src="${RAW}"]`);
+        toast('Kuva lisätty ✓', 'success');
+        if (newImg && typeof window.__rteSelectImage === 'function') {
+          setTimeout(() => window.__rteSelectImage(newImg), 50);
+        }
+      } catch(err) {
+        const ph = document.getElementById(placeholderId);
+        if (ph) ph.remove();
+        console.error('Drop image upload failed:', err);
+        toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
+      }
+    });
+  });
+
   // ── Handle image paste in article body RTE ───────────────────────────────
   // Three cases:
   //   1. Raw image data on clipboard (e.g. screenshot, "Copy image") — upload it
@@ -1342,64 +1431,73 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // CASE 3 — Plain text paste: let browser handle it natively
     });
+  });
 
-    // ── Post-paste safety net (Firefox fallback) ─────────────────────────────
-    // Some Firefox versions paste images as <img src="data:..."> directly into
-    // contenteditable, bypassing clipboardData.items entirely. The handler above
-    // can't intercept those because Firefox doesn't expose them as clipboard items
-    // and doesn't fill in getData('text/html') for them either. Solution: after
-    // every paste, scan for data:image URLs and convert them to real uploads.
-    el.addEventListener('paste', () => {
-      // Defer to next tick so the browser has finished inserting whatever it does
-      setTimeout(() => {
-        const dataImgs = el.querySelectorAll('img[src^="data:image/"]');
-        if (dataImgs.length === 0) return;
-        const isNews = id === 'nf-body';
-        const baseSlug = isNews
-          ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
-          : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
-        const folder = isNews ? 'news' : 'events';
+  // ── Universal data-URL image catcher ──────────────────────────────────────
+  // Some browsers/sources sneak <img src="data:..."> into the editor via paths
+  // we can't intercept (Firefox drag-drop in some configurations, browser
+  // restore from autosave, devtools paste, etc). A MutationObserver scans the
+  // editors continuously and converts any data-URL image to a real upload.
+  function _convertDataUrlImg(el, img) {
+    if (img.dataset.uploading === '1') return; // already in progress
+    img.dataset.uploading = '1';
 
-        dataImgs.forEach(async (img, i) => {
-          const dataUrl = img.getAttribute('src');
-          const filename = `${baseSlug}-${Date.now()}-${i}.jpg`;
-          // Replace the data URL img with a placeholder so the user sees progress
-          const placeholderId = `img-uploading-fb-${Date.now()}-${i}`;
-          const placeholder = document.createElement('span');
-          placeholder.id = placeholderId;
-          placeholder.style.cssText = 'color:var(--text-muted);font-style:italic';
-          placeholder.textContent = '⏳ Ladataan kuvaa…';
-          img.replaceWith(placeholder);
+    const id = el.id;
+    const isNews = id === 'nf-body';
+    const baseSlug = isNews
+      ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
+      : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
+    const folder = isNews ? 'news' : 'events';
+    const filename = `${baseSlug}-${Date.now()}-${Math.random().toString(36).slice(2,6)}.jpg`;
+    const dataUrl = img.getAttribute('src');
 
-          try {
-            // Convert data URL → Blob → File so uploadImage can handle it
-            const blob = await (await fetch(dataUrl)).blob();
-            const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
-            const url = await uploadImage(file, folder, filename);
-            const RAW = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
-            // Replace placeholder with wrapped image (same structure as Case 1)
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = `<p><img src="${RAW}" alt="" class="img-full"></p><p><br></p>`;
-            const ph = document.getElementById(placeholderId);
-            if (ph) {
-              const parent = ph.parentNode;
-              while (wrapper.firstChild) parent.insertBefore(wrapper.firstChild, ph);
-              parent.removeChild(ph);
-            }
-            const newImg = el.querySelector(`img[src="${RAW}"]`);
-            toast('Kuva lisätty ✓', 'success');
-            if (newImg && typeof window.__rteSelectImage === 'function') {
-              setTimeout(() => window.__rteSelectImage(newImg), 50);
-            }
-          } catch(err) {
-            const ph = document.getElementById(placeholderId);
-            if (ph) ph.remove();
-            console.error('Fallback image upload failed:', err);
-            toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
-          }
-        });
-      }, 0);
+    const placeholder = document.createElement('span');
+    const placeholderId = `img-uploading-mo-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    placeholder.id = placeholderId;
+    placeholder.style.cssText = 'color:var(--text-muted);font-style:italic';
+    placeholder.textContent = '⏳ Ladataan kuvaa…';
+    img.replaceWith(placeholder);
+
+    (async () => {
+      try {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+        await uploadImage(file, folder, filename);
+        const RAW = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = `<p><img src="${RAW}" alt="" class="img-full"></p><p><br></p>`;
+        const ph = document.getElementById(placeholderId);
+        if (ph) {
+          const parent = ph.parentNode;
+          while (wrapper.firstChild) parent.insertBefore(wrapper.firstChild, ph);
+          parent.removeChild(ph);
+        }
+        const newImg = el.querySelector(`img[src="${RAW}"]`);
+        toast('Kuva lisätty ✓', 'success');
+        if (newImg && typeof window.__rteSelectImage === 'function') {
+          setTimeout(() => window.__rteSelectImage(newImg), 50);
+        }
+      } catch(err) {
+        const ph = document.getElementById(placeholderId);
+        if (ph) ph.remove();
+        console.error('MutationObserver image upload failed:', err);
+        toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
+      }
+    })();
+  }
+
+  ['nf-body', 'ef-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const observer = new MutationObserver(muts => {
+      // Find any data-URL img in the editor (added directly or inside a subtree)
+      el.querySelectorAll('img[src^="data:image/"]').forEach(img => {
+        if (img.dataset.uploading !== '1') {
+          _convertDataUrlImg(el, img);
+        }
+      });
     });
+    observer.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
   });
 
   // ── Floating image size toolbar for RTE editors ──────────────────────────
@@ -1429,9 +1527,9 @@ window.addEventListener('DOMContentLoaded', () => {
         const btn = e.target.closest('button');
         if (!btn || !selectedImg) return;
         if (btn.dataset.action === 'delete') {
-          // Confirm before destroying — ✕ icon previously caused accidental deletes
-          // because users read it as "close toolbar" rather than "delete image".
-          if (!confirm('Poista kuva uutisesta?')) return;
+          // Remove the image. The button label is unambiguous (🗑 Poista) so we
+          // don't need a confirm — and a confirm dialog was masking a Firefox
+          // focus-related bug where Poista appeared not to work at all.
           selectedImg.remove();
           hideBar();
           return;
