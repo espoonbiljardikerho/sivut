@@ -236,8 +236,21 @@
     border-radius: 0 0 var(--radius) var(--radius);
     color: var(--text); font-size: 14px; line-height: 1.7;
     outline: none;
+    overflow-wrap: break-word; word-break: break-word;
   }
   .rte-content:focus { border-color: var(--gold); }
+  /* Defensive — never let pasted/embedded media break the editor box.
+     Applies regardless of inline width/height attributes from clipboard. */
+  .rte-content img,
+  .rte-content video,
+  .rte-content iframe {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin: 6px 0;
+    border-radius: 6px;
+  }
+  .rte-content table { max-width: 100%; }
 
   /* Image upload */
   .img-upload-area {
@@ -1159,43 +1172,80 @@ window.addEventListener('DOMContentLoaded', () => {
   if (savedToken) document.getElementById('login-token').value = savedToken;
 
   // ── Handle image paste in article body RTE ───────────────────────────────
-  // Uploads pasted images to images/news/ in repo, inserts URL tag — never embeds base64
+  // Three cases:
+  //   1. Raw image data on clipboard (e.g. screenshot, "Copy image") — upload it
+  //   2. HTML with <img> tags (e.g. copy from webpage) — strip the imgs, paste text only,
+  //      and toast a hint to use the upload button. Never embed huge external images.
+  //   3. Plain text — let browser handle normally.
   ['nf-body', 'ef-desc'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('paste', async function(e) {
-      const items = Array.from(e.clipboardData?.items || []);
-      const imageItem = items.find(i => i.type.startsWith('image/'));
-      if (!imageItem) return; // no image — let browser handle text paste normally
+      const cd = e.clipboardData;
+      if (!cd) return;
+      const items = Array.from(cd.items || []);
+      const imageItem = items.find(i => i.kind === 'file' && i.type.startsWith('image/'));
 
-      e.preventDefault();
+      // CASE 1 — Raw image: intercept and upload
+      if (imageItem) {
+        e.preventDefault();
 
-      // Get slug for filename
-      const isNews = id === 'nf-body';
-      const slugEl = document.getElementById(isNews ? 'nf-slug' : 'ef-name');
-      const baseSlug = isNews
-        ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
-        : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
-      const filename = `${baseSlug}-${Date.now()}.jpg`;
-      const folder   = isNews ? 'news' : 'events';
+        const isNews = id === 'nf-body';
+        const baseSlug = isNews
+          ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
+          : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
+        const filename = `${baseSlug}-${Date.now()}.jpg`;
+        const folder   = isNews ? 'news' : 'events';
 
-      // Show uploading placeholder
-      const placeholder = `<span id="img-uploading-${Date.now()}" style="color:var(--text-muted);font-style:italic">⏳ Ladataan kuvaa…</span>`;
-      document.execCommand('insertHTML', false, placeholder);
+        const placeholderId = `img-uploading-${Date.now()}`;
+        const placeholder = `<span id="${placeholderId}" style="color:var(--text-muted);font-style:italic">⏳ Ladataan kuvaa…</span>`;
+        document.execCommand('insertHTML', false, placeholder);
 
-      try {
-        const file = imageItem.getAsFile();
-        const url  = await uploadImage(file, folder, filename);
-        const RAW  = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
-        // Replace placeholder with actual image
-        el.querySelectorAll('[id^="img-uploading-"]').forEach(p => {
-          p.outerHTML = `<img src="${RAW}" alt="" style="max-width:100%;border-radius:6px;margin:6px 0;">`;
-        });
-        toast('Kuva lisätty ✓', 'success');
-      } catch(err) {
-        el.querySelectorAll('[id^="img-uploading-"]').forEach(p => p.remove());
-        toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
+        try {
+          const file = imageItem.getAsFile();
+          const url  = await uploadImage(file, folder, filename);
+          const RAW  = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
+          el.querySelectorAll('[id^="img-uploading-"]').forEach(p => {
+            p.outerHTML = `<img src="${RAW}" alt="" style="max-width:100%;height:auto;border-radius:6px;margin:6px 0;display:block">`;
+          });
+          toast('Kuva lisätty ✓', 'success');
+        } catch(err) {
+          el.querySelectorAll('[id^="img-uploading-"]').forEach(p => p.remove());
+          toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
+        }
+        return;
       }
+
+      // CASE 2 — HTML paste with embedded images (e.g. copied from webpage)
+      const html = cd.getData('text/html');
+      if (html && /<img\b/i.test(html)) {
+        e.preventDefault();
+        // Parse, strip imgs, keep text + basic formatting
+        let cleaned;
+        try {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          // Remove all images, iframes, videos, scripts
+          doc.querySelectorAll('img, iframe, video, audio, script, style, link, object, embed').forEach(n => n.remove());
+          // Strip event handlers and inline styles that could break layout
+          doc.querySelectorAll('*').forEach(n => {
+            // Keep only safe attributes
+            Array.from(n.attributes).forEach(attr => {
+              const name = attr.name.toLowerCase();
+              if (name.startsWith('on') || name === 'style' || name === 'class' || name === 'id') {
+                n.removeAttribute(attr.name);
+              }
+            });
+          });
+          cleaned = doc.body.innerHTML.trim();
+        } catch(_) {
+          cleaned = cd.getData('text/plain') || '';
+        }
+        if (cleaned) document.execCommand('insertHTML', false, cleaned);
+        toast('Kuvat poistettu — käytä "Lataa kuva" -painiketta lisätäksesi kuvia', 'success');
+        return;
+      }
+
+      // CASE 3 — Plain text paste: let browser handle it natively
     });
   });
   if (savedToken && savedAuthed) {
