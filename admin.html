@@ -250,6 +250,44 @@
     margin: 6px 0;
     border-radius: 6px;
   }
+  /* Image size presets — percentage of editor content width.
+     Centered with auto margins so they don't hug the left edge.
+     Public site has matching classes in uutinen.html. */
+  .rte-content img.img-sm   { width: 25%; margin: 6px auto; }
+  .rte-content img.img-md   { width: 50%; margin: 6px auto; }
+  .rte-content img.img-lg   { width: 75%; margin: 6px auto; }
+  .rte-content img.img-full { width: 100%; margin: 6px auto; }
+  /* Legacy images without a size class — match public site behavior:
+     natural size up to 100% width, centered. (Public site additionally caps
+     height at 360px; we don't here since the editor pane is already small.) */
+  .rte-content img:not([class*="img-"]) {
+    width: auto; max-width: 100%; margin: 6px auto;
+  }
+  /* Selected image — gold outline + slight scale on hover indicates clickability */
+  .rte-content img { cursor: pointer; transition: outline 0.12s; outline: 2px solid transparent; outline-offset: 2px; }
+  .rte-content img.rte-img-selected { outline: 2px solid var(--gold); }
+
+  /* Floating image-size toolbar */
+  .img-size-bar {
+    position: absolute; z-index: 200;
+    display: flex; gap: 4px; padding: 6px;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    font-family: var(--font); font-size: 12px;
+  }
+  .img-size-bar button {
+    padding: 4px 10px; background: transparent;
+    border: 1px solid transparent; border-radius: 4px;
+    color: var(--text2); cursor: pointer; font-size: 12px; font-weight: 500;
+    min-width: 32px;
+  }
+  .img-size-bar button:hover { background: var(--surface2); color: var(--text); }
+  .img-size-bar button.active { background: var(--surface2); color: var(--gold); border-color: var(--border2); }
+  .img-size-bar .sep { width: 1px; background: var(--border2); margin: 2px 4px; }
+  .img-size-bar button.danger { color: var(--danger); }
+  .img-size-bar button.danger:hover { background: rgba(220, 80, 80, 0.12); }
+
   .rte-content table { max-width: 100%; }
 
   /* Image upload */
@@ -1206,7 +1244,7 @@ window.addEventListener('DOMContentLoaded', () => {
           const url  = await uploadImage(file, folder, filename);
           const RAW  = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
           el.querySelectorAll('[id^="img-uploading-"]').forEach(p => {
-            p.outerHTML = `<img src="${RAW}" alt="" style="max-width:100%;height:auto;border-radius:6px;margin:6px 0;display:block">`;
+            p.outerHTML = `<img src="${RAW}" alt="" class="img-full">`;
           });
           toast('Kuva lisätty ✓', 'success');
         } catch(err) {
@@ -1248,6 +1286,134 @@ window.addEventListener('DOMContentLoaded', () => {
       // CASE 3 — Plain text paste: let browser handle it natively
     });
   });
+
+  // ── Floating image size toolbar for RTE editors ──────────────────────────
+  // Click any image in nf-body / ef-desc → 4-button bar appears above it
+  // (S · M · L · XL · ✕). Click outside → bar disappears. Sizes apply as
+  // classes (img-sm/md/lg/full) so the public site honors the same names.
+  (function setupImageSizeBar() {
+    const SIZE_CLASSES = ['img-sm', 'img-md', 'img-lg', 'img-full'];
+    let selectedImg = null;
+    let bar = null;
+
+    function createBar() {
+      const b = document.createElement('div');
+      b.className = 'img-size-bar';
+      b.style.display = 'none';
+      b.innerHTML = `
+        <button data-size="img-sm"   title="Pieni (25%)">S</button>
+        <button data-size="img-md"   title="Keski (50%)">M</button>
+        <button data-size="img-lg"   title="Iso (75%)">L</button>
+        <button data-size="img-full" title="Täysi (100%)">XL</button>
+        <span class="sep"></span>
+        <button data-action="delete" class="danger" title="Poista kuva">✕</button>
+      `;
+      // Stop mousedown on bar from bubbling to document (which would deselect)
+      b.addEventListener('mousedown', e => e.stopPropagation());
+      b.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn || !selectedImg) return;
+        if (btn.dataset.action === 'delete') {
+          selectedImg.remove();
+          hideBar();
+          return;
+        }
+        const size = btn.dataset.size;
+        SIZE_CLASSES.forEach(c => selectedImg.classList.remove(c));
+        selectedImg.classList.add(size);
+        updateBarActiveButton();
+        positionBar(); // image dimensions changed, reposition
+      });
+      document.body.appendChild(b);
+      return b;
+    }
+
+    function updateBarActiveButton() {
+      if (!selectedImg || !bar) return;
+      // Find which preset class the image has (if any). Unclassed legacy images
+      // get no active button — clicking any size applies it for the first time.
+      const current = SIZE_CLASSES.find(c => selectedImg.classList.contains(c));
+      bar.querySelectorAll('button[data-size]').forEach(btn => {
+        btn.classList.toggle('active', current ? btn.dataset.size === current : false);
+      });
+    }
+
+    function positionBar() {
+      if (!selectedImg || !bar) return;
+      const rect = selectedImg.getBoundingClientRect();
+      const barRect = bar.getBoundingClientRect();
+      // Place bar centered above image. If no room above, place below.
+      const above = rect.top - barRect.height - 8;
+      const below = rect.bottom + 8;
+      const top = above > 8 ? above : below;
+      const left = Math.max(8, Math.min(
+        rect.left + rect.width / 2 - barRect.width / 2,
+        window.innerWidth - barRect.width - 8
+      ));
+      bar.style.top  = `${top + window.scrollY}px`;
+      bar.style.left = `${left + window.scrollX}px`;
+    }
+
+    function selectImage(img) {
+      if (selectedImg) selectedImg.classList.remove('rte-img-selected');
+      selectedImg = img;
+      img.classList.add('rte-img-selected');
+      if (!bar) bar = createBar();
+      bar.style.display = 'flex';
+      updateBarActiveButton();
+      // Need a frame so the bar has dimensions before we position it
+      requestAnimationFrame(positionBar);
+    }
+
+    function hideBar() {
+      if (selectedImg) selectedImg.classList.remove('rte-img-selected');
+      selectedImg = null;
+      if (bar) bar.style.display = 'none';
+    }
+
+    // Click on an image inside any RTE → select it
+    ['nf-body', 'ef-desc'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', (e) => {
+        const img = e.target.closest('img');
+        if (img && el.contains(img)) {
+          e.preventDefault();
+          selectImage(img);
+        }
+      });
+    });
+
+    // Click anywhere else → deselect
+    document.addEventListener('mousedown', (e) => {
+      if (!selectedImg) return;
+      // Ignore clicks on the bar itself (handled in createBar via stopPropagation)
+      if (bar && bar.contains(e.target)) return;
+      // Ignore clicks on the currently-selected image (re-selection)
+      if (e.target === selectedImg) return;
+      hideBar();
+    });
+
+    // Reposition on scroll/resize (editor can scroll independently)
+    window.addEventListener('scroll', () => { if (selectedImg) positionBar(); }, true);
+    window.addEventListener('resize', () => { if (selectedImg) positionBar(); });
+
+    // Hide bar when any modal closes (image might be gone from DOM)
+    document.querySelectorAll('.modal-bg').forEach(bg => {
+      bg.addEventListener('click', e => {
+        if (e.target === bg) hideBar();
+      });
+      // Also watch the .open class — handles close via X button, Peruuta, save
+      new MutationObserver(() => {
+        if (!bg.classList.contains('open') && selectedImg) hideBar();
+      }).observe(bg, { attributes: true, attributeFilter: ['class'] });
+    });
+    // Escape clears
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && selectedImg) hideBar();
+    });
+  })();
+
   if (savedToken && savedAuthed) {
     ghToken = savedToken;
     document.getElementById('login-screen').style.display = 'none';

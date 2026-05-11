@@ -246,10 +246,33 @@ section { padding: var(--spy) var(--px); }
 .article-content img {
   max-width:100%; width:auto; display:block;
   max-height:360px; object-fit:contain;
-  border-radius:7px; margin:0.6em 0;
+  border-radius:7px; margin:0.6em auto;
   filter:brightness(0.88) saturate(0.75);
   border:1px solid var(--border);
   background:var(--surface-card);
+}
+/* Size presets set by the admin editor. Width % of the article content column.
+   Centered with auto margins. Mobile rule below collapses all to full width.
+   Sized images opt OUT of the legacy 360px height cap so the user's chosen
+   width determines the height via aspect ratio. */
+.article-content img.img-sm,
+.article-content img.img-md,
+.article-content img.img-lg,
+.article-content img.img-full {
+  max-height: none;
+  object-fit: unset;
+  height: auto;
+}
+.article-content img.img-sm   { width: 25%; }
+.article-content img.img-md   { width: 50%; }
+.article-content img.img-lg   { width: 75%; }
+.article-content img.img-full { width: 100%; }
+@media (max-width: 560px) {
+  /* Phones — too narrow for fractional widths to look sensible */
+  .article-content img.img-sm,
+  .article-content img.img-md,
+  .article-content img.img-lg,
+  .article-content img.img-full { width: 100%; }
 }
 /* Collapse empty paragraphs that Yhdistysavain inserts around images */
 .article-content p:empty { display:none; margin:0; padding:0; }
