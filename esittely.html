@@ -12,10 +12,10 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --gold: #C8A84B; --gold-light: #E2C97A; --gold-dim: #7a6528;
-  --green-dark: #0D1F0F; --green-mid: #152B17; --green-felt: #1A3A1C;
-  --surface: #111E12; --surface-card: #192A1B;
-  --text-primary: #F0EDE4; --text-secondary: #A8A090; --text-muted: #6B6358;
-  --border: rgba(200,168,75,0.14); --border-strong: rgba(200,168,75,0.28);
+  --green-dark: #15281A; --green-mid: #1F3A26; --green-felt: #2A5238;
+  --surface: #1A3220; --surface-card: #244530;
+  --text-primary: #F0EDE4; --text-secondary: #B4AC9C; --text-muted: #6B6358;
+  --border: rgba(200,168,75,0.16); --border-strong: rgba(200,168,75,0.32);
   --px: clamp(1rem, 4vw, 3rem); --spy: clamp(36px, 5vw, 64px);
 }
 html { scroll-behavior: smooth; }
@@ -71,7 +71,7 @@ section { padding: var(--spy) var(--px); }
   position:absolute; inset:0;
   background: radial-gradient(ellipse 90% 70% at 65% 50%, rgba(26,58,28,0.55) 0%, transparent 70%),
     radial-gradient(ellipse 40% 40% at 10% 80%, rgba(200,168,75,0.05) 0%, transparent 60%),
-    linear-gradient(160deg, #0D1F0F 0%, #111E12 60%, #0A1A0B 100%);
+    linear-gradient(160deg, #15281A 0%, #1A3220 60%, #0F2014 100%);
 }
 .hero-felt {
   position:absolute; inset:0; opacity:0.28;
@@ -197,8 +197,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 /* ── LIGHT THEME ──────────────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --gold:          #8A6F1E;
-  --gold-light:    #A68A2A;
+  --gold:          #A6862E;
+  --gold-light:    #BFA042;
   --gold-dim:      #6B5612;
   --gold-soft:     #F2EAD0;
   --green-dark:    #FAF7F1;
@@ -244,6 +244,33 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 }
 [data-theme="light"] .btn-primary:hover,
 [data-theme="light"] .nav-cta:hover { background: #142A17 !important; border-color: #142A17 !important; }
+/* ── Light theme: extend dark-green-ink treatment to ALL primary actions ── */
+[data-theme="light"] .m-cta,
+[data-theme="light"] .jm-submit,
+[data-theme="light"] .rm-submit {
+  background: #1F3A22 !important;
+  color: #FAF7F1 !important;
+  border-color: #1F3A22 !important;
+}
+[data-theme="light"] .m-cta:hover,
+[data-theme="light"] .jm-submit:hover,
+[data-theme="light"] .rm-submit:hover {
+  background: #142A17 !important;
+  border-color: #142A17 !important;
+}
+/* Logo monogram circle: keep gold ring but use dark ink text */
+[data-theme="light"] .nav-logo-icon {
+  background: #1F3A22 !important;
+  color: #FAF7F1 !important;
+}
+/* Membership form privacy/terms checkmark — dark-green box with cream check */
+[data-theme="light"] .jm-check-label:has(.jm-check-input:checked) .jm-check-box {
+  background: #1F3A22 !important;
+  border-color: #1F3A22 !important;
+}
+[data-theme="light"] .jm-check-label:has(.jm-check-input:checked) .jm-check-box::after {
+  color: #FAF7F1 !important;
+}
 [data-theme="light"] .btn-secondary {
   background: transparent !important;
   color: var(--text-primary) !important;

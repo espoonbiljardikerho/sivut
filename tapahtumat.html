@@ -15,16 +15,16 @@
   --gold: #C8A84B;
   --gold-light: #E2C97A;
   --gold-dim: #7a6528;
-  --green-dark: #0D1F0F;
-  --green-mid: #152B17;
-  --green-felt: #1A3A1C;
-  --surface: #111E12;
-  --surface-card: #192A1B;
+  --green-dark: #15281A;
+  --green-mid: #1F3A26;
+  --green-felt: #2A5238;
+  --surface: #1A3220;
+  --surface-card: #244530;
   --text-primary: #F0EDE4;
-  --text-secondary: #A8A090;
+  --text-secondary: #B4AC9C;
   --text-muted: #6B6358;
-  --border: rgba(200,168,75,0.14);
-  --border-strong: rgba(200,168,75,0.28);
+  --border: rgba(200,168,75,0.16);
+  --border-strong: rgba(200,168,75,0.32);
   --px: clamp(1rem, 4vw, 3rem);
   --spy: clamp(36px, 5vw, 64px);
 }
@@ -373,9 +373,22 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   border-radius:2px; margin:12px auto 18px;
 }
 .mobile-panel-close {
-  position:absolute; top:14px; right:var(--px);
-  background:none; border:none; color:var(--text-muted);
-  font-size:18px; cursor:pointer; padding:4px;
+  position:absolute; top:14px; right:14px;
+  width:36px; height:36px; border-radius:50%;
+  background:rgba(20,20,20,0.78);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.15);
+  color:#fff;
+  font-size:16px; line-height:1; cursor:pointer; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  z-index:20;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+  transition:background .15s ease, transform .15s ease;
+}
+.mobile-panel-close:hover, .mobile-panel-close:focus-visible {
+  background:rgba(0,0,0,0.92);
+  transform:scale(1.05);
+  outline:none;
 }
 
 /* ── ANIMATIONS ── */
@@ -409,8 +422,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 
 /* ── LIGHT THEME ──────────────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --gold:          #8A6F1E;
-  --gold-light:    #A68A2A;
+  --gold:          #A6862E;
+  --gold-light:    #BFA042;
   --gold-dim:      #6B5612;
   --gold-soft:     #F2EAD0;
   --green-dark:    #FAF7F1;
@@ -456,6 +469,37 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 }
 [data-theme="light"] .btn-primary:hover,
 [data-theme="light"] .nav-cta:hover { background: #142A17 !important; border-color: #142A17 !important; }
+/* ── Light theme: extend dark-green-ink treatment to ALL primary actions ── */
+[data-theme="light"] .m-cta,
+[data-theme="light"] .jm-submit,
+[data-theme="light"] .rm-submit {
+  background: #1F3A22 !important;
+  color: #FAF7F1 !important;
+  border-color: #1F3A22 !important;
+}
+[data-theme="light"] .m-cta:hover,
+[data-theme="light"] .jm-submit:hover,
+[data-theme="light"] .rm-submit:hover {
+  background: #142A17 !important;
+  border-color: #142A17 !important;
+}
+/* Accent links: gold in dark mode, dark-ink in light */
+.accent-link { color: var(--gold); }
+[data-theme="light"] .accent-link { color: #1F3A22 !important; }
+
+/* Logo monogram circle: keep gold ring but use dark ink text */
+[data-theme="light"] .nav-logo-icon {
+  background: #1F3A22 !important;
+  color: #FAF7F1 !important;
+}
+/* Membership form privacy/terms checkmark — dark-green box with cream check */
+[data-theme="light"] .jm-check-label:has(.jm-check-input:checked) .jm-check-box {
+  background: #1F3A22 !important;
+  border-color: #1F3A22 !important;
+}
+[data-theme="light"] .jm-check-label:has(.jm-check-input:checked) .jm-check-box::after {
+  color: #FAF7F1 !important;
+}
 [data-theme="light"] .btn-secondary {
   background: transparent !important;
   color: var(--text-primary) !important;
@@ -1234,7 +1278,7 @@ html { font-size: 120%; }
           <span class="summary-detail-icon">👤</span>
           <div>
             <span class="summary-detail-label">Järjestäjä</span>
-            <span class="summary-detail-value">${organizer.name}${organizer.email ? ` · <a href="mailto:${organizer.email}" style="color:var(--gold)">${organizer.email}</a>` : ''}</span>
+            <span class="summary-detail-value">${organizer.name}${organizer.email ? ` · <a href="mailto:${organizer.email}" class="accent-link">${organizer.email}</a>` : ''}</span>
           </div>
         </div>` : ''}
       </div>
