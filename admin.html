@@ -1295,43 +1295,280 @@ function adminProgress(msg) {
   }
 }
 
+// ── Save Gate ─────────────────────────────────────────────────────────────────
+// Bullet-proofs admin saves against GitHub's secondary-rate-limit and our own
+// stale local state. After every successful PUT we:
+//   1. Poll the API until ghGet returns the new SHA (proves the commit landed)
+//   2. Wait an additional settling delay (3s) to let GitHub's per-path write
+//      throttle clear, so the NEXT save to the same file won't get a spurious 409
+//   3. Only then release the lock for that file
+//
+// While a file is locked, any "Tallenna" button targeting that file is
+// disabled and shows status text. The lock is PER-FILE, so e.g. saving a
+// news post does not block editing a member profile.
+//
+// Tunables — aggressively safe defaults
+const GATE_SETTLE_MS       = 3000;   // wait after verify before releasing lock
+const GATE_VERIFY_MAX_TRIES = 8;     // ghGet polls to confirm new SHA
+const GATE_VERIFY_DELAY_MS  = 500;   // between verify polls
+const GATE_PUT_MAX_TRIES    = 3;     // retry full PUT on 409 (rate-limited)
+const GATE_PUT_BACKOFF_MS   = [2000, 4000, 6000];  // backoff between PUT retries
+
+// State: which files are currently locked, plus callbacks to refresh UI
+const _gateLocks = new Map();        // path -> { phase, msg, startedAt }
+const _gateListeners = new Set();    // functions called whenever a lock changes
+
+function _gateNotify() {
+  _gateListeners.forEach(fn => { try { fn(); } catch(_) {} });
+}
+
+function gateOnChange(fn) {
+  _gateListeners.add(fn);
+  return () => _gateListeners.delete(fn);
+}
+
+// Is this file currently in a save+verify cycle?
+function gateIsLocked(path) {
+  return _gateLocks.has(path);
+}
+
+// Human-readable status for the file ('' if unlocked)
+function gateStatus(path) {
+  const s = _gateLocks.get(path);
+  return s ? s.msg : '';
+}
+
+// All locked paths (for the top banner)
+function gateAllLocked() {
+  return Array.from(_gateLocks.entries());
+}
+
+function _gateSet(path, phase, msg) {
+  _gateLocks.set(path, { phase, msg, startedAt: _gateLocks.get(path)?.startedAt ?? Date.now() });
+  _gateNotify();
+}
+
+function _gateClear(path) {
+  _gateLocks.delete(path);
+  _gateNotify();
+}
+
+async function _sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// Run a save through the gate. The actual PUT may retry on 409 with backoff;
+// after success it polls until the new SHA is visible, then waits settling delay.
+// Returns { ok: true, newSha } on success, { ok: false, error } on failure.
+async function _gateRunSave(path, data, msg, knownSha) {
+  // PHASE 1 — Get current SHA if we don't have one
+  let sha = knownSha;
+  if (sha === undefined || sha === null) {
+    try {
+      const fetched = await ghGet(path).catch(e => {
+        if (e instanceof GhError && e.status === 404) return null;
+        throw e;
+      });
+      sha = fetched?.sha ?? null;
+    } catch(e) {
+      return { ok: false, error: e };
+    }
+  }
+
+  // PHASE 2 — PUT with retry on 409 (treat 409 as rate-limit, refetch sha)
+  let putResult = null;
+  let lastError = null;
+  for (let attempt = 0; attempt < GATE_PUT_MAX_TRIES; attempt++) {
+    try {
+      const content = JSON.stringify(data, null, 2);
+      const retryMsg = attempt > 0 ? `${msg} (retry ${attempt})` : msg;
+      putResult = await ghPut(path, content, retryMsg, sha);
+      break; // success
+    } catch(e) {
+      lastError = e;
+      if (e instanceof GhError && e.status === 409 && attempt < GATE_PUT_MAX_TRIES - 1) {
+        _gateSet(path, 'retrying', `GitHub on kiireinen, yritetään uudelleen… (${attempt + 1}/${GATE_PUT_MAX_TRIES - 1})`);
+        await _sleep(GATE_PUT_BACKOFF_MS[attempt] || 6000);
+        try {
+          const fresh = await ghGet(path);
+          sha = fresh?.sha ?? null;
+        } catch(_) { /* keep old sha; will likely fail next attempt */ }
+        continue;
+      }
+      return { ok: false, error: e };
+    }
+  }
+  if (!putResult) return { ok: false, error: lastError || new Error('Save failed') };
+
+  const newSha = putResult?.content?.sha || null;
+
+  // PHASE 3 — Verify the new SHA is visible via GET (confirms commit landed)
+  _gateSet(path, 'verifying', 'Vahvistetaan tallennusta…');
+  for (let attempt = 0; attempt < GATE_VERIFY_MAX_TRIES; attempt++) {
+    try {
+      const check = await ghGet(path);
+      if (!newSha || check.sha === newSha) {
+        // Verified
+        return { ok: true, newSha: check.sha, content: check.content };
+      }
+    } catch(_) { /* transient — retry */ }
+    await _sleep(GATE_VERIFY_DELAY_MS);
+  }
+  // Verification timed out — the save likely succeeded but we can't confirm.
+  // Treat as success (we DID get a 200 from PUT) but log it.
+  console.warn(`Save to ${path} succeeded but verify polling exceeded ${GATE_VERIFY_MAX_TRIES} tries`);
+  return { ok: true, newSha, content: null };
+}
+
 /**
- * Save JSON to GitHub with automatic 409 conflict retry.
+ * Save JSON to GitHub through the gate. Will:
+ *   - Block other saves to the same file until verification+settling completes
+ *   - Auto-retry 409s with exponential backoff
+ *   - Verify the commit is visible before releasing the lock
+ *   - Hold the lock for an additional GATE_SETTLE_MS to clear GitHub's throttle
  *
  * @param {string} path - file path in repo
  * @param {*} data - data to serialize
  * @param {string} msg - commit message
- * @param {string|null} knownSha - SHA from a prior fetch (avoid re-fetch)
- * @returns {boolean} true on success, false on failure (error already shown via banner)
+ * @param {string|null} knownSha - SHA from a prior fetch (optional)
+ * @returns {boolean} true on success, false on failure (error already shown)
  */
 async function saveJSON(path, data, msg, knownSha) {
+  // If a save to this file is already in flight, refuse — caller should
+  // have respected the gate. Defensive guard.
+  if (gateIsLocked(path)) {
+    showError({
+      title: 'Tallennus on jo käynnissä',
+      msg: `Tiedostoa ${path} ollaan parhaillaan tallentamassa. Odota että edellinen tallennus valmistuu.`,
+      technical: `gate locked: ${gateStatus(path)}`
+    });
+    return false;
+  }
+
   adminLock();
+  _gateSet(path, 'saving', 'Tallennetaan…');
+
   try {
-    const sha = knownSha ?? (await ghGet(path).catch(e => {
-      // 404 is OK — file doesn't exist yet (creating new). Other errors propagate.
-      if (e instanceof GhError && e.status === 404) return null;
-      throw e;
-    }))?.sha;
-    try {
-      await ghPut(path, JSON.stringify(data, null, 2), msg, sha);
-    } catch(e) {
-      // On 409 conflict, retry ONCE with fresh SHA. We only do this safely for
-      // path-level conflicts; the caller is responsible for ensuring `data` is
-      // built from a fresh read (which the save flows now do).
-      if (e instanceof GhError && e.status === 409 && knownSha) {
-        adminProgress('Yhteensovitetaan ja yritetään uudelleen…');
-        const fresh = await ghGet(path);
-        await ghPut(path, JSON.stringify(data, null, 2), msg + ' (retry)', fresh.sha);
-      } else {
-        throw e;
-      }
+    const result = await _gateRunSave(path, data, msg, knownSha);
+    if (!result.ok) {
+      showError(result.error, path);
+      return false;
     }
+
+    // PHASE 4 — Settling delay (lets GitHub's per-path write throttle clear)
+    _gateSet(path, 'settling', 'Vahvistettu, viimeistellään… (3s)');
+    await _sleep(GATE_SETTLE_MS);
+
+    // PHASE 5 — Flash success
+    _gateSet(path, 'done', 'Valmis ✓');
+    await _sleep(800);
+
     return true;
   } catch(e) {
     showError(e, path);
     return false;
   } finally {
+    _gateClear(path);
     adminUnlock();
+  }
+}
+
+// ── Save button sync ──────────────────────────────────────────────────────────
+// Every "Tallenna" button in the app reflects gate state. Buttons map to a
+// target file via data-gate-path attribute, OR we infer from button id/context.
+// When the gate state changes, this re-syncs all visible save buttons.
+
+const SAVE_BUTTONS = [
+  { id: 'news-save-btn',  paths: [PATH_NEWS_HOT, PATH_NEWS_ARCHIVE] },
+  { id: 'evt-save-btn',   paths: [PATH_EVENTS] },
+];
+
+function _syncSaveButtons() {
+  // Modal save buttons (news, events have explicit IDs)
+  SAVE_BUTTONS.forEach(({ id, paths }) => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    // Skip if this button is mid-its-own-save (controlled by saveNews/saveEvent)
+    if (btn.dataset.activeSave === '1') return;
+    const lockedPath = paths.find(p => gateIsLocked(p));
+    if (lockedPath) {
+      btn.disabled = true;
+      btn.textContent = 'Odota edellistä tallennusta…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Tallenna';
+    }
+  });
+
+  // Member modal — selector-based (no fixed id)
+  const memberBtn = document.querySelector('#member-modal .btn-primary');
+  if (memberBtn && memberBtn.dataset.activeSave !== '1') {
+    if (gateIsLocked(PATH_MEMBERS)) {
+      memberBtn.disabled = true;
+      memberBtn.textContent = 'Odota edellistä tallennusta…';
+    } else {
+      memberBtn.disabled = false;
+      memberBtn.textContent = 'Tallenna';
+    }
+  }
+
+  // Delete buttons — disable all delete buttons whose file is locked
+  // (covers list-row delete buttons and modal-internal delete buttons)
+  document.querySelectorAll('button[data-slug]').forEach(btn => {
+    const onclick = btn.getAttribute('onclick') || '';
+    let path = null;
+    if (onclick.includes('deleteNews'))   path = PATH_NEWS_HOT; // covers archive too via OR below
+    if (onclick.includes('deleteEvent'))  path = PATH_EVENTS;
+    if (onclick.includes('deleteMember')) path = PATH_MEMBERS;
+    if (!path) return;
+    const isNewsLocked = path === PATH_NEWS_HOT && (gateIsLocked(PATH_NEWS_HOT) || gateIsLocked(PATH_NEWS_ARCHIVE));
+    if (isNewsLocked || gateIsLocked(path)) {
+      btn.disabled = true;
+    } else {
+      btn.disabled = false;
+    }
+  });
+
+  // Member delete button inside modal
+  const memberDelBtn = document.getElementById('member-delete-btn');
+  if (memberDelBtn) {
+    memberDelBtn.disabled = gateIsLocked(PATH_MEMBERS);
+  }
+}
+
+function _syncTopBanner() {
+  const locked = gateAllLocked();
+  const bar = document.getElementById('top-progress-bar');
+  const msgEl = document.getElementById('top-progress-msg');
+  const sideBar = document.getElementById('save-lock-bar');
+  const sideMsg = document.getElementById('save-lock-msg');
+  if (locked.length === 0) {
+    if (bar) bar.classList.remove('visible');
+    if (sideBar) sideBar.classList.remove('visible');
+    return;
+  }
+  // Show the most recently-started lock's message
+  const [, state] = locked[locked.length - 1];
+  if (bar && msgEl) {
+    msgEl.textContent = state.msg;
+    bar.classList.add('visible');
+  }
+  if (sideBar && sideMsg) {
+    sideMsg.textContent = state.msg;
+    sideBar.classList.add('visible');
+  }
+}
+
+// Wire the listener immediately if DOM is already loaded, else wait for DOMContentLoaded
+if (typeof document !== 'undefined') {
+  const _registerGateListeners = () => {
+    gateOnChange(_syncSaveButtons);
+    gateOnChange(_syncTopBanner);
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _registerGateListeners, { once: true });
+  } else {
+    _registerGateListeners();
   }
 }
 
@@ -1556,6 +1793,7 @@ function openNewsModal(idx) {
   document.getElementById('nf-slug').dataset.locked = a ? 'true' : 'false';
   pendingImg = null;
   document.getElementById('news-modal').classList.add('open');
+  _syncSaveButtons(); // reflect gate state on Save button
 }
 
 // Lock slug after manual edit
@@ -1575,6 +1813,12 @@ function autoSlug() {
 }
 
 async function saveNews() {
+  // Defensive gate guard — button should already be disabled when locked
+  if (gateIsLocked(PATH_NEWS_HOT) || gateIsLocked(PATH_NEWS_ARCHIVE)) {
+    toast('Edellinen tallennus on vielä käynnissä, odota hetki', 'error');
+    return;
+  }
+
   const title   = document.getElementById('nf-title').value.trim();
   const slug    = document.getElementById('nf-slug').value.trim();
   const dateRaw = document.getElementById('nf-date').value.trim(); // YYYY-MM-DD
@@ -1599,6 +1843,7 @@ async function saveNews() {
   const body = rawBody.replace(/<img[^>]+src=["']data:[^"']*["'][^>]*>/gi, '');
 
   const btn = document.getElementById('news-save-btn');
+  btn.dataset.activeSave = '1'; // tell _syncSaveButtons to leave this button alone
   btn.textContent = 'Tallennetaan…'; btn.disabled = true;
 
   try {
@@ -1737,7 +1982,9 @@ async function saveNews() {
       toast('Uutinen tallennettu ✓', 'success');
     }
   } finally {
-    btn.textContent = 'Tallenna'; btn.disabled = false;
+    // Release control of the button — _syncSaveButtons will manage it based on gate state.
+    delete btn.dataset.activeSave;
+    _syncSaveButtons();
   }
 }
 
@@ -1802,10 +2049,17 @@ function openEventModal(idx) {
   switchEvtTab('details');
   pendingImg = null;
   document.getElementById('event-modal').classList.add('open');
+  _syncSaveButtons(); // reflect gate state on Save button
 }
 
 
 async function saveEvent() {
+  // Defensive gate guard
+  if (gateIsLocked(PATH_EVENTS)) {
+    toast('Edellinen tallennus on vielä käynnissä, odota hetki', 'error');
+    return;
+  }
+
   const name = document.getElementById('ef-name').value.trim();
   if (!name) { toast('Nimi on pakollinen', 'error'); return; }
 
@@ -1823,7 +2077,10 @@ async function saveEvent() {
   }
 
   const btn_save = document.querySelector('#event-modal .btn-primary');
-  if (btn_save) { btn_save.textContent = 'Tallennetaan…'; btn_save.disabled = true; }
+  if (btn_save) {
+    btn_save.dataset.activeSave = '1';
+    btn_save.textContent = 'Tallennetaan…'; btn_save.disabled = true;
+  }
 
   try {
     let imgUrl = window._pickedImgUrl?.context === 'events' ? window._pickedImgUrl.url
@@ -1934,7 +2191,10 @@ async function saveEvent() {
       toast('Tapahtuma tallennettu ✓', 'success');
     }
   } finally {
-    if (btn_save) { btn_save.textContent = 'Tallenna'; btn_save.disabled = false; }
+    if (btn_save) {
+      delete btn_save.dataset.activeSave;
+    }
+    _syncSaveButtons();
   }
 }
 
@@ -1989,14 +2249,24 @@ function openMemberModal(idx) {
   document.getElementById('member-delete-btn').style.display = m ? 'inline-flex' : 'none';
   pendingImg = null;
   document.getElementById('member-modal').classList.add('open');
+  _syncSaveButtons(); // reflect gate state on Save button
 }
 
 async function saveMember() {
+  // Defensive gate guard
+  if (gateIsLocked(PATH_MEMBERS)) {
+    toast('Edellinen tallennus on vielä käynnissä, odota hetki', 'error');
+    return;
+  }
+
   const name = document.getElementById('mf-name').value.trim();
   if (!name) { toast('Nimi on pakollinen', 'error'); return; }
 
   const btn = document.querySelector('#member-modal .btn-primary');
-  if (btn) { btn.textContent = 'Tallennetaan…'; btn.disabled = true; }
+  if (btn) {
+    btn.dataset.activeSave = '1';
+    btn.textContent = 'Tallennetaan…'; btn.disabled = true;
+  }
 
   try {
     let photoUrl = window._pickedImgUrl?.context === 'members' ? window._pickedImgUrl.url
@@ -2090,7 +2360,10 @@ async function saveMember() {
       toast('Jäsen tallennettu ✓', 'success');
     }
   } finally {
-    if (btn) { btn.textContent = 'Tallenna'; btn.disabled = false; }
+    if (btn) {
+      delete btn.dataset.activeSave;
+    }
+    _syncSaveButtons();
   }
 }
 
