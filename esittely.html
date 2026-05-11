@@ -170,8 +170,8 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
   .hamburger { display:flex; }
   .hero-inner { grid-template-columns:1fr; }
   .hero-stats { flex-direction:row; flex-wrap:wrap; gap:10px; }
-  .stat-row { flex:1 1 calc(50% - 10px); min-width:0; max-width:calc(50% - 5px); }
-  .stat-text { font-size:11px; word-break:break-word; }
+  .stat-row { flex:1 1 calc(50% - 10px); min-width:0; max-width:calc(50% - 5px); padding:12px 14px; gap:12px; }
+  .stat-text { font-size:11px; overflow-wrap:break-word; }
   .stat-text strong { display:block; white-space:normal; }
   .about-inner { grid-template-columns:1fr; }
   .viikko-grid { grid-template-columns:1fr; }
@@ -181,6 +181,11 @@ footer { background:var(--green-dark); border-top:1px solid var(--border); paddi
 @media (max-width:560px) {
   .tables-grid { grid-template-columns:repeat(2,1fr); }
   .footer-grid { grid-template-columns:1fr; }
+  /* Narrow viewports: stats go single-column so long Finnish words ("Biljardipöytää",
+     "Perustettu") have room to fit on one line instead of breaking mid-word */
+  .hero-stats { flex-direction:column; }
+  .stat-row { flex:1 1 auto; max-width:none; padding:14px 16px; }
+  .stat-text strong { font-size:13px; }
 }
 
 /* ── Theme toggle button ─────────────────────────────────────────────────── */
