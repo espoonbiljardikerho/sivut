@@ -1342,6 +1342,64 @@ window.addEventListener('DOMContentLoaded', () => {
 
       // CASE 3 — Plain text paste: let browser handle it natively
     });
+
+    // ── Post-paste safety net (Firefox fallback) ─────────────────────────────
+    // Some Firefox versions paste images as <img src="data:..."> directly into
+    // contenteditable, bypassing clipboardData.items entirely. The handler above
+    // can't intercept those because Firefox doesn't expose them as clipboard items
+    // and doesn't fill in getData('text/html') for them either. Solution: after
+    // every paste, scan for data:image URLs and convert them to real uploads.
+    el.addEventListener('paste', () => {
+      // Defer to next tick so the browser has finished inserting whatever it does
+      setTimeout(() => {
+        const dataImgs = el.querySelectorAll('img[src^="data:image/"]');
+        if (dataImgs.length === 0) return;
+        const isNews = id === 'nf-body';
+        const baseSlug = isNews
+          ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value) || 'kuva')
+          : autoSlugFrom(document.getElementById('ef-name').value || 'kuva');
+        const folder = isNews ? 'news' : 'events';
+
+        dataImgs.forEach(async (img, i) => {
+          const dataUrl = img.getAttribute('src');
+          const filename = `${baseSlug}-${Date.now()}-${i}.jpg`;
+          // Replace the data URL img with a placeholder so the user sees progress
+          const placeholderId = `img-uploading-fb-${Date.now()}-${i}`;
+          const placeholder = document.createElement('span');
+          placeholder.id = placeholderId;
+          placeholder.style.cssText = 'color:var(--text-muted);font-style:italic';
+          placeholder.textContent = '⏳ Ladataan kuvaa…';
+          img.replaceWith(placeholder);
+
+          try {
+            // Convert data URL → Blob → File so uploadImage can handle it
+            const blob = await (await fetch(dataUrl)).blob();
+            const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+            const url = await uploadImage(file, folder, filename);
+            const RAW = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
+            // Replace placeholder with wrapped image (same structure as Case 1)
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `<p><img src="${RAW}" alt="" class="img-full"></p><p><br></p>`;
+            const ph = document.getElementById(placeholderId);
+            if (ph) {
+              const parent = ph.parentNode;
+              while (wrapper.firstChild) parent.insertBefore(wrapper.firstChild, ph);
+              parent.removeChild(ph);
+            }
+            const newImg = el.querySelector(`img[src="${RAW}"]`);
+            toast('Kuva lisätty ✓', 'success');
+            if (newImg && typeof window.__rteSelectImage === 'function') {
+              setTimeout(() => window.__rteSelectImage(newImg), 50);
+            }
+          } catch(err) {
+            const ph = document.getElementById(placeholderId);
+            if (ph) ph.remove();
+            console.error('Fallback image upload failed:', err);
+            toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
+          }
+        });
+      }, 0);
+    });
   });
 
   // ── Floating image size toolbar for RTE editors ──────────────────────────
@@ -2118,7 +2176,9 @@ async function saveNews() {
   })() : '';
   const tag     = document.getElementById('nf-tag').value;
   const excerpt = document.getElementById('nf-excerpt').value.trim();
-  // Safety net: strip any base64 images that bypassed the paste handler
+  // Safety net: strip any base64 images that bypassed the paste handler.
+  // (The Firefox fallback above SHOULD catch these and convert them to uploads,
+  // but if it failed silently we don't want huge data URLs in the JSON.)
   const rawBody = document.getElementById('nf-body').innerHTML;
   const body = rawBody.replace(/<img[^>]+src=["']data:[^"']*["'][^>]*>/gi, '');
 
