@@ -251,17 +251,16 @@
     border-radius: 6px;
   }
   /* Image size presets — percentage of editor content width.
-     Centered with auto margins so they don't hug the left edge.
+     Left-aligned (margin 0) to match natural reading flow.
      Public site has matching classes in uutinen.html. */
-  .rte-content img.img-sm   { width: 25%; margin: 6px auto; }
-  .rte-content img.img-md   { width: 50%; margin: 6px auto; }
-  .rte-content img.img-lg   { width: 75%; margin: 6px auto; }
-  .rte-content img.img-full { width: 100%; margin: 6px auto; }
+  .rte-content img.img-sm   { width: 25%; margin: 6px 0; }
+  .rte-content img.img-md   { width: 50%; margin: 6px 0; }
+  .rte-content img.img-lg   { width: 75%; margin: 6px 0; }
+  .rte-content img.img-full { width: 100%; margin: 6px 0; }
   /* Legacy images without a size class — match public site behavior:
-     natural size up to 100% width, centered. (Public site additionally caps
-     height at 360px; we don't here since the editor pane is already small.) */
+     natural size up to 100% width, left-aligned. */
   .rte-content img:not([class*="img-"]) {
-    width: auto; max-width: 100%; margin: 6px auto;
+    width: auto; max-width: 100%; margin: 6px 0;
   }
   /* Selected image — gold outline + slight scale on hover indicates clickability */
   .rte-content img { cursor: pointer; transition: outline 0.12s; outline: 2px solid transparent; outline-offset: 2px; }
@@ -1209,6 +1208,26 @@ window.addEventListener('DOMContentLoaded', () => {
   const savedAuthed = localStorage.getItem('ebk_authed');
   if (savedToken) document.getElementById('login-token').value = savedToken;
 
+  // ── Disable Firefox/legacy native image controls inside the RTE ──────────
+  // Firefox draws its own resize handles on images inside contenteditable and
+  // makes them draggable/deletable, which conflicts with our custom toolbar
+  // and has been observed to silently drop pasted images. Turning off both
+  // legacy commands here is harmless in Chromium and necessary in Firefox.
+  try {
+    document.execCommand('enableObjectResizing', false, 'false');
+    document.execCommand('enableInlineTableEditing', false, 'false');
+  } catch(_) { /* not supported on this engine — ignore */ }
+
+  // Also prevent the default image-drag behaviour (Firefox lets you drag
+  // images out of contenteditable, which can corrupt the document)
+  ['nf-body', 'ef-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('dragstart', e => {
+      if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+    });
+  });
+
   // ── Handle image paste in article body RTE ───────────────────────────────
   // Three cases:
   //   1. Raw image data on clipboard (e.g. screenshot, "Copy image") — upload it
@@ -1243,10 +1262,28 @@ window.addEventListener('DOMContentLoaded', () => {
           const file = imageItem.getAsFile();
           const url  = await uploadImage(file, folder, filename);
           const RAW  = `https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/${folder}/${filename}`;
+          // Replace placeholder with: image wrapped in <p>, then empty <p> for cursor.
+          // The empty paragraph gives the user a clean place to continue typing
+          // BELOW the image — fixes the cursor-mismatch bug where text appeared
+          // below but the caret looked next to the image.
+          let insertedImg = null;
           el.querySelectorAll('[id^="img-uploading-"]').forEach(p => {
-            p.outerHTML = `<img src="${RAW}" alt="" class="img-full">`;
+            // Use a <div> wrapper (not <span>) for parsing — both Chromium and
+            // Firefox accept block-level children inside <div> without restructuring.
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `<p><img src="${RAW}" alt="" class="img-full"></p><p><br></p>`;
+            const parent = p.parentNode;
+            while (wrapper.firstChild) parent.insertBefore(wrapper.firstChild, p);
+            parent.removeChild(p);
           });
+          // Find the newly inserted <img> so we can auto-select it
+          insertedImg = el.querySelector(`img[src="${RAW}"]`);
           toast('Kuva lisätty ✓', 'success');
+          // Auto-select the new image so the size toolbar appears immediately
+          if (insertedImg && typeof window.__rteSelectImage === 'function') {
+            // Small delay so DOM is fully painted before positioning bar
+            setTimeout(() => window.__rteSelectImage(insertedImg), 50);
+          }
         } catch(err) {
           el.querySelectorAll('[id^="img-uploading-"]').forEach(p => p.remove());
           toast('Kuvan lataus epäonnistui: ' + err.message, 'error');
@@ -1254,22 +1291,40 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // CASE 2 — HTML paste with embedded images (e.g. copied from webpage)
+      // CASE 2 — HTML paste with embedded images (e.g. copied from webpage,
+      // or copied from within the editor itself). Strip FOREIGN images (different
+      // domain) but PRESERVE images already hosted on our repo, so intra-editor
+      // copy/paste of pasted images still works.
       const html = cd.getData('text/html');
       if (html && /<img\b/i.test(html)) {
         e.preventDefault();
-        // Parse, strip imgs, keep text + basic formatting
+        const OWN_HOSTS = ['raw.githubusercontent.com', 'espoonbiljardikerho.fi', 'espoonbiljardikerho.com'];
         let cleaned;
+        let strippedAny = false;
         try {
           const doc = new DOMParser().parseFromString(html, 'text/html');
-          // Remove all images, iframes, videos, scripts
-          doc.querySelectorAll('img, iframe, video, audio, script, style, link, object, embed').forEach(n => n.remove());
-          // Strip event handlers and inline styles that could break layout
+          // Remove non-image embeds always
+          doc.querySelectorAll('iframe, video, audio, script, style, link, object, embed').forEach(n => n.remove());
+          // For images: keep if hosted on our repo, otherwise strip
+          doc.querySelectorAll('img').forEach(img => {
+            const src = img.getAttribute('src') || '';
+            const isOwn = OWN_HOSTS.some(h => src.includes(h));
+            if (!isOwn) {
+              img.remove();
+              strippedAny = true;
+            }
+          });
+          // Strip event handlers and inline styles that could break layout.
+          // Keep class on imgs (so img-sm/md/lg/full survives intra-editor paste)
+          // but strip class from other elements (avoids importing foreign styling).
           doc.querySelectorAll('*').forEach(n => {
-            // Keep only safe attributes
             Array.from(n.attributes).forEach(attr => {
               const name = attr.name.toLowerCase();
-              if (name.startsWith('on') || name === 'style' || name === 'class' || name === 'id') {
+              if (name.startsWith('on')) {
+                n.removeAttribute(attr.name);
+              } else if (name === 'style' || name === 'id') {
+                n.removeAttribute(attr.name);
+              } else if (name === 'class' && n.tagName !== 'IMG') {
                 n.removeAttribute(attr.name);
               }
             });
@@ -1279,7 +1334,9 @@ window.addEventListener('DOMContentLoaded', () => {
           cleaned = cd.getData('text/plain') || '';
         }
         if (cleaned) document.execCommand('insertHTML', false, cleaned);
-        toast('Kuvat poistettu — käytä "Lataa kuva" -painiketta lisätäksesi kuvia', 'success');
+        if (strippedAny) {
+          toast('Vieras kuva poistettu — käytä "Lataa kuva" -painiketta', 'success');
+        }
         return;
       }
 
@@ -1306,7 +1363,7 @@ window.addEventListener('DOMContentLoaded', () => {
         <button data-size="img-lg"   title="Iso (75%)">L</button>
         <button data-size="img-full" title="Täysi (100%)">XL</button>
         <span class="sep"></span>
-        <button data-action="delete" class="danger" title="Poista kuva">✕</button>
+        <button data-action="delete" class="danger" title="Poista kuva pysyvästi">🗑 Poista</button>
       `;
       // Stop mousedown on bar from bubbling to document (which would deselect)
       b.addEventListener('mousedown', e => e.stopPropagation());
@@ -1314,6 +1371,9 @@ window.addEventListener('DOMContentLoaded', () => {
         const btn = e.target.closest('button');
         if (!btn || !selectedImg) return;
         if (btn.dataset.action === 'delete') {
+          // Confirm before destroying — ✕ icon previously caused accidental deletes
+          // because users read it as "close toolbar" rather than "delete image".
+          if (!confirm('Poista kuva uutisesta?')) return;
           selectedImg.remove();
           hideBar();
           return;
@@ -1370,6 +1430,10 @@ window.addEventListener('DOMContentLoaded', () => {
       selectedImg = null;
       if (bar) bar.style.display = 'none';
     }
+
+    // Expose selectImage so other code (like the paste handler) can trigger
+    // selection programmatically after inserting an image.
+    window.__rteSelectImage = selectImage;
 
     // Click on an image inside any RTE → select it
     ['nf-body', 'ef-desc'].forEach(id => {
