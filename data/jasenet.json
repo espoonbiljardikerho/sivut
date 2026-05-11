@@ -1975,5 +1975,22 @@
     "bio": "Ying liittyi EBK:n jäseneksi marraskuussa 2021 ja osallistui heti naisten Kaisan SM-kilpailuihin. Pääasialliset lajit on kaisa ja pool.",
     "achievements": [],
     "records": []
+  },
+  {
+    "slug": "skobe",
+    "name": "skobe",
+    "nickname": "ap-kingi",
+    "type": "tays",
+    "joined": null,
+    "started": "1864",
+    "sports": [
+      "Pool",
+      "Snooker"
+    ],
+    "motto": "ei mottoja",
+    "bio": "mitäpä sitä selittelemään",
+    "photo": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/.jpg",
+    "achievements": [],
+    "records": []
   }
 ]
