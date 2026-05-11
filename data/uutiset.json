@@ -7,7 +7,7 @@
     "excerpt": "kuvaus",
     "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/ebk-n-ykkosnyrkit-cappe-ja-jarno-ma.jpg",
     "tag": "Uutinen",
-    "body": "<div>missä kingi</div><div><br></div><div>siinähän se</div>"
+    "body": "<div>missä kingi</div><div><p><img src=\"https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/testi-1778525954806.jpg\" alt=\"\" class=\"img-sm\"></p><p><br></p></div><div>siinähän se<p></p><p><p><img src=\"https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/testi-1778525972139.jpg\" alt=\"\" class=\"img-sm\"></p><p><br></p></p></div>"
   },
   {
     "slug": "ap-kingi-hurjana",
