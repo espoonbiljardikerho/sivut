@@ -53,9 +53,10 @@
   {
     "slug": "ahola-joni",
     "name": "Joni Ahola",
+    "nickname": "JohnnyBoyh",
     "type": "tays",
-    "photo": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/members/ahola-joni.jpg",
-    "nickname": "Johnny Boyh",
+    "joined": "1997",
+    "started": "1997",
     "sports": [
       "Kaisa",
       "Pool",
@@ -63,10 +64,9 @@
       "Kara",
       "Pyramidi"
     ],
-    "joined": "1997",
-    "started": "1997",
     "motto": "Mitään hyvää ei saa helpolla",
     "bio": "Joni Ahola aloitti EBK:n puheenjohtajana 2011 ja on toiminut enemmän hallinnollisissa hommissa siitä lähtien. Jonin vahvin pelimuoto on pyramidi jossa hän on voittanut SM-mitalin kaikissa yleisen sarjan pelimuodoissa ja muutaman myös kaisasta. Taustalla Joni tekee paljon töitä EBK:n ja koko Suomen biljardin eteen mm. liiton puheenjohtajana vuodesta 2017 alkaen. SBIL:n hallituksessa Joni on ollut jo toistakymmentä vuotta ja toimii paljon eri lajien jaostoissa (kaisa, pyramidi, kara ja pool)",
+    "photo": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/members/ahola-joni.jpg",
     "achievements": [
       "4x SM-kulta (Amerikanka 2010, Nevskaja Pari 2010, Kaisa Pari 2009, Pyramidi Pari SM 2018)",
       "9x SM-hopea (3x Amerikanka 2008, 2009, 2014, Pyramidi Pari 2015, 2016, 2017 ja 2019 + 2x Kaisa Joukkue 2009, 2002)",
