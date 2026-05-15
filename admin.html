@@ -294,11 +294,40 @@
     border: 2px dashed var(--border2); border-radius: var(--radius);
     padding: 20px; text-align: center; cursor: pointer;
     color: var(--text3); font-size: 12px; transition: all 0.15s;
-    position: relative;
+    position: relative; min-height: 80px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   }
   .img-upload-area:hover { border-color: var(--gold); color: var(--text2); }
-  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .img-preview { max-height: 120px; max-width: 100%; border-radius: 4px; margin-top: 8px; }
+  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 1; }
+  .img-upload-area.has-preview {
+    padding: 0; border-style: solid; border-color: var(--border2);
+    cursor: default; background: var(--bg);
+  }
+  .img-upload-area.has-preview input[type=file] { display: none; }
+  .img-upload-area.has-preview .img-placeholder { display: none; }
+  .img-preview {
+    display: none; width: 100%; max-height: 220px;
+    object-fit: contain; border-radius: calc(var(--radius) - 2px);
+    background: var(--bg);
+  }
+  .img-upload-area.has-preview .img-preview { display: block; }
+  .img-remove-btn {
+    display: none; position: absolute; top: 6px; right: 6px; z-index: 2;
+    background: rgba(15,26,16,0.85); border: 1px solid var(--border2);
+    color: var(--text2); border-radius: 4px; padding: 3px 8px;
+    font-size: 11px; cursor: pointer; font-family: var(--font);
+    backdrop-filter: blur(4px); transition: background 0.15s, color 0.15s;
+  }
+  .img-remove-btn:hover { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+  .img-upload-area.has-preview .img-remove-btn { display: block; }
+  .img-info-bar {
+    display: none; width: 100%; padding: 5px 10px;
+    font-size: 11px; color: var(--text3); text-align: left;
+    border-top: 1px solid var(--border); background: var(--surface2);
+    border-radius: 0 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .img-upload-area.has-preview .img-info-bar { display: block; }
 
   /* ── Panel / Card ──────────────────────────────────────────────── */
   .panel {
@@ -538,6 +567,36 @@
           <div class="kpi-card"><div class="kpi-num" id="kpi-events">—</div><div class="kpi-label">Tulevaa tapahtumaa</div></div>
           <div class="kpi-card"><div class="kpi-num" id="kpi-members">—</div><div class="kpi-label">Jäsentä</div></div>
         </div>
+
+        <!-- Version card -->
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-header" style="justify-content:space-between;align-items:center">
+            <div class="panel-title">Admin-paneelin versio</div>
+            <span id="version-status-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0" title="Tarkistetaan…"></span>
+          </div>
+          <div style="padding:14px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 24px;font-size:13px">
+            <div>
+              <div class="text-muted" style="margin-bottom:2px">Versio</div>
+              <strong id="ver-number" style="color:var(--gold);font-family:'Playfair Display',Georgia,serif;font-size:16px">2025-06-01</strong>
+            </div>
+            <div>
+              <div class="text-muted" style="margin-bottom:2px">Tiedosto päivitetty</div>
+              <span id="ver-file-date">—</span>
+            </div>
+            <div>
+              <div class="text-muted" style="margin-bottom:2px">GitHub commit</div>
+              <span id="ver-commit" style="font-family:monospace;font-size:12px">—</span>
+            </div>
+            <div>
+              <div class="text-muted" style="margin-bottom:2px">Repo</div>
+              <a href="https://github.com/espoonbiljardikerho/sivut" target="_blank" rel="noopener" style="font-size:12px">espoonbiljardikerho/sivut</a>
+            </div>
+          </div>
+          <div id="ver-update-notice" style="display:none;padding:10px 16px;background:rgba(200,168,75,0.08);border-top:1px solid rgba(200,168,75,0.2);font-size:12px;color:var(--gold)">
+            ⚠ Uudempi versio admin.html:stä on saatavilla reposta. Lataa uusi versio pitääksesi hallintapaneelin ajan tasalla.
+          </div>
+        </div>
+
         <div class="panel">
           <div class="panel-header"><div class="panel-title">Viimeisimmät uutiset</div></div>
           <div id="dashboard-news"></div>
@@ -695,10 +754,14 @@
           <label>Kuva</label>
           <div style="display:flex;gap:8px;align-items:flex-start">
             <div class="img-upload-area" id="nf-img-area" style="flex:1">
-              <input type="file" accept="image/*" onchange="handleImageUpload(this,'nf-img-preview','nf-img-path')">
-              <div>📷 Klikkaa ladataksesi kuva</div>
-              <div class="text-muted" style="margin-top:4px" id="nf-img-path"></div>
-              <img id="nf-img-preview" class="img-preview" style="display:none">
+              <input type="file" accept="image/*" onchange="handleImageUpload(this,'nf-img-area','nf-img-preview','nf-img-info')">
+              <div class="img-placeholder">
+                <div>📷 Klikkaa ladataksesi kuva</div>
+                <div class="text-muted" style="margin-top:4px">JPG, PNG tai WebP · max 8 MB</div>
+              </div>
+              <img id="nf-img-preview" class="img-preview" alt="">
+              <button type="button" class="img-remove-btn" onclick="removeImage('nf-img-area','nf-img-preview','nf-img-info','news')">✕ Poista kuva</button>
+              <div class="img-info-bar" id="nf-img-info"></div>
             </div>
             <button type="button" class="btn btn-secondary" style="flex-shrink:0;margin-top:0" onclick="openImgPicker('news')">📁 Repo</button>
           </div>
@@ -825,12 +888,16 @@
           <div class="field form-full">
             <label>Kuva</label>
             <div style="display:flex;gap:8px;align-items:flex-start">
-              <div class="img-upload-area" style="flex:1">
-                <input type="file" accept="image/*" onchange="handleImageUpload(this,'ef-img-preview','ef-img-path')">
+            <div class="img-upload-area" id="ef-img-area" style="flex:1">
+              <input type="file" accept="image/*" onchange="handleImageUpload(this,'ef-img-area','ef-img-preview','ef-img-info')">
+              <div class="img-placeholder">
                 <div>📷 Klikkaa ladataksesi kuva</div>
-                <div class="text-muted" style="margin-top:4px" id="ef-img-path"></div>
-                <img id="ef-img-preview" class="img-preview" style="display:none">
+                <div class="text-muted" style="margin-top:4px">JPG, PNG tai WebP · max 8 MB</div>
               </div>
+              <img id="ef-img-preview" class="img-preview" alt="">
+              <button type="button" class="img-remove-btn" onclick="removeImage('ef-img-area','ef-img-preview','ef-img-info','events')">✕ Poista kuva</button>
+              <div class="img-info-bar" id="ef-img-info"></div>
+            </div>
               <button type="button" class="btn btn-secondary" style="flex-shrink:0;margin-top:0" onclick="openImgPicker('events')">📁 Repo</button>
             </div>
           </div>
@@ -892,11 +959,15 @@
         <div class="field form-full">
           <label>Kuva</label>
           <div style="display:flex;gap:8px;align-items:flex-start">
-            <div class="img-upload-area" style="flex:1">
-              <input type="file" accept="image/*" onchange="handleImageUpload(this,'mf-img-preview','mf-img-path','members')">
-              <div>📷 Klikkaa ladataksesi kuva</div>
-              <div class="text-muted" style="margin-top:4px" id="mf-img-path"></div>
-              <img id="mf-img-preview" class="img-preview" style="display:none">
+            <div class="img-upload-area" id="mf-img-area" style="flex:1">
+              <input type="file" accept="image/*" onchange="handleImageUpload(this,'mf-img-area','mf-img-preview','mf-img-info','members')">
+              <div class="img-placeholder">
+                <div>📷 Klikkaa ladataksesi kuva</div>
+                <div class="text-muted" style="margin-top:4px">JPG, PNG tai WebP · max 8 MB</div>
+              </div>
+              <img id="mf-img-preview" class="img-preview" alt="">
+              <button type="button" class="img-remove-btn" onclick="removeImage('mf-img-area','mf-img-preview','mf-img-info','members')">✕ Poista kuva</button>
+              <div class="img-info-bar" id="mf-img-info"></div>
             </div>
             <button type="button" class="btn btn-secondary" style="flex-shrink:0;margin-top:0" onclick="openImgPicker('members')">📁 Repo</button>
           </div>
@@ -2135,6 +2206,7 @@ async function loadAllData() {
   window._archiveNewsCount = archiveNews.length;
 
   renderDashboard();
+  loadVersionInfo(); // async, non-blocking
   renderNews();
   renderEvents('upcoming');
   renderMembers();
@@ -2195,6 +2267,45 @@ function renderDashboard() {
     </table>` : '<div class="empty-state"><div class="empty-icon">📰</div><p>Ei uutisia</p></div>';
 }
 
+// ── Version info ──────────────────────────────────────────────────────────────
+// Update ADMIN_VERSION to today's date whenever you deploy a new admin.html.
+// The dashboard compares this against the last commit date from GitHub.
+const ADMIN_VERSION = '2025-06-01';
+
+async function loadVersionInfo() {
+  try {
+    const r = await fetch(`${WORKER_URL}/admin/github-commits`, {
+      headers: { Authorization: `Bearer ${sessionToken}` },
+    });
+    if (!r.ok) throw new Error(`${r.status}`);
+    const commits = await r.json();
+    if (!Array.isArray(commits) || !commits.length) throw new Error('no commits');
+
+    const latest    = commits[0];
+    const sha       = latest.sha?.slice(0, 7) || '—';
+    const commitUrl = latest.html_url || `https://github.com/espoonbiljardikerho/sivut/commits/main/admin.html`;
+    const rawDate   = latest.commit?.committer?.date || latest.commit?.author?.date || '';
+    const fileDate  = rawDate ? rawDate.slice(0, 10) : '—';
+
+    document.getElementById('ver-commit').innerHTML =
+      `<a href="${commitUrl}" target="_blank" rel="noopener" style="font-family:monospace;font-size:12px">${sha}</a>`;
+    document.getElementById('ver-file-date').textContent = fileDate;
+
+    const dot = document.getElementById('version-status-dot');
+    if (fileDate > ADMIN_VERSION) {
+      dot.style.background = '#d96f6f'; dot.title = 'Uudempi versio saatavilla';
+      document.getElementById('ver-update-notice').style.display = 'block';
+    } else {
+      dot.style.background = 'var(--green)'; dot.title = 'Ajan tasalla';
+    }
+  } catch(e) {
+    document.getElementById('ver-file-date').textContent = '(ei saatavilla)';
+    document.getElementById('ver-commit').textContent    = '—';
+    const dot = document.getElementById('version-status-dot');
+    dot.style.background = 'var(--border2)'; dot.title = 'Ei voitu tarkistaa';
+  }
+}
+
 // ── News ─────────────────────────────────────────────────────────────────────
 function renderNews(filtered) {
   const items = filtered || newsData;
@@ -2247,9 +2358,18 @@ function openNewsModal(idx) {
   document.getElementById('nf-tag').value     = a?.tag     || 'Uutinen';
   document.getElementById('nf-excerpt').value = a?.excerpt || '';
   document.getElementById('nf-body').innerHTML = a?.body   || '';
-  document.getElementById('nf-img-path').textContent = a?.img ? '\u2713 ' + (a.img.split('/').pop() || 'kuva') : '';
-  document.getElementById('nf-img-preview').style.display = a?.img ? 'block' : 'none';
-  if (a?.img) document.getElementById('nf-img-preview').src = a.img;
+  const nfArea = document.getElementById('nf-img-area');
+  const nfPrev = document.getElementById('nf-img-preview');
+  const nfInfo = document.getElementById('nf-img-info');
+  if (a?.img) {
+    if (nfArea) nfArea.classList.add('has-preview');
+    if (nfPrev) nfPrev.src = a.img;
+    if (nfInfo) nfInfo.textContent = '✓ ' + (a.img.split('/').pop() || 'kuva') + '  (tallennettu)';
+  } else {
+    if (nfArea) nfArea.classList.remove('has-preview');
+    if (nfPrev) nfPrev.src = '';
+    if (nfInfo) nfInfo.textContent = '';
+  }
   // Slug lock: locked when editing, auto-generated for new
   document.getElementById('nf-slug').dataset.locked = a ? 'true' : 'false';
   pendingImg = null;
@@ -2509,6 +2629,19 @@ function openEventModal(idx) {
   // Dates — use ISO date fields directly
   document.getElementById('ef-date').value    = e?.startDate || '';
   document.getElementById('ef-enddate').value = e?.endDate   || '';
+  // Preview area state
+  const efArea = document.getElementById('ef-img-area');
+  const efPrev = document.getElementById('ef-img-preview');
+  const efInfo = document.getElementById('ef-img-info');
+  if (e?.img) {
+    if (efArea) efArea.classList.add('has-preview');
+    if (efPrev) efPrev.src = e.img;
+    if (efInfo) efInfo.textContent = '✓ ' + (e.img.split('/').pop() || 'kuva') + '  (tallennettu)';
+  } else {
+    if (efArea) efArea.classList.remove('has-preview');
+    if (efPrev) efPrev.src = '';
+    if (efInfo) efInfo.textContent = '';
+  }
   switchEvtTab('details');
   pendingImg = null;
   document.getElementById('event-modal').classList.add('open');
@@ -2706,9 +2839,18 @@ function openMemberModal(idx) {
   document.getElementById('mf-sports').value   = (m?.sports||[]).join(', ');
   document.getElementById('mf-motto').value    = m?.motto    || '';
   document.getElementById('mf-bio').value      = m?.bio      || '';
-  document.getElementById('mf-img-path').textContent = m?.photo ? '✓ ' + (m.photo.split('/').pop() || 'kuva') : '';
-  document.getElementById('mf-img-preview').style.display = m?.photo ? 'block' : 'none';
-  if (m?.photo) document.getElementById('mf-img-preview').src = m.photo;
+  const mfArea = document.getElementById('mf-img-area');
+  const mfPrev = document.getElementById('mf-img-preview');
+  const mfInfo = document.getElementById('mf-img-info');
+  if (m?.photo) {
+    if (mfArea) mfArea.classList.add('has-preview');
+    if (mfPrev) mfPrev.src = m.photo;
+    if (mfInfo) mfInfo.textContent = '✓ ' + (m.photo.split('/').pop() || 'kuva') + '  (tallennettu)';
+  } else {
+    if (mfArea) mfArea.classList.remove('has-preview');
+    if (mfPrev) mfPrev.src = '';
+    if (mfInfo) mfInfo.textContent = '';
+  }
   document.getElementById('member-delete-btn').style.display = m ? 'inline-flex' : 'none';
   pendingImg = null;
   document.getElementById('member-modal').classList.add('open');
@@ -2869,29 +3011,59 @@ function deleteMember() {
 }
 
 // ── Image upload ─────────────────────────────────────────────────────────────
-function handleImageUpload(input, previewId, pathId, folder) {
+async function handleImageUpload(input, areaId, previewId, infoId, folder) {
   const file = input.files[0];
   if (!file) return;
 
   folder = folder || (editingType === 'member' ? 'members' : editingType === 'event' ? 'events' : 'news');
-  const ext  = file.name.split('.').pop();
   const base = editingType === 'member' && editingIdx !== null
     ? (membersData[editingIdx]?.slug || autoSlugFrom(document.getElementById('mf-name').value))
     : editingType === 'news'
     ? (document.getElementById('nf-slug').value || autoSlugFrom(document.getElementById('nf-title').value))
     : (document.getElementById('ef-name').value ? autoSlugFrom(document.getElementById('ef-name').value) : 'image');
-  const filename = `${base}.${ext}`;
 
-  pendingImg = { file, folder, filename };
-  document.getElementById(pathId).textContent = `📎 ${filename} (ladataan tallennettaessa)`;
+  const area   = document.getElementById(areaId);
+  const infoEl = document.getElementById(infoId);
+  if (infoEl) infoEl.textContent = '⏳ Pakataan…';
+  if (area)   area.classList.add('has-preview');
+
+  let compressed;
+  try {
+    compressed = await processImageForUpload(file);
+  } catch(e) {
+    toast('Kuvan käsittely epäonnistui: ' + e.message, 'error');
+    if (area) area.classList.remove('has-preview');
+    return;
+  }
+
+  const filename = `${base}.jpg`;
+  pendingImg = { file: compressed, folder, filename };
 
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = ev => {
     const img = document.getElementById(previewId);
-    img.src = e.target.result;
-    img.style.display = 'block';
+    if (img) img.src = ev.target.result;
+    const origKB = Math.round(file.size / 1024);
+    const newKB  = Math.round(compressed.size / 1024);
+    if (infoEl) infoEl.textContent = `📎 ${filename}  ·  ${origKB} KB → ${newKB} KB (ladataan tallennettaessa)`;
   };
-  reader.readAsDataURL(file);
+  reader.readAsDataURL(compressed);
+}
+
+// ── Remove image from upload area ─────────────────────────────────────────────
+function removeImage(areaId, previewId, infoId, context) {
+  const area = document.getElementById(areaId);
+  const img  = document.getElementById(previewId);
+  const info = document.getElementById(infoId);
+  if (area) area.classList.remove('has-preview');
+  if (img)  img.src = '';
+  if (info) info.textContent = '';
+  if (area) { const inp = area.querySelector('input[type=file]'); if (inp) inp.value = ''; }
+  pendingImg = null;
+  window._pickedImgUrl = null;
+  if (context === 'news'    && editingIdx !== null && newsData[editingIdx])    newsData[editingIdx].img   = null;
+  if (context === 'events'  && editingIdx !== null && eventsData[editingIdx])  eventsData[editingIdx].img = null;
+  if (context === 'members' && editingIdx !== null && membersData[editingIdx]) membersData[editingIdx].photo = null;
 }
 
 // ── Rich text editor ─────────────────────────────────────────────────────────
@@ -3021,18 +3193,17 @@ function renderPickerGrid(images) {
 }
 
 function selectPickerImage(url, filename) {
-  if (pickerContext === 'news') {
-    document.getElementById('nf-img-path').textContent = '✓ ' + filename;
-    document.getElementById('nf-img-preview').src = url;
-    document.getElementById('nf-img-preview').style.display = 'block';
-  } else if (pickerContext === 'events') {
-    document.getElementById('ef-img-path').textContent = '✓ ' + filename;
-    document.getElementById('ef-img-preview').src = url;
-    document.getElementById('ef-img-preview').style.display = 'block';
-  } else if (pickerContext === 'members') {
-    document.getElementById('mf-img-path').textContent = '✓ ' + filename;
-    document.getElementById('mf-img-preview').src = url;
-    document.getElementById('mf-img-preview').style.display = 'block';
+  let areaId, previewId, infoId;
+  if (pickerContext === 'news')    { areaId = 'nf-img-area'; previewId = 'nf-img-preview'; infoId = 'nf-img-info'; }
+  else if (pickerContext === 'events')  { areaId = 'ef-img-area'; previewId = 'ef-img-preview'; infoId = 'ef-img-info'; }
+  else if (pickerContext === 'members') { areaId = 'mf-img-area'; previewId = 'mf-img-preview'; infoId = 'mf-img-info'; }
+  if (areaId) {
+    const area = document.getElementById(areaId);
+    const img  = document.getElementById(previewId);
+    const info = document.getElementById(infoId);
+    if (area) area.classList.add('has-preview');
+    if (img)  img.src = url;
+    if (info) info.textContent = '✓ ' + filename + '  (repo)';
   }
   pendingImg = null;
   window._pickedImgUrl = { context: pickerContext, url };
