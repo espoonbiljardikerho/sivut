@@ -1573,9 +1573,17 @@ html { font-size: 120%; }
     const events = await resp.json();
     const MONTHS_SHORT = ['Tam','Hel','Maa','Huh','Tou','Kes','Hei','Elo','Syy','Lok','Mar','Jou'];
 
-    // Show 5 soonest upcoming events — ISO dates sort correctly as strings
+    // Show 5 soonest upcoming events — compute isPast from date (end-of-day),
+    // so events move off the list automatically without any manual flag-flipping.
+    const now = new Date();
+    function isEventPast(e) {
+      const refDate = e.endDate || e.startDate;
+      if (!refDate) return e.isPast || false; // no date: trust stored flag
+      const [ry, rm, rd] = refDate.split('-').map(Number);
+      return new Date(ry, rm - 1, rd, 23, 59, 59) < now;
+    }
     const upcoming = events
-      .filter(e => !e.isPast && e.startDate)
+      .filter(e => !isEventPast(e) && e.startDate)
       .sort((a, b) => a.startDate.localeCompare(b.startDate))
       .slice(0, 5);
 

@@ -1420,6 +1420,18 @@ html { font-size: 120%; }
               dateInfo = { day: String(sd), month: MONTHS[sm-1]||'', year: String(sy), isSeries: false };
             }
           }
+          // Compute isPast from the date when available; fall back to stored flag
+          // for events with no date (e.g. TBA). End-of-day (23:59) of the event
+          // date (or series end date) is used so same-day events stay "upcoming"
+          // until midnight — no manual flag-flipping needed.
+          let isPast = e.isPast || false;
+          const refDate = e.endDate || e.startDate; // series: use end date
+          if (refDate) {
+            const [ry, rm, rd] = refDate.split('-').map(Number);
+            const eventEnd = new Date(ry, rm - 1, rd, 23, 59, 59);
+            isPast = eventEnd < new Date();
+          }
+
           return {
             slug:         e.slug,
             href:         e.href,
@@ -1430,7 +1442,7 @@ html { font-size: 120%; }
             endDate:      e.endDate   || null,
             time:         e.time,
             fee:          e.fee,
-            isPast:       e.isPast || false,
+            isPast,
             img:          e.img || null,
             detail:       e.detail || {},
             capacity:     e.capacity || null,
