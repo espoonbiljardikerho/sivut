@@ -1432,7 +1432,7 @@ async function doLogin() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     document.getElementById('sidebar-user-name').textContent = username + ' · ';
-    history.replaceState({ page: 'dashboard' }, '', '#dashboard');
+    history.replaceState({ page: 'dashboard' }, '');
     loadAllData();
   } catch(e) {
     err.textContent = e.message;
@@ -1888,7 +1888,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('app').classList.add('visible');
     document.getElementById('sidebar-user-name').textContent = storedUser + ' · ';
     // Seed history so the first back press stays within the app
-    history.replaceState({ page: 'dashboard' }, '', '#dashboard');
+    history.replaceState({ page: 'dashboard' }, '');
     loadAllData();
   }
 });
@@ -2404,17 +2404,18 @@ function showPage(name, pushState = true) {
   document.querySelector(`.nav-item[onclick="showPage('${name}')"]`).classList.add('active');
   document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
   document.getElementById('topbar-actions').innerHTML = PAGE_ACTIONS[name] || '';
-  // Push to browser history so the phone back button navigates within the app
-  // instead of leaving the page entirely.
+  // Store current page in history state so the phone back button stays within
+  // the app. We don't change the URL (pass null) to avoid hash-scroll issues
+  // on mobile browsers.
   if (pushState) {
-    history.pushState({ page: name }, '', '#' + name);
+    history.pushState({ page: name }, '');
   }
 }
 
 // Handle browser back/forward — restore the page without reloading
 window.addEventListener('popstate', function(e) {
   const page = e.state?.page || 'dashboard';
-  showPage(page, false); // false = don't push again
+  showPage(page, false);
 });
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
