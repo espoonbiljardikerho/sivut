@@ -869,7 +869,7 @@ html { font-size: 120%; }
         <div class="jm-form-title">Täytä hakemus</div>
 
         <form id="jm-form" class="jm-form">
-          <input type="hidden" name="_subject" value="Uusi jäsenhakemus — Espoon Biljardikerho">
+
 
           <!-- Membership type checkboxes -->
           <div class="jm-field">
@@ -1125,7 +1125,7 @@ html { font-size: 120%; }
 
 <script>
 (function() {
-  const FORMSUBMIT = 'https://formsubmit.co/ajax/ebk.repo@gmail.com';
+  const FORMSUBMIT = 'https://api.web3forms.com/submit';
 
   window.openJoinModal = function() {
     document.getElementById('jm-form').reset();
@@ -1171,9 +1171,8 @@ html { font-size: 120%; }
 
       try {
         const formData = new FormData(this);
-        formData.append('_subject', 'Jäsenhakemus — Espoon Biljardikerho');
-        formData.append('_template', 'table');
-        formData.append('_captcha', 'false');
+        formData.append('access_key', '69776530-1ca4-4d1a-8e4e-c8d9fa3badc1');
+        formData.append('subject', 'Jäsenhakemus — Espoon Biljardikerho');
         const res = await fetch(FORMSUBMIT, {
           method: 'POST',
           body: formData
