@@ -1,5 +1,15 @@
 [
   {
+    "slug": "testi-uutinen",
+    "href": "/uutiset/testi-uutinen/",
+    "title": "testi uutinen",
+    "date": "15.5.2026",
+    "excerpt": "lyhyt kuvaus",
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/.jpg",
+    "tag": "Uutinen",
+    "body": "pitkä kuvaus"
+  },
+  {
     "slug": "karavalmennusta-tarjolla-lauantaina-16-5",
     "href": "/uutiset/karavalmennusta-tarjolla-lauantaina-16-5/",
     "title": "Karavalmennusta tarjolla lauantaina 16.5.",
