@@ -490,7 +490,7 @@
       width: 100%; height: auto; flex-shrink: 0;
       border-right: none; border-top: 1px solid var(--border);
       padding: 0; flex-direction: row; align-items: stretch;
-      order: 2; /* push to bottom */
+      order: 2;
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
       overflow-x: auto; overflow-y: hidden;
     }
@@ -510,21 +510,14 @@
     .nav-item.active { border-left: none; border-top-color: var(--gold); }
     .nav-icon { width: auto; font-size: 18px; }
 
-    /* Logout button — show as a tab at the end */
-    .sidebar-bottom {
-      display: flex; align-items: center; justify-content: center;
-      padding: 8px 6px; flex: 0 0 56px;
-    }
-    .sidebar-bottom .btn { font-size: 10px; padding: 4px 8px; }
+    /* Mobile logout tab */
+    .nav-item-logout { display: flex; flex: 0 0 auto; }
 
     #main {
       flex: 1; overflow-y: auto;
       padding-bottom: 64px; /* space for bottom tab bar */
       order: 1;
     }
-
-    /* Mobile logout tab */
-    .nav-item-logout { display: flex; flex: 0 0 auto; }
 
     /* ── Topbar ── */
     .topbar { padding: 12px 16px; }
@@ -569,29 +562,51 @@
     .toolbar { flex-wrap: wrap; }
     .search-input { max-width: 100%; }
 
-    /* ── Modals — full screen on mobile ── */
-    .modal-bg { align-items: flex-end; }
-    .modal {
-      width: 100% !important; max-width: 100% !important;
-      max-height: 92vh; border-radius: 12px 12px 0 0;
+    /* ── Modals ─────────────────────────────────────────────────────────────
+       BUG FIX 1: modal z-index must be above the bottom nav (z-index:90).
+       BUG FIX 2: modal sits above bottom nav — account for 64px nav height.
+       BUG FIX 3: overflow-x hidden + width constraint stop fields overflowing. */
+    .modal-bg {
+      align-items: flex-end;
+      z-index: 200; /* above bottom nav bar (z-index:90) */
     }
-    .modal-body { padding: 16px; }
-    .modal-header { padding: 14px 16px; }
-    .modal-footer { padding: 12px 16px; flex-wrap: wrap; }
-    .modal-footer .btn { flex: 1; text-align: center; }
+    .modal {
+      width: 100vw !important; max-width: 100vw !important;
+      /* Leave 64px at bottom for the nav bar so footer buttons are reachable */
+      max-height: calc(92vh - 64px);
+      border-radius: 12px 12px 0 0;
+      overflow-x: hidden; /* prevent horizontal overflow from form fields */
+      box-sizing: border-box;
+    }
+    /* Ensure all inputs/textareas inside modals stay within bounds */
+    .modal input, .modal textarea, .modal select,
+    .modal .rte-content, .modal .rte-toolbar {
+      max-width: 100%; box-sizing: border-box;
+    }
+    .modal-body { padding: 14px; overflow-x: hidden; }
+    .modal-header { padding: 12px 14px; }
+    /* BUG FIX 2 cont: footer sticks to bottom of the modal, always visible */
+    .modal-footer {
+      padding: 12px 14px;
+      position: sticky; bottom: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap; gap: 8px; z-index: 2;
+    }
+    .modal-footer .btn { flex: 1; text-align: center; min-width: 80px; }
 
     /* ── Form grid — single column on mobile ── */
     .form-grid { grid-template-columns: 1fr; }
     .form-full { grid-column: 1; }
 
     /* ── Image picker modal ── */
-    #img-picker-modal .modal { width: 100% !important; }
+    #img-picker-modal .modal { width: 100vw !important; }
     #picker-grid { grid-template-columns: repeat(3, 1fr) !important; }
 
     /* ── Login box ── */
     .login-box { width: calc(100% - 32px); padding: 28px 20px; }
 
-    /* ── Toast ── */
+    /* ── Toast — above bottom nav ── */
     #toast { left: 12px; right: 12px; bottom: 76px; max-width: none; }
 
     /* ── Sync / archive panels ── */
@@ -1417,6 +1432,7 @@ async function doLogin() {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     document.getElementById('sidebar-user-name').textContent = username + ' · ';
+    history.replaceState({ page: 'dashboard' }, '', '#dashboard');
     loadAllData();
   } catch(e) {
     err.textContent = e.message;
@@ -1871,6 +1887,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     document.getElementById('sidebar-user-name').textContent = storedUser + ' · ';
+    // Seed history so the first back press stays within the app
+    history.replaceState({ page: 'dashboard' }, '', '#dashboard');
     loadAllData();
   }
 });
@@ -2379,14 +2397,25 @@ const PAGE_ACTIONS = {
   members: '<button class="btn btn-primary btn-sm" onclick="openMemberModal()">+ Uusi jäsen</button>',
 };
 
-function showPage(name) {
+function showPage(name, pushState = true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   document.querySelector(`.nav-item[onclick="showPage('${name}')"]`).classList.add('active');
   document.getElementById('topbar-title').textContent = PAGE_TITLES[name] || name;
   document.getElementById('topbar-actions').innerHTML = PAGE_ACTIONS[name] || '';
+  // Push to browser history so the phone back button navigates within the app
+  // instead of leaving the page entirely.
+  if (pushState) {
+    history.pushState({ page: name }, '', '#' + name);
+  }
 }
+
+// Handle browser back/forward — restore the page without reloading
+window.addEventListener('popstate', function(e) {
+  const page = e.state?.page || 'dashboard';
+  showPage(page, false); // false = don't push again
+});
 
 // ── Dashboard ────────────────────────────────────────────────────────────────
 function renderDashboard() {
