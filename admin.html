@@ -898,7 +898,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="news-modal-title">Uusi uutinen</div>
-      <button class="modal-close" onclick="closeModal('news-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('news-modal', true)">×</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -955,7 +955,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('news-modal')">Peruuta</button>
+      <button class="btn btn-secondary" onclick="closeModal('news-modal', true)">Peruuta</button>
       <button class="btn btn-primary" onclick="saveNews()" id="news-save-btn">Tallenna</button>
     </div>
   </div>
@@ -966,7 +966,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="event-modal-title">Uusi tapahtuma</div>
-      <button class="modal-close" onclick="closeModal('event-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('event-modal', true)">×</button>
     </div>
     <div class="tabs" style="padding:0 20px;border-bottom:1px solid var(--border);margin-bottom:0;">
       <button class="tab-btn active" id="evt-tab-details" onclick="switchEvtTab('details')">Tiedot</button>
@@ -1076,7 +1076,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('event-modal')">Peruuta</button>
+      <button class="btn btn-secondary" onclick="closeModal('event-modal', true)">Peruuta</button>
       <button class="btn btn-primary" onclick="saveEvent()" id="evt-save-btn">Tallenna</button>
     </div>
   </div>
@@ -1087,7 +1087,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="member-modal-title">Muokkaa jäsentä</div>
-      <button class="modal-close" onclick="closeModal('member-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('member-modal', true)">×</button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
@@ -1147,7 +1147,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger btn-sm" id="member-delete-btn" onclick="deleteMember()">Poista</button>
-      <button class="btn btn-secondary" onclick="closeModal('member-modal')">Peruuta</button>
+      <button class="btn btn-secondary" onclick="closeModal('member-modal', true)">Peruuta</button>
       <button class="btn btn-primary" onclick="saveMember()">Tallenna</button>
     </div>
   </div>
@@ -1173,7 +1173,7 @@
   <div class="modal" style="width:520px">
     <div class="modal-header">
       <div class="modal-title" id="archive-modal-title">Arkistoi vanhat uutiset</div>
-      <button class="modal-close" onclick="closeModal('archive-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('archive-modal', true)">×</button>
     </div>
     <div class="modal-body">
       <div id="archive-modal-body" style="font-size:13px;line-height:1.6;color:var(--text2)">
@@ -1189,7 +1189,7 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('archive-modal')">Peruuta</button>
+      <button class="btn btn-secondary" onclick="closeModal('archive-modal', true)">Peruuta</button>
       <button class="btn btn-primary" id="archive-confirm-btn" disabled onclick="executeArchive()">Vahvista</button>
     </div>
   </div>
@@ -2427,8 +2427,16 @@ function showPage(name, pushState = true) {
   }
 }
 
-// Handle browser back/forward — restore the page without reloading
+// Handle browser back/forward
+// Priority: if a modal is open, close it. Otherwise navigate between pages.
 window.addEventListener('popstate', function(e) {
+  // Check if any modal-bg is currently open
+  const openModal = document.querySelector('.modal-bg.open');
+  if (openModal) {
+    // Close without popping history (we already popped)
+    closeModal(openModal.id, false);
+    return;
+  }
   const page = e.state?.page || 'dashboard';
   showPage(page, false);
 });
@@ -2559,7 +2567,7 @@ function openNewsModal(idx) {
   // Slug lock: locked when editing, auto-generated for new
   document.getElementById('nf-slug').dataset.locked = a ? 'true' : 'false';
   pendingImg = null;
-  document.getElementById('news-modal').classList.add('open');
+  _openModal('news-modal');
   _syncSaveButtons(); // reflect gate state on Save button
 }
 
@@ -2830,7 +2838,7 @@ function openEventModal(idx) {
   }
   switchEvtTab('details');
   pendingImg = null;
-  document.getElementById('event-modal').classList.add('open');
+  _openModal('event-modal');
   _syncSaveButtons(); // reflect gate state on Save button
 }
 
@@ -3039,7 +3047,7 @@ function openMemberModal(idx) {
   }
   document.getElementById('member-delete-btn').style.display = m ? 'inline-flex' : 'none';
   pendingImg = null;
-  document.getElementById('member-modal').classList.add('open');
+  _openModal('member-modal');
   _syncSaveButtons(); // reflect gate state on Save button
 }
 
@@ -3321,7 +3329,19 @@ function autoSlugFrom(title) {
     .replace(/^-|-$/g,'');
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('open'); pendingImg = null; }
+function closeModal(id, popHistory = false) {
+  document.getElementById(id).classList.remove('open');
+  pendingImg = null;
+  // When called by the back button (popHistory=false) we've already popped.
+  // When called by ✕ / Peruuta we need to pop the modal's history entry.
+  if (popHistory) history.back();
+}
+
+// ── Open modal helpers — push history so back button closes the modal ─────────
+function _openModal(id) {
+  document.getElementById(id).classList.add('open');
+  history.pushState({ modal: id }, '');
+}
 
 let confirmCallback = null;
 function confirm(title, msg, cb) {
@@ -3342,9 +3362,11 @@ function toast(msg, type = 'success') {
   toastTimer = setTimeout(() => el.className = '', 3000);
 }
 
-// Close modals on bg click
+// Close modals on bg click — also pop the modal's history entry
 document.querySelectorAll('.modal-bg').forEach(bg => {
-  bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); });
+  bg.addEventListener('click', e => {
+    if (e.target === bg) closeModal(bg.id, true);
+  });
 });
 
 // ── Image Picker ─────────────────────────────────────────────────────────────
@@ -3358,7 +3380,7 @@ function openImgPicker(context) {
                : 'images/members';
   document.getElementById('picker-folder').value = folder;
   document.getElementById('picker-search').value = '';
-  document.getElementById('img-picker-modal').classList.add('open');
+  _openModal('img-picker-modal');
   loadPickerFolder();
 }
 
@@ -3653,7 +3675,7 @@ async function openArchiveModal() {
   document.getElementById('archive-confirm-btn').onclick = executeArchive;
 
   body.innerHTML = '<p>Lasketaan…</p>';
-  document.getElementById('archive-modal').classList.add('open');
+  _openModal('archive-modal');
 
   try {
     const s = await getArchiveStats();
@@ -3802,7 +3824,7 @@ async function openUnarchiveModal() {
 
   const body = document.getElementById('archive-modal-body');
   body.innerHTML = '<p>Lasketaan…</p>';
-  document.getElementById('archive-modal').classList.add('open');
+  _openModal('archive-modal');
 
   try {
     let arcArr = [];
@@ -3941,7 +3963,7 @@ async function executeUnarchive() {
   <div class="modal" style="width:760px">
     <div class="modal-header">
       <div class="modal-title">Valitse kuva</div>
-      <button class="modal-close" onclick="closeModal('img-picker-modal')">×</button>
+      <button class="modal-close" onclick="closeModal('img-picker-modal', true)">×</button>
     </div>
     <div class="modal-body">
       <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
@@ -3960,7 +3982,7 @@ async function executeUnarchive() {
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('img-picker-modal')">Peruuta</button>
+      <button class="btn btn-secondary" onclick="closeModal('img-picker-modal', true)">Peruuta</button>
     </div>
   </div>
 </div>
