@@ -1,5 +1,35 @@
 [
   {
+    "slug": "karavalmennus",
+    "href": "/tapahtumat/karavalmennus/",
+    "name": "Karavalmennus",
+    "tag": "Kara",
+    "startDate": "2026-05-16",
+    "endDate": null,
+    "time": "10:00",
+    "fee": null,
+    "isPast": false,
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/events/karavalmennus.jpg",
+    "capacity": null,
+    "schedule": [
+      {
+        "time": "",
+        "label": "10:00-14:00"
+      }
+    ],
+    "organizer": {
+      "name": "Jarno Ahola",
+      "email": null
+    },
+    "participants": [],
+    "detail": {
+      "deadline": "To 14.5",
+      "venue": "Espoon Biljardi Klubi",
+      "participation": "jasenet",
+      "description": "EBK:n seura- ja klubijäsenille on tarjolla <strong>karavalmennusta</strong>\n Jarno Aholan toimesta.<br>&nbsp;<br>Toukokuun puolessa välissä järjestetään 1-2 \nsessiota halukkaille - kesto n. 2-4h riippuen halukkaiden määrästä."
+    }
+  },
+  {
     "slug": "testi",
     "href": "/tapahtumat/testi/",
     "name": "testi",
