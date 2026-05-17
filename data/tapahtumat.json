@@ -8,7 +8,7 @@
     "endDate": null,
     "time": "10:00",
     "fee": null,
-    "isPast": false,
+    "isPast": true,
     "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/events/karavalmennus.jpg",
     "capacity": null,
     "schedule": [
