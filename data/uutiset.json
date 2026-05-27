@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "slug": "ensimmainen-uutinen",
+    "href": "/uutiset/ensimmainen-uutinen/",
+    "title": "Ensimmäinen uutinen",
+    "date": "27.5.2026",
+    "excerpt": "Ensimmäinen uutinen...",
+    "img": "https://raw.githubusercontent.com/espoonbiljardikerho/sivut/main/images/news/.jpg",
+    "tag": "Uutinen",
+    "body": "Ei ihmeempää sisältöä"
+  }
+]
