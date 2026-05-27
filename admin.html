@@ -2436,6 +2436,7 @@ function showPage(name, pushState = true) {
 // Handle browser back/forward
 // Priority: if a modal is open, close it. Otherwise navigate between pages.
 window.addEventListener('popstate', function(e) {
+  if (_suppressNextPopstate) { _suppressNextPopstate = false; return; }
   // Check if any modal-bg is currently open
   const openModal = document.querySelector('.modal-bg.open');
   if (openModal) {
@@ -3377,6 +3378,7 @@ document.querySelectorAll('.modal-bg').forEach(bg => {
 
 // ── Image Picker ─────────────────────────────────────────────────────────────
 let pickerContext   = 'news';
+let _suppressNextPopstate = false;
 let pickerAllImages = [];
 
 function openImgPicker(context) {
@@ -3444,6 +3446,7 @@ function selectPickerImage(url, filename) {
   }
   pendingImg = null;
   window._pickedImgUrl = { context: pickerContext, url };
+  _suppressNextPopstate = true;
   closeModal('img-picker-modal', true);
   toast('Kuva valittu: ' + filename, 'success');
 }
